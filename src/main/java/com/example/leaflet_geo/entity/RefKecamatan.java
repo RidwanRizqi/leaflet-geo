@@ -1,0 +1,16 @@
+package com.example.leaflet_geo.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class RefKecamatan {
+    
+    private String kdPropinsi;
+    private String kdDati2;
+    private String kdKecamatan;
+    private String nmKecamatan;
+}
