@@ -1,12 +1,15 @@
 package com.example.leaflet_geo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/bidang")
@@ -14,12 +17,17 @@ import java.util.Map;
 public class BidangController {
     
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    @Qualifier("postgresJdbcTemplate")
+    private JdbcTemplate postgresJdbcTemplate;
+    
+    @Autowired
+    @Qualifier("oracleJdbcTemplate")
+    private JdbcTemplate oracleJdbcTemplate;
     
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         try {
-            Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sig.bidang", Long.class);
+            Long count = postgresJdbcTemplate.queryForObject("SELECT COUNT(*) FROM sig.bidang", Long.class);
             return ResponseEntity.ok("Database connected successfully! Total records: " + count);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Database connection failed: " + e.getMessage());
@@ -34,12 +42,12 @@ public class BidangController {
             int offset = page * size;
             
             // Get total count
-            Long totalCount = jdbcTemplate.queryForObject(
+            Long totalCount = postgresJdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM sig.bidang WHERE is_active = true", Long.class
             );
             
             // Get paginated data
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT * FROM sig.bidang WHERE is_active = true ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 size, offset
             );
@@ -70,7 +78,7 @@ public class BidangController {
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getBidangById(@PathVariable String id) {
         try {
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT * FROM sig.bidang WHERE id = ?", id
             );
             if (data.isEmpty()) {
@@ -85,7 +93,7 @@ public class BidangController {
     @GetMapping("/nop/{nop}")
     public ResponseEntity<Map<String, Object>> getBidangByNop(@PathVariable String nop) {
         try {
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT * FROM sig.bidang WHERE nop = ?", nop
             );
             if (data.isEmpty()) {
@@ -105,12 +113,12 @@ public class BidangController {
             int offset = page * size;
             
             // Get total count
-            Long totalCount = jdbcTemplate.queryForObject(
+            Long totalCount = postgresJdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM sig.bidang WHERE is_active = true AND geom IS NOT NULL", Long.class
             );
             
             // Get paginated data with GeoJSON conversion
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT id, nop, ST_AsGeoJSON(geom) as geojson, kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, no_urut, kd_jns_op, created_at, is_active FROM sig.bidang WHERE is_active = true AND geom IS NOT NULL ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 size, offset
             );
@@ -141,7 +149,7 @@ public class BidangController {
     @GetMapping("/province/{kdProp}")
     public ResponseEntity<List<Map<String, Object>>> getBidangByProvince(@PathVariable String kdProp) {
         try {
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT * FROM sig.bidang WHERE kd_prop = ? AND is_active = true", kdProp
             );
             return ResponseEntity.ok(data);
@@ -161,13 +169,13 @@ public class BidangController {
             int offset = page * size;
             
             // Get total count
-            Long totalCount = jdbcTemplate.queryForObject(
+            Long totalCount = postgresJdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND is_active = true", 
                 Long.class, kdProp, kdDati2, kdKec
             );
             
             // Get paginated data
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT * FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND is_active = true ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 kdProp, kdDati2, kdKec, size, offset
             );
@@ -212,13 +220,13 @@ public class BidangController {
             int offset = page * size;
             
             // Get total count
-            Long totalCount = jdbcTemplate.queryForObject(
+            Long totalCount = postgresJdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND kd_kel = ? AND is_active = true", 
                 Long.class, kdProp, kdDati2, kdKec, kdKel
             );
             
             // Get paginated data
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT * FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND kd_kel = ? AND is_active = true ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 kdProp, kdDati2, kdKec, kdKel, size, offset
             );
@@ -263,13 +271,13 @@ public class BidangController {
             int offset = page * size;
             
             // Get total count
-            Long totalCount = jdbcTemplate.queryForObject(
+            Long totalCount = postgresJdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND is_active = true AND geom IS NOT NULL", 
                 Long.class, kdProp, kdDati2, kdKec
             );
             
             // Get paginated data with GeoJSON conversion
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT id, nop, ST_AsGeoJSON(geom) as geojson, kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, no_urut, kd_jns_op, created_at, is_active FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND is_active = true AND geom IS NOT NULL ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 kdProp, kdDati2, kdKec, size, offset
             );
@@ -314,13 +322,13 @@ public class BidangController {
             int offset = page * size;
             
             // Get total count
-            Long totalCount = jdbcTemplate.queryForObject(
+            Long totalCount = postgresJdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND kd_kel = ? AND is_active = true AND geom IS NOT NULL", 
                 Long.class, kdProp, kdDati2, kdKec, kdKel
             );
             
             // Get paginated data with GeoJSON conversion
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(
                 "SELECT id, nop, ST_AsGeoJSON(geom) as geojson, kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, no_urut, kd_jns_op, created_at, is_active FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND kd_kel = ? AND is_active = true AND geom IS NOT NULL ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 kdProp, kdDati2, kdKec, kdKel, size, offset
             );
@@ -393,14 +401,14 @@ public class BidangController {
             
             // Get total count
             String countQuery = "SELECT COUNT(*) FROM sig.bidang " + whereClause;
-            Long totalCount = jdbcTemplate.queryForObject(countQuery, Long.class, params.toArray());
+            Long totalCount = postgresJdbcTemplate.queryForObject(countQuery, Long.class, params.toArray());
             
             // Get paginated data
             String dataQuery = "SELECT * FROM sig.bidang " + whereClause + " ORDER BY created_at DESC LIMIT ? OFFSET ?";
             params.add(size);
             params.add(offset);
             
-            List<Map<String, Object>> data = jdbcTemplate.queryForList(dataQuery, params.toArray());
+            List<Map<String, Object>> data = postgresJdbcTemplate.queryForList(dataQuery, params.toArray());
             
             // Calculate pagination info
             int totalPages = (int) Math.ceil((double) totalCount / size);
@@ -436,10 +444,10 @@ public class BidangController {
     public ResponseEntity<Map<String, Object>> setupDatabase() {
         try {
             // Create schema if not exists
-            jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS sig");
+            postgresJdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS sig");
             
             // Create table if not exists
-            jdbcTemplate.execute("""
+            postgresJdbcTemplate.execute("""
                 CREATE TABLE IF NOT EXISTS sig.bidang (
                     id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
                     kd_prop char(2) NOT NULL,
@@ -465,7 +473,7 @@ public class BidangController {
             """);
             
             // Insert sample data
-            jdbcTemplate.execute("""
+            postgresJdbcTemplate.execute("""
                 INSERT INTO sig.bidang (
                     id, kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, no_urut, kd_jns_op, nop, geom, 
                     created_at, created_by, updated_at, updated_by, is_active
@@ -489,7 +497,7 @@ public class BidangController {
             """);
             
             // Test the setup
-            Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sig.bidang", Long.class);
+            Long count = postgresJdbcTemplate.queryForObject("SELECT COUNT(*) FROM sig.bidang", Long.class);
             
             return ResponseEntity.ok(Map.of(
                 "status", "Database setup completed successfully",
@@ -509,21 +517,21 @@ public class BidangController {
     public ResponseEntity<Map<String, Object>> testDatabase() {
         try {
             // Test 1: Basic connection
-            String connectionTest = jdbcTemplate.queryForObject("SELECT 'Database connected' as status", String.class);
+            String connectionTest = postgresJdbcTemplate.queryForObject("SELECT 'Database connected' as status", String.class);
             
             // Test 2: List all schemas
-            List<Map<String, Object>> schemas = jdbcTemplate.queryForList(
+            List<Map<String, Object>> schemas = postgresJdbcTemplate.queryForList(
                 "SELECT schema_name FROM information_schema.schemata ORDER BY schema_name"
             );
             
             // Test 3: Check if sig schema exists specifically
-            String sigExists = jdbcTemplate.queryForObject(
+            String sigExists = postgresJdbcTemplate.queryForObject(
                 "SELECT CASE WHEN EXISTS(SELECT 1 FROM information_schema.schemata WHERE schema_name = 'sig') THEN 'sig schema exists' ELSE 'sig schema does not exist' END",
                 String.class
             );
             
             // Test 4: List all tables with 'bidang' in name
-            List<Map<String, Object>> tables = jdbcTemplate.queryForList(
+            List<Map<String, Object>> tables = postgresJdbcTemplate.queryForList(
                 "SELECT table_schema, table_name FROM information_schema.tables WHERE table_name LIKE '%bidang%'"
             );
             
@@ -533,22 +541,22 @@ public class BidangController {
             
             try {
                 // Try with public schema first
-                data = jdbcTemplate.queryForList("SELECT * FROM public.bidang LIMIT 1");
+                data = postgresJdbcTemplate.queryForList("SELECT * FROM public.bidang LIMIT 1");
                 tableQuery = "public.bidang - SUCCESS";
             } catch (Exception e1) {
                 try {
                     // Try without schema
-                    data = jdbcTemplate.queryForList("SELECT * FROM bidang LIMIT 1");
+                    data = postgresJdbcTemplate.queryForList("SELECT * FROM bidang LIMIT 1");
                     tableQuery = "bidang (no schema) - SUCCESS";
                 } catch (Exception e2) {
                     try {
                         // Try with quotes
-                        data = jdbcTemplate.queryForList("SELECT * FROM \"public\".\"bidang\" LIMIT 1");
+                        data = postgresJdbcTemplate.queryForList("SELECT * FROM \"public\".\"bidang\" LIMIT 1");
                         tableQuery = "public.bidang (with quotes) - SUCCESS";
                     } catch (Exception e3) {
                         try {
                             // Try sig schema
-                            data = jdbcTemplate.queryForList("SELECT * FROM sig.bidang LIMIT 1");
+                            data = postgresJdbcTemplate.queryForList("SELECT * FROM sig.bidang LIMIT 1");
                             tableQuery = "sig.bidang - SUCCESS";
                         } catch (Exception e4) {
                             tableQuery = "All attempts failed. Last error: " + e4.getMessage();
@@ -571,6 +579,148 @@ public class BidangController {
             return ResponseEntity.status(500).body(Map.of(
                 "error", e.getMessage(),
                 "connection", "Failed"
+            ));
+        }
+    }
+    
+    /**
+     * Get kecamatan with count from PostgreSQL and names from Oracle
+     */
+    @GetMapping("/kecamatan-with-count/{kdProp}/{kdDati2}")
+    public ResponseEntity<Map<String, Object>> getKecamatanWithCount(
+            @PathVariable String kdProp,
+            @PathVariable String kdDati2) {
+        try {
+            // Step 1: Get count from PostgreSQL
+            List<Map<String, Object>> countData = postgresJdbcTemplate.queryForList(
+                "SELECT kd_kec, COUNT(*) as jumlah_bidang FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND is_active = true GROUP BY kd_kec ORDER BY kd_kec",
+                kdProp, kdDati2
+            );
+            
+            // Create count map
+            Map<String, Integer> countMap = new HashMap<>();
+            for (Map<String, Object> row : countData) {
+                String kdKec = (String) row.get("kd_kec");
+                Integer count = ((Number) row.get("jumlah_bidang")).intValue();
+                countMap.put(kdKec, count);
+            }
+            
+            // Step 2: Get names from Oracle
+            List<Map<String, Object>> kecamatanData = oracleJdbcTemplate.queryForList(
+                "SELECT KD_PROPINSI, KD_DATI2, KD_KECAMATAN, NM_KECAMATAN FROM SYSTEM.REF_KECAMATAN WHERE KD_PROPINSI = ? AND KD_DATI2 = ? ORDER BY KD_KECAMATAN",
+                kdProp, kdDati2
+            );
+            
+            // Step 3: Combine data with logic
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Map<String, Object> kecamatan : kecamatanData) {
+                String kdKec = (String) kecamatan.get("KD_KECAMATAN");
+                Integer count = countMap.getOrDefault(kdKec, 0);
+                
+                Map<String, Object> combined = new HashMap<>();
+                combined.put("kdPropinsi", kecamatan.get("KD_PROPINSI"));
+                combined.put("kdDati2", kecamatan.get("KD_DATI2"));
+                combined.put("kdKecamatan", kdKec);
+                combined.put("nmKecamatan", kecamatan.get("NM_KECAMATAN"));
+                combined.put("jumlahBidang", count);
+                
+                result.add(combined);
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "data", result,
+                "success", true,
+                "message", "Kecamatan with count retrieved successfully"
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", e.getMessage(),
+                "success", false
+            ));
+        }
+    }
+    
+    /**
+     * Get kelurahan with count from PostgreSQL and names from Oracle
+     */
+    @GetMapping("/kelurahan-with-count/{kdProp}/{kdDati2}/{kdKec}")
+    public ResponseEntity<Map<String, Object>> getKelurahanWithCount(
+            @PathVariable String kdProp,
+            @PathVariable String kdDati2,
+            @PathVariable String kdKec) {
+        try {
+            // Step 1: Get count from PostgreSQL
+            List<Map<String, Object>> countData = postgresJdbcTemplate.queryForList(
+                "SELECT kd_kel, COUNT(*) as jumlah_bidang FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND is_active = true GROUP BY kd_kel ORDER BY kd_kel",
+                kdProp, kdDati2, kdKec
+            );
+            
+            // Create count map
+            Map<String, Integer> countMap = new HashMap<>();
+            for (Map<String, Object> row : countData) {
+                String kdKel = (String) row.get("kd_kel");
+                Integer count = ((Number) row.get("jumlah_bidang")).intValue();
+                countMap.put(kdKel, count);
+            }
+            
+            // Step 2: Get names from Oracle
+            List<Map<String, Object>> kelurahanData = oracleJdbcTemplate.queryForList(
+                "SELECT KD_PROPINSI, KD_DATI2, KD_KECAMATAN, KD_KELURAHAN, NM_KELURAHAN FROM SYSTEM.REF_KELURAHAN WHERE KD_PROPINSI = ? AND KD_DATI2 = ? AND KD_KECAMATAN = ? ORDER BY KD_KELURAHAN",
+                kdProp, kdDati2, kdKec
+            );
+            
+            // Step 3: Combine data with logic
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Map<String, Object> kelurahan : kelurahanData) {
+                String kdKel = (String) kelurahan.get("KD_KELURAHAN");
+                Integer count = countMap.getOrDefault(kdKel, 0);
+                
+                Map<String, Object> combined = new HashMap<>();
+                combined.put("kdPropinsi", kelurahan.get("KD_PROPINSI"));
+                combined.put("kdDati2", kelurahan.get("KD_DATI2"));
+                combined.put("kdKecamatan", kelurahan.get("KD_KECAMATAN"));
+                combined.put("kdKelurahan", kdKel);
+                combined.put("nmKelurahan", kelurahan.get("NM_KELURAHAN"));
+                combined.put("jumlahBidang", count);
+                
+                result.add(combined);
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "data", result,
+                "success", true,
+                "message", "Kelurahan with count retrieved successfully"
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", e.getMessage(),
+                "success", false
+            ));
+        }
+    }
+    
+    /**
+     * Get total count of all bidang
+     */
+    @GetMapping("/total-count")
+    public ResponseEntity<Map<String, Object>> getTotalBidangCount() {
+        try {
+            Long totalCount = postgresJdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM sig.bidang WHERE is_active = true", Long.class
+            );
+            
+            return ResponseEntity.ok(Map.of(
+                "totalBidang", totalCount,
+                "success", true,
+                "message", "Total bidang count retrieved successfully"
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", e.getMessage(),
+                "success", false
             ));
         }
     }

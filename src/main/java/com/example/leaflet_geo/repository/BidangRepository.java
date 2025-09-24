@@ -79,5 +79,17 @@ public interface BidangRepository extends JpaRepository<Bidang, UUID> {
      */
     @Query("SELECT b FROM Bidang b WHERE b.isActive = true AND b.geom IS NOT NULL")
     List<Bidang> findAllWithGeometry();
+    
+    /**
+     * Count active records by sub-district (kecamatan)
+     */
+    @Query("SELECT COUNT(b) FROM Bidang b WHERE b.kdProp = :kdProp AND b.kdDati2 = :kdDati2 AND b.kdKec = :kdKec AND b.isActive = true")
+    Long countByKecamatan(@Param("kdProp") String kdProp, @Param("kdDati2") String kdDati2, @Param("kdKec") String kdKec);
+    
+    /**
+     * Count active records by village (kelurahan)
+     */
+    @Query("SELECT COUNT(b) FROM Bidang b WHERE b.kdProp = :kdProp AND b.kdDati2 = :kdDati2 AND b.kdKec = :kdKec AND b.kdKel = :kdKel AND b.isActive = true")
+    Long countByKelurahan(@Param("kdProp") String kdProp, @Param("kdDati2") String kdDati2, @Param("kdKec") String kdKec, @Param("kdKel") String kdKel);
 }
 
