@@ -724,4 +724,44 @@ public class BidangController {
             ));
         }
     }
+
+    /**
+     * Get blok with count from PostgreSQL
+     */
+    @GetMapping("/blok-with-count/{kdProp}/{kdDati2}/{kdKec}/{kdKel}")
+    public ResponseEntity<Map<String, Object>> getBlokWithCount(
+            @PathVariable String kdProp,
+            @PathVariable String kdDati2,
+            @PathVariable String kdKec,
+            @PathVariable String kdKel) {
+        try {
+            // Step 1: Get count from PostgreSQL
+            List<Map<String, Object>> countData = postgresJdbcTemplate.queryForList(
+                "SELECT kd_blok, COUNT(*) as jumlah_bidang FROM sig.bidang WHERE kd_prop = ? AND kd_dati2 = ? AND kd_kec = ? AND kd_kel = ? AND is_active = true GROUP BY kd_blok ORDER BY kd_blok",
+                kdProp, kdDati2, kdKec, kdKel
+            );
+            
+            // Step 2: Create result list with blok codes and counts
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Map<String, Object> row : countData) {
+                Map<String, Object> blokData = new HashMap<>();
+                blokData.put("kdBlok", row.get("kd_blok"));
+                blokData.put("nmBlok", "Blok " + row.get("kd_blok")); // Simple name generation
+                blokData.put("jumlahBidang", ((Long) row.get("jumlah_bidang")).intValue());
+                result.add(blokData);
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "data", result,
+                "success", true,
+                "message", "Blok with count retrieved successfully"
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", e.getMessage(),
+                "success", false
+            ));
+        }
+    }
 }
