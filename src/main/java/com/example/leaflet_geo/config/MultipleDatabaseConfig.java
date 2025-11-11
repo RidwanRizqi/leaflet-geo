@@ -37,6 +37,17 @@ public class MultipleDatabaseConfig {
                 .build();
     }
 
+    // MySQL SIMATDA sebagai database ketiga
+    @Bean(name = "mysqlDataSource")
+    public DataSource mysqlDataSource() {
+        return DataSourceBuilder.create()
+                .url("jdbc:mysql://192.178.10.112:3306/simpatda_lumajang?useSSL=false&serverTimezone=UTC")
+                .username("polinema")
+                .password("P0l1n3m4@bprd")
+                .driverClassName("com.mysql.cj.jdbc.Driver")
+                .build();
+    }
+
     // JdbcTemplate untuk PostgreSQL (primary)
     @Primary
     @Bean(name = "postgresJdbcTemplate")
@@ -47,6 +58,12 @@ public class MultipleDatabaseConfig {
     // JdbcTemplate untuk Oracle (secondary)
     @Bean(name = "oracleJdbcTemplate")
     public JdbcTemplate oracleJdbcTemplate(@Qualifier("oracleDataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
+    // JdbcTemplate untuk MySQL SIMATDA
+    @Bean(name = "mysqlJdbcTemplate")
+    public JdbcTemplate mysqlJdbcTemplate(@Qualifier("mysqlDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 }
