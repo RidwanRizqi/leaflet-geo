@@ -1,6 +1,7 @@
 package com.example.leaflet_geo.service;
 
 import com.example.leaflet_geo.dto.DashboardSummaryDTO;
+import com.example.leaflet_geo.dto.RekeningDetailDTO;
 import com.example.leaflet_geo.dto.TargetRealisasiDTO;
 import com.example.leaflet_geo.dto.TopKontributorDTO;
 import com.example.leaflet_geo.dto.TrendBulananDTO;
@@ -135,8 +136,41 @@ public class PendapatanService {
             dto.setRealisasi(realisasi);
             dto.setSelisih(selisih);
             dto.setPersentasePencapaian(persentase);
+            
+            // Get breakdown detail per rekening
+            dto.setDetails(getRekeningDetailByJenis(idJenis, tahun));
+            
             return dto;
         }, tahun);
+    }
+    
+    /**
+     * Get breakdown detail per rekening untuk jenis pajak tertentu
+     */
+    private List<RekeningDetailDTO> getRekeningDetailByJenis(Integer idJenis, Integer tahun) {
+        String sql = """
+            SELECT 
+                r.s_namakorek AS nama_rekening,
+                r.s_idkorek AS id_rekening,
+                CONCAT(r.s_tipekorek, '.', r.s_kelompokkorek, '.', r.s_jeniskorek, '.', r.s_objekkorek) AS kode_rekening,
+                COALESCE(SUM(t.t_jmlhpembayaran), 0) AS realisasi
+            FROM s_rekening r
+            LEFT JOIN t_transaksi t ON t.t_idkorek = r.s_idkorek 
+                AND YEAR(t.t_tglpembayaran) = ?
+            WHERE r.s_jenisobjek = ? AND r.s_golbunga IS NULL
+            GROUP BY r.s_idkorek, r.s_namakorek, r.s_tipekorek, r.s_kelompokkorek, r.s_jeniskorek, r.s_objekkorek
+            HAVING realisasi > 0
+            ORDER BY realisasi DESC
+            """;
+            
+        return mysqlJdbcTemplate.query(sql, (rs, rowNum) -> {
+            RekeningDetailDTO detail = new RekeningDetailDTO();
+            detail.setNamaRekening(rs.getString("nama_rekening"));
+            detail.setIdRekening(rs.getInt("id_rekening"));
+            detail.setKodeRekening(rs.getString("kode_rekening"));
+            detail.setRealisasi(rs.getBigDecimal("realisasi"));
+            return detail;
+        }, tahun, idJenis);
     }
 
     /**

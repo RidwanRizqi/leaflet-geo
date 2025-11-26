@@ -5,17 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TargetRealisasiDTO {
+public class RekeningDetailDTO {
+    private String namaRekening;
+    private Integer idRekening;
+    private String kodeRekening;
     private String jenisPajak;
-    private Integer urutan;
-    private BigDecimal target;
     private BigDecimal realisasi;
-    private BigDecimal selisih;
-    private Double persentasePencapaian;
-    private List<RekeningDetailDTO> details; // Breakdown per rekening
 }
