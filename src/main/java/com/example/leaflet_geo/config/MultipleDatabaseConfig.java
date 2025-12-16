@@ -47,6 +47,39 @@ public class MultipleDatabaseConfig {
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }
+    
+    // PostgreSQL BPHTB sebagai database keempat
+    @Bean(name = "bphtbDataSource")
+    public DataSource bphtbDataSource() {
+        return DataSourceBuilder.create()
+                .url("jdbc:postgresql://192.178.10.114:5432/mybphtb")
+                .username("postgres")
+                .password("BprdLum4j4ng@2025")
+                .driverClassName("org.postgresql.Driver")
+                .build();
+    }
+    
+    // Oracle SISMIOP sebagai database kelima
+    @Bean(name = "sismiopDataSource")
+    public DataSource sismiopDataSource() {
+        return DataSourceBuilder.create()
+                .url("jdbc:oracle:thin:@//192.178.10.101:1521/SISMIOP")
+                .username("PBB")
+                .password("PBB")
+                .driverClassName("oracle.jdbc.OracleDriver")
+                .build();
+    }
+    
+    // PostgreSQL E-PASIR sebagai database keenam
+    @Bean(name = "epasirDataSource")
+    public DataSource epasirDataSource() {
+        return DataSourceBuilder.create()
+                .url("jdbc:postgresql://192.178.10.225:5432/e-pasir-reborn")
+                .username("epasir")
+                .password("BPRD@2023#")
+                .driverClassName("org.postgresql.Driver")
+                .build();
+    }
 
     // JdbcTemplate untuk PostgreSQL (primary)
     @Primary
@@ -64,6 +97,24 @@ public class MultipleDatabaseConfig {
     // JdbcTemplate untuk MySQL SIMATDA
     @Bean(name = "mysqlJdbcTemplate")
     public JdbcTemplate mysqlJdbcTemplate(@Qualifier("mysqlDataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+    
+    // JdbcTemplate untuk PostgreSQL BPHTB
+    @Bean(name = "bphtbJdbcTemplate")
+    public JdbcTemplate bphtbJdbcTemplate(@Qualifier("bphtbDataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+    
+    // JdbcTemplate untuk Oracle SISMIOP
+    @Bean(name = "sismiopJdbcTemplate")
+    public JdbcTemplate sismiopJdbcTemplate(@Qualifier("sismiopDataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+    
+    // JdbcTemplate untuk PostgreSQL E-PASIR
+    @Bean(name = "epasirJdbcTemplate")
+    public JdbcTemplate epasirJdbcTemplate(@Qualifier("epasirDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 }
