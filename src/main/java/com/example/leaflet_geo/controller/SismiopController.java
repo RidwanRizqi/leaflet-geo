@@ -210,4 +210,52 @@ public class SismiopController {
             return ResponseEntity.status(404).body(response);
         }
     }
+
+    /**
+     * Debug: Get SPPT by individual kode components
+     * GET /api/sismiop/sppt-by-kode?kd_prop=35&kd_dati2=08&kd_kec=060&kd_kel=014&kd_blok=007&no_urut=0028&kd_jns_op=0&tahun=2025
+     */
+    @GetMapping("/sppt-by-kode")
+    public ResponseEntity<Map<String, Object>> getSpptByKode(
+            @RequestParam String kd_prop,
+            @RequestParam String kd_dati2,
+            @RequestParam String kd_kec,
+            @RequestParam String kd_kel,
+            @RequestParam String kd_blok,
+            @RequestParam String no_urut,
+            @RequestParam String kd_jns_op,
+            @RequestParam String tahun) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Map<String, Object> data = sismiopService.getSpptByKodes(
+                kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, no_urut, kd_jns_op, tahun);
+            response.put("status", "success");
+            response.put("params", Map.of(
+                "kd_prop", kd_prop,
+                "kd_dati2", kd_dati2,
+                "kd_kec", kd_kec,
+                "kd_kel", kd_kel,
+                "kd_blok", kd_blok,
+                "no_urut", no_urut,
+                "kd_jns_op", kd_jns_op,
+                "tahun", tahun
+            ));
+            response.put("data", data);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", e.getMessage());
+            response.put("params", Map.of(
+                "kd_prop", kd_prop,
+                "kd_dati2", kd_dati2,
+                "kd_kec", kd_kec,
+                "kd_kel", kd_kel,
+                "kd_blok", kd_blok,
+                "no_urut", no_urut,
+                "kd_jns_op", kd_jns_op,
+                "tahun", tahun
+            ));
+            return ResponseEntity.status(404).body(response);
+        }
+    }
 }

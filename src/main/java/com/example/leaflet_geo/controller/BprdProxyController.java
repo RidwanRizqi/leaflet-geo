@@ -27,6 +27,9 @@ public class BprdProxyController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private com.example.leaflet_geo.service.SismiopService sismiopService;
+
     private String cachedToken = null;
     private final String BPRD_BASE_URL = "https://bprd.lumajangkab.go.id:1151/api";
     
@@ -617,6 +620,98 @@ public class BprdProxyController {
                     System.err.println("❌ Failed to process bidang boundary: " + e.getMessage());
                     e.printStackTrace();
                 }
+            }
+
+            // ENRICHMENT STEP: Fetch payment status using individual kode components
+            try {
+                // Collect kode components for each bidang
+                List<Map<String, String>> kodeList = new ArrayList<>();
+                for (BidangBoundaryDTO dto : convertedBidangBoundaries) {
+                    if (dto.getKdProp() != null && dto.getKdDati2() != null && 
+                        dto.getKdKec() != null && dto.getKdKel() != null && 
+                        dto.getKdBlok() != null && dto.getNoUrut() != null && 
+                        dto.getKdJnsOp() != null) {
+                        
+                        Map<String, String> kodes = new HashMap<>();
+                        kodes.put("kd_prop", dto.getKdProp());
+                        kodes.put("kd_dati2", dto.getKdDati2());
+                        kodes.put("kd_kec", dto.getKdKec());
+                        kodes.put("kd_kel", dto.getKdKel());
+                        kodes.put("kd_blok", dto.getKdBlok());
+                        kodes.put("no_urut", dto.getNoUrut());
+                        kodes.put("kd_jns_op", dto.getKdJnsOp());
+                        kodeList.add(kodes);
+                    }
+                }
+                
+                System.out.println("📋 Collected " + kodeList.size() + " kode sets for payment status check");
+                if (!kodeList.isEmpty()) {
+                    Map<String, String> sample = kodeList.get(0);
+                    System.out.println("🔍 Sample kode: " + sample.get("kd_prop") + "-" + sample.get("kd_dati2") + 
+                                     "-" + sample.get("kd_kec") + "-" + sample.get("kd_kel") + "-" + 
+                                     sample.get("kd_blok") + "-" + sample.get("no_urut") + "-" + sample.get("kd_jns_op"));
+                }
+
+                if (!kodeList.isEmpty()) {
+                    System.out.println("💰 Fetching payment status using individual kode components...");
+                    
+                    // Use 2025 as default year for PBB data (most recent complete year)
+                    // TODO: Make this configurable or dynamic based on available data
+                    String tahunPajak = "2025";
+                    System.out.println("📅 Using tahun pajak: " + tahunPajak);
+                    
+                    Map<String, Map<String, Object>> paymentStatusMap = sismiopService.getPaymentStatusByKodes(kodeList, tahunPajak);
+                    
+                    System.out.println("📋 Payment status map returned " + paymentStatusMap.size() + " entries");
+                    
+                    // Enrich DTOs
+                    int enrichedCount = 0;
+                    int matchCount = 0;
+                    for (BidangBoundaryDTO dto : convertedBidangBoundaries) {
+                        if (dto.getGeojson() != null) {
+                            // Build composite key for lookup
+                            String key = dto.getKdProp() + "-" + dto.getKdDati2() + "-" + 
+                                       dto.getKdKec() + "-" + dto.getKdKel() + "-" + 
+                                       dto.getKdBlok() + "-" + dto.getNoUrut() + "-" + 
+                                       dto.getKdJnsOp();
+                            
+                            Map<String, Object> statusData = paymentStatusMap.get(key);
+                            
+                            if (statusData != null) {
+                                matchCount++;
+                            } else {
+                                // Log first few mismatches for debugging
+                                if (enrichedCount < 3) {
+                                    System.out.println("⚠️ No match found for key: " + key + " (NOP: " + dto.getNop() + ")");
+                                }
+                            }
+                            
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> geoJsonMap = (Map<String, Object>) dto.getGeojson();
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> properties = (Map<String, Object>) geoJsonMap.get("properties");
+                            
+                            if (properties == null) {
+                                properties = new HashMap<>();
+                                geoJsonMap.put("properties", properties);
+                            }
+
+                            if (statusData != null) {
+                                properties.put("status_bayar", statusData.get("STATUS")); // LUNAS / TERHUTANG
+                                properties.put("tagihan", statusData.get("TAGIHAN"));
+                                properties.put("bayar", statusData.get("BAYAR"));
+                                enrichedCount++;
+                            } else {
+                                properties.put("status_bayar", "UNKNOWN");
+                            }
+                        }
+                    }
+                    System.out.println("📊 Match stats: " + matchCount + " found in DB out of " + kodeList.size() + " bidang");
+                    System.out.println("✅ Enriched " + enrichedCount + " bidang with payment status");
+                }
+            } catch (Exception e) {
+                System.err.println("⚠️ Failed to enrich payment status: " + e.getMessage());
+                // Don't fail the whole request, just log error
             }
 
             System.out.println("📦 Bidang boundary conversion complete: " + successCount + " success, " + failCount + " failed");
