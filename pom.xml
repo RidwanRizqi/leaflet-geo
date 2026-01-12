@@ -76,6 +76,12 @@
 			<scope>test</scope>
 		</dependency>
 		
+		<!-- Validation -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		
 		<!-- JTS Topology Suite for WKB/Geometry handling -->
 		<dependency>
 			<groupId>org.locationtech.jts</groupId>
