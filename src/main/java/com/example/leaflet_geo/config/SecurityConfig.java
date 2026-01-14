@@ -46,6 +46,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/ref-kelurahan/**").permitAll()
                         .requestMatchers("/api/dat-objek-pajak/**").permitAll()
                         .requestMatchers("/api/dat-subjek-pajak/**").permitAll()
+                        // Dashboard endpoints (public for dashboards)
+                        .requestMatchers("/api/pendapatan/**").permitAll()
+                        .requestMatchers("/api/dashboard/**").permitAll()
+                        .requestMatchers("/api/pajak/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

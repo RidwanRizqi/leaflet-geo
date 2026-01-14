@@ -371,7 +371,7 @@ public class PendapatanService {
     public List<TopKontributorDTO> getTopKontributor(Integer tahun, Integer limit) {
         String sql = """
                 SELECT
-                    wp.t_npwpd AS npwpd,
+                    COALESCE(wp.t_npwpd_lama, CAST(wp.t_idwp AS CHAR)) AS npwpd,
                     wp.t_nama AS nama_wp,
                     j.s_namajenis AS jenis_pajak,
                     SUM(t.t_jmlhpembayaran) AS total_pembayaran,
@@ -381,7 +381,7 @@ public class PendapatanService {
                 JOIN t_wp wp ON obj.t_idwp = wp.t_idwp
                 LEFT JOIN s_jenisobjek j ON t.t_jenispajak = j.s_idjenis
                 WHERE YEAR(t.t_tglpembayaran) = ?
-                GROUP BY wp.t_idwp, wp.t_npwpd, wp.t_nama, j.s_namajenis
+                GROUP BY wp.t_idwp, wp.t_npwpd_lama, wp.t_nama, j.s_namajenis
                 ORDER BY total_pembayaran DESC
                 LIMIT ?
                 """;
