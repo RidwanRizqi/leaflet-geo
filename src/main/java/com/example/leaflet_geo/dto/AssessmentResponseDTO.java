@@ -44,6 +44,10 @@ public class AssessmentResponseDTO {
     // Location
     private LocationDetails location;
     
+    // Supporting documents
+    private String[] photoUrls;
+    private String supportingDocUrl;
+    
     // Timestamps
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

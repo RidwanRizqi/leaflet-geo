@@ -198,6 +198,8 @@ public class PbjtAssessmentService {
                 .kecamatan(assessment.getKecamatan())
                 .kabupaten(assessment.getKabupaten())
                 .build())
+            .photoUrls(assessment.getPhotoUrls())
+            .supportingDocUrl(assessment.getSupportingDocUrl())
             .createdAt(assessment.getCreatedAt())
             .updatedAt(assessment.getUpdatedAt())
             .build();
