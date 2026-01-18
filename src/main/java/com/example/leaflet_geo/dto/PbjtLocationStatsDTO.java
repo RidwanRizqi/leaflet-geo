@@ -14,6 +14,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class PbjtLocationStatsDTO {
     private String kecamatan;
+    private String kdKec;  // Kode kecamatan untuk drill-down
+    private String kdKel;  // Kode kelurahan dari SISMIOP
     private String kelurahan;
     private Long jumlahUsaha;
     private BigDecimal totalAnnualPbjt;

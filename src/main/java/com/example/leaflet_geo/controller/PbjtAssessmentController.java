@@ -7,13 +7,23 @@ import com.example.leaflet_geo.service.PbjtAssessmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,6 +34,9 @@ import java.util.stream.Collectors;
 public class PbjtAssessmentController {
     
     private final PbjtAssessmentService assessmentService;
+    
+    @Value("${file.upload.dir:uploads/pbjt-images}")
+    private String uploadDir;
     
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllAssessments(
@@ -279,6 +292,80 @@ public class PbjtAssessmentController {
         } catch (Exception e) {
             log.error("Error getting assessments by location: {}, {}", kecamatan, kelurahan, e);
             return ResponseEntity.status(500).build();
+        }
+    }
+    
+    /**
+     * Upload business images
+     * Max 4 images, 5MB per file
+     */
+    @PostMapping("/upload-images")
+    public ResponseEntity<Map<String, Object>> uploadImages(
+            @RequestParam("files") MultipartFile[] files) {
+        try {
+            // Validate file count
+            if (files.length > 4) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Maksimal 4 gambar"
+                ));
+            }
+            
+            // Create upload directory if not exists
+            File uploadDirectory = new File(uploadDir);
+            if (!uploadDirectory.exists()) {
+                uploadDirectory.mkdirs();
+                log.info("Created upload directory: {}", uploadDir);
+            }
+            
+            List<String> uploadedUrls = new ArrayList<>();
+            
+            for (MultipartFile file : files) {
+                // Validate file
+                if (file.isEmpty()) {
+                    continue;
+                }
+                
+                // Validate file type
+                String contentType = file.getContentType();
+                if (contentType == null || !contentType.startsWith("image/")) {
+                    return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "File " + file.getOriginalFilename() + " bukan gambar"
+                    ));
+                }
+                
+                // Generate unique filename
+                String originalFilename = file.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                }
+                String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+                
+                // Save file
+                Path filePath = Paths.get(uploadDir, uniqueFilename);
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                
+                // Store relative URL
+                String fileUrl = "/uploads/pbjt-images/" + uniqueFilename;
+                uploadedUrls.add(fileUrl);
+                
+                log.info("Uploaded image: {} -> {}", originalFilename, fileUrl);
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Gambar berhasil diupload",
+                "urls", uploadedUrls
+            ));
+            
+        } catch (IOException e) {
+            log.error("Error uploading images", e);
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "message", "Error uploading images: " + e.getMessage()
+            ));
         }
     }
 }

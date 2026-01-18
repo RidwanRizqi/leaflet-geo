@@ -137,6 +137,12 @@ public class PbjtAssessment {
     @Column(name = "kecamatan")
     private String kecamatan;
     
+    @Column(name = "kd_kec", length = 10)
+    private String kdKec;  // Kode kecamatan untuk drill-down ke kelurahan
+    
+    @Column(name = "kd_kel", length = 10)
+    private String kdKel;  // Kode kelurahan dari SISMIOP untuk join akurat
+    
     @Column(name = "kabupaten")
     private String kabupaten;
     

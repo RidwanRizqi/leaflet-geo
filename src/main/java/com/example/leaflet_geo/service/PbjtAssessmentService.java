@@ -271,8 +271,24 @@ public class PbjtAssessmentService {
             .filter(a -> a.getBusinessType() != null)
             .collect(Collectors.groupingBy(PbjtAssessment::getBusinessType, Collectors.counting()));
         
+        // Get kdKec from first assessment that has it
+        String kdKec = assessments.stream()
+            .filter(a -> a.getKdKec() != null && !a.getKdKec().isEmpty())
+            .findFirst()
+            .map(PbjtAssessment::getKdKec)
+            .orElse(null);
+        
+        // Get kdKel from first assessment that has it
+        String kdKel = assessments.stream()
+            .filter(a -> a.getKdKel() != null && !a.getKdKel().isEmpty())
+            .findFirst()
+            .map(PbjtAssessment::getKdKel)
+            .orElse(null);
+        
         return com.example.leaflet_geo.dto.PbjtLocationStatsDTO.builder()
             .kecamatan(kecamatan)
+            .kdKec(kdKec)
+            .kdKel(kdKel)
             .kelurahan(kelurahan)
             .jumlahUsaha(jumlahUsaha)
             .totalAnnualPbjt(totalPbjt)
