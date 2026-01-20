@@ -171,6 +171,8 @@ public class PbjtAssessmentService {
             .buildingArea(assessment.getBuildingArea())
             .seatingCapacity(assessment.getSeatingCapacity())
             .businessType(assessment.getBusinessType())
+            .operatingHoursStart(assessment.getOperatingHoursStart() != null ? assessment.getOperatingHoursStart().toString() : null)
+            .operatingHoursEnd(assessment.getOperatingHoursEnd() != null ? assessment.getOperatingHoursEnd().toString() : null)
             .address(assessment.getAddress())
             .dailyRevenueWeekday(assessment.getDailyRevenueWeekday())
             .dailyRevenueWeekend(assessment.getDailyRevenueWeekend())

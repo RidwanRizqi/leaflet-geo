@@ -25,6 +25,8 @@ public class AssessmentResponseDTO {
     private BigDecimal buildingArea;
     private Integer seatingCapacity;
     private String businessType;
+    private String operatingHoursStart;
+    private String operatingHoursEnd;
     private String address;
     
     // Calculation results
