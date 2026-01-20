@@ -22,7 +22,7 @@ public class PbjtAssessmentWithRealizationDTO {
     private BigDecimal latitude;
     private BigDecimal longitude;
     
-    // Realisasi per tahun dari SIMATDA
+    // Realisasi per tahun dari tabel pbjt_realisasi (PostgreSQL lokal)
     private BigDecimal realisasi2021;
     private BigDecimal realisasi2022;
     private BigDecimal realisasi2023;

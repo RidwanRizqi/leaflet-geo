@@ -15,14 +15,14 @@ import java.util.stream.Collectors;
 public class PbjtRealizationService {
     
     private final PbjtAssessmentRepository assessmentRepository;
-    private final JdbcTemplate mysqlJdbcTemplate;
+    private final JdbcTemplate pbjtJdbcTemplate; // JdbcTemplate untuk database pbjt_assessment_db
     
-    // Constructor dengan @Qualifier untuk mysqlJdbcTemplate
+    // Constructor - gunakan pbjtJdbcTemplate untuk query tabel pbjt_realisasi
     public PbjtRealizationService(
             PbjtAssessmentRepository assessmentRepository,
-            @Qualifier("mysqlJdbcTemplate") JdbcTemplate mysqlJdbcTemplate) {
+            @Qualifier("pbjtJdbcTemplate") JdbcTemplate pbjtJdbcTemplate) {
         this.assessmentRepository = assessmentRepository;
-        this.mysqlJdbcTemplate = mysqlJdbcTemplate;
+        this.pbjtJdbcTemplate = pbjtJdbcTemplate;
     }
     
     public List<PbjtAssessmentWithRealizationDTO> getAllAssessmentsWithRealization() {
@@ -32,18 +32,9 @@ public class PbjtRealizationService {
         List<PbjtAssessment> assessments = assessmentRepository.findAll();
         System.out.println("Found " + assessments.size() + " assessments from PostgreSQL");
         
-        // Collect all NOPs
-        List<String> allNops = assessments.stream()
-            .map(PbjtAssessment::getTaxObjectNumber)
-            .filter(nop -> nop != null && !nop.isEmpty())
-            .distinct()
-            .collect(Collectors.toList());
-        
-        System.out.println("Found " + allNops.size() + " unique NOPs to query");
-        
-        // Batch query all realization data in ONE query
-        Map<String, Map<Integer, BigDecimal>> allRealizationData = getAllRealizationDataBatch(allNops);
-        System.out.println("Got realization data for " + allRealizationData.size() + " NOPs from SIMATDA");
+        // Get ALL realisasi data from pbjt_realisasi table (PostgreSQL local)
+        Map<Long, Map<Integer, BigDecimal>> allRealizationData = getAllRealizationFromLocal();
+        System.out.println("Got realization data for " + allRealizationData.size() + " assessments from pbjt_realisasi table");
         
         List<PbjtAssessmentWithRealizationDTO> results = new ArrayList<>();
         
@@ -65,11 +56,9 @@ public class PbjtRealizationService {
             dto.setMonthlyPbjt(assessment.getMonthlyPbjt());
             dto.setConfidenceLevel(assessment.getConfidenceLevel());
             
-            // Get realization from batch result
-            String nop = assessment.getTaxObjectNumber();
-            Map<Integer, BigDecimal> realizationByYear = (nop != null && !nop.isEmpty()) 
-                ? allRealizationData.getOrDefault(nop, Collections.emptyMap())
-                : Collections.emptyMap();
+            // Get realisasi from local pbjt_realisasi table
+            Long assessmentId = assessment.getId();
+            Map<Integer, BigDecimal> realizationByYear = allRealizationData.getOrDefault(assessmentId, Collections.emptyMap());
             
             dto.setRealisasi2021(realizationByYear.getOrDefault(2021, BigDecimal.ZERO));
             dto.setRealisasi2022(realizationByYear.getOrDefault(2022, BigDecimal.ZERO));
@@ -96,80 +85,68 @@ public class PbjtRealizationService {
     }
     
     /**
-     * Batch query - satu query untuk NOP tertentu saja menggunakan IN clause
+     * Get ALL realization data from pbjt_realisasi table (PostgreSQL local)
+     * Returns Map: assessment_id -> (year -> amount)
      */
-    private Map<String, Map<Integer, BigDecimal>> getAllRealizationDataBatch(List<String> nops) {
-        if (nops.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        
-        // Build IN clause dengan placeholder
-        String placeholders = nops.stream().map(n -> "?").collect(Collectors.joining(","));
-        
+    private Map<Long, Map<Integer, BigDecimal>> getAllRealizationFromLocal() {
         String query = """
             SELECT 
-                b.t_nop as nop,
-                YEAR(a.t_tglpembayaran) as tahun,
-                SUM(COALESCE(a.t_jmlhpembayaran, 0)) as total_bayar
-            FROM t_transaksi a
-            LEFT JOIN view_wpobjek b ON a.t_idwpobjek = b.t_idobjek
-            LEFT JOIN s_rekening c ON a.t_idkorek = c.s_idkorek
-            WHERE b.t_nop IN (%s)
-              AND c.s_jenisobjek = 2
-              AND a.t_tglpembayaran IS NOT NULL
-              AND YEAR(a.t_tglpembayaran) BETWEEN 2021 AND 2025
-            GROUP BY b.t_nop, YEAR(a.t_tglpembayaran)
-            """.formatted(placeholders);
+                assessment_id,
+                tahun,
+                realisasi_amount
+            FROM pbjt_realisasi
+            ORDER BY assessment_id, tahun
+            """;
         
-        Map<String, Map<Integer, BigDecimal>> resultMap = new HashMap<>();
+        Map<Long, Map<Integer, BigDecimal>> resultMap = new HashMap<>();
         
         try {
-            System.out.println("Executing batch SIMATDA query for " + nops.size() + " NOPs...");
-            List<Map<String, Object>> rows = mysqlJdbcTemplate.queryForList(query, nops.toArray());
-            System.out.println("Got " + rows.size() + " rows from SIMATDA");
+            List<Map<String, Object>> rows = pbjtJdbcTemplate.queryForList(query);
             
             for (Map<String, Object> row : rows) {
-                String nop = (String) row.get("nop");
+                Long assessmentId = ((Number) row.get("assessment_id")).longValue();
                 Integer year = ((Number) row.get("tahun")).intValue();
-                BigDecimal amount = new BigDecimal(row.get("total_bayar").toString());
+                BigDecimal amount = (BigDecimal) row.get("realisasi_amount");
                 
-                resultMap.computeIfAbsent(nop, k -> new HashMap<>()).put(year, amount);
+                resultMap.computeIfAbsent(assessmentId, k -> new HashMap<>()).put(year, amount);
             }
         } catch (Exception e) {
-            System.err.println("Error batch querying SIMATDA: " + e.getMessage());
+            System.err.println("Error querying pbjt_realisasi: " + e.getMessage());
             e.printStackTrace();
         }
         
         return resultMap;
     }
     
-    private Map<Integer, BigDecimal> getRealizationByYear(String nop) {
+    /**
+     * Get realization for single assessment from pbjt_realisasi table
+     */
+    private Map<Integer, BigDecimal> getRealizationByAssessmentId(Long assessmentId) {
         String query = """
             SELECT 
-                YEAR(a.t_tglpembayaran) as tahun,
-                SUM(COALESCE(a.t_jmlhpembayaran, 0)) as total_bayar
-            FROM t_transaksi a
-            LEFT JOIN view_wpobjek b ON a.t_idwpobjek = b.t_idobjek
-            LEFT JOIN s_rekening c ON a.t_idkorek = c.s_idkorek
-            WHERE b.t_nop = ?
-              AND c.s_jenisobjek = 2
-              AND a.t_tglpembayaran IS NOT NULL
-              AND YEAR(a.t_tglpembayaran) BETWEEN 2021 AND 2025
-            GROUP BY YEAR(a.t_tglpembayaran)
+                tahun,
+                realisasi_amount
+            FROM pbjt_realisasi
+            WHERE assessment_id = ?
+            ORDER BY tahun
             """;
         
         Map<Integer, BigDecimal> resultMap = new HashMap<>();
         
         try {
-            List<Map<String, Object>> rows = mysqlJdbcTemplate.queryForList(query, nop);
+            System.out.println("DEBUG: Querying realisasi for assessment_id = " + assessmentId);
+            List<Map<String, Object>> rows = pbjtJdbcTemplate.queryForList(query, assessmentId);
+            System.out.println("DEBUG: Found " + rows.size() + " rows");
             
             for (Map<String, Object> row : rows) {
                 Integer year = ((Number) row.get("tahun")).intValue();
-                BigDecimal amount = new BigDecimal(row.get("total_bayar").toString());
+                BigDecimal amount = (BigDecimal) row.get("realisasi_amount");
+                System.out.println("DEBUG: Year=" + year + ", Amount=" + amount);
                 resultMap.put(year, amount);
             }
         } catch (Exception e) {
-            System.err.println("Error querying SIMATDA for NOP " + nop + ": " + e.getMessage());
+            System.err.println("Error querying pbjt_realisasi for assessment " + assessmentId + ": " + e.getMessage());
+            e.printStackTrace();
         }
         
         return resultMap;
@@ -200,22 +177,20 @@ public class PbjtRealizationService {
         dto.setMonthlyPbjt(assessment.getMonthlyPbjt());
         dto.setConfidenceLevel(assessment.getConfidenceLevel());
         
-        // Get realization from SIMATDA
-        if (assessment.getTaxObjectNumber() != null && !assessment.getTaxObjectNumber().isEmpty()) {
-            Map<Integer, BigDecimal> realizationByYear = getRealizationByYear(assessment.getTaxObjectNumber());
-            
-            dto.setRealisasi2021(realizationByYear.getOrDefault(2021, BigDecimal.ZERO));
-            dto.setRealisasi2022(realizationByYear.getOrDefault(2022, BigDecimal.ZERO));
-            dto.setRealisasi2023(realizationByYear.getOrDefault(2023, BigDecimal.ZERO));
-            dto.setRealisasi2024(realizationByYear.getOrDefault(2024, BigDecimal.ZERO));
-            dto.setRealisasi2025(realizationByYear.getOrDefault(2025, BigDecimal.ZERO));
-            
-            BigDecimal total = BigDecimal.ZERO;
-            for (BigDecimal value : realizationByYear.values()) {
-                total = total.add(value);
-            }
-            dto.setTotalRealisasi(total);
+        // Get realization from pbjt_realisasi table
+        Map<Integer, BigDecimal> realizationByYear = getRealizationByAssessmentId(id);
+        
+        dto.setRealisasi2021(realizationByYear.getOrDefault(2021, BigDecimal.ZERO));
+        dto.setRealisasi2022(realizationByYear.getOrDefault(2022, BigDecimal.ZERO));
+        dto.setRealisasi2023(realizationByYear.getOrDefault(2023, BigDecimal.ZERO));
+        dto.setRealisasi2024(realizationByYear.getOrDefault(2024, BigDecimal.ZERO));
+        dto.setRealisasi2025(realizationByYear.getOrDefault(2025, BigDecimal.ZERO));
+        
+        BigDecimal total = BigDecimal.ZERO;
+        for (BigDecimal value : realizationByYear.values()) {
+            total = total.add(value);
         }
+        dto.setTotalRealisasi(total);
         
         return dto;
     }
@@ -230,15 +205,8 @@ public class PbjtRealizationService {
         List<PbjtAssessment> assessments = assessmentRepository.findByKecamatanIgnoreCaseAndKelurahanIgnoreCase(kecamatan, kelurahan);
         System.out.println("Found " + assessments.size() + " assessments for " + kelurahan + ", " + kecamatan);
         
-        // Collect all NOPs
-        List<String> allNops = assessments.stream()
-            .map(PbjtAssessment::getTaxObjectNumber)
-            .filter(nop -> nop != null && !nop.isEmpty())
-            .distinct()
-            .collect(java.util.stream.Collectors.toList());
-        
-        // Batch query all realization data
-        Map<String, Map<Integer, BigDecimal>> allRealizationData = getAllRealizationDataBatch(allNops);
+        // Get realisasi data from local table
+        Map<Long, Map<Integer, BigDecimal>> allRealizationData = getAllRealizationFromLocal();
         
         List<PbjtAssessmentWithRealizationDTO> results = new ArrayList<>();
         
@@ -262,11 +230,9 @@ public class PbjtRealizationService {
             dto.setConfidenceLevel(assessment.getConfidenceLevel());
             dto.setConfidenceScore(assessment.getConfidenceScore());
             
-            // Get realization from batch result
-            String nop = assessment.getTaxObjectNumber();
-            Map<Integer, BigDecimal> realizationByYear = (nop != null && !nop.isEmpty()) 
-                ? allRealizationData.getOrDefault(nop, java.util.Collections.emptyMap())
-                : java.util.Collections.emptyMap();
+            // Get realisasi from local table
+            Long assessmentId = assessment.getId();
+            Map<Integer, BigDecimal> realizationByYear = allRealizationData.getOrDefault(assessmentId, Collections.emptyMap());
             
             dto.setRealisasi2021(realizationByYear.getOrDefault(2021, BigDecimal.ZERO));
             dto.setRealisasi2022(realizationByYear.getOrDefault(2022, BigDecimal.ZERO));
@@ -274,7 +240,6 @@ public class PbjtRealizationService {
             dto.setRealisasi2024(realizationByYear.getOrDefault(2024, BigDecimal.ZERO));
             dto.setRealisasi2025(realizationByYear.getOrDefault(2025, BigDecimal.ZERO));
             
-            // Calculate total
             BigDecimal total = dto.getRealisasi2021()
                 .add(dto.getRealisasi2022())
                 .add(dto.getRealisasi2023())

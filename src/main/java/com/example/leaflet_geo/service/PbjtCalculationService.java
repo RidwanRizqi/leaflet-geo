@@ -149,9 +149,12 @@ public class PbjtCalculationService {
         
         BigDecimal totalAvg = observations.stream()
             .map(obs -> {
-                List<BigDecimal> samples = obs.getSampleTransactions();
-                BigDecimal sum = samples.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-                return sum.divide(BigDecimal.valueOf(samples.size()), 2, RoundingMode.HALF_UP);
+                // Extract amounts from SampleTransactionDTO list
+                List<BigDecimal> amounts = obs.getSampleTransactions().stream()
+                    .map(ObservationDTO.SampleTransactionDTO::getAmount)
+                    .toList();
+                BigDecimal sum = amounts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+                return sum.divide(BigDecimal.valueOf(amounts.size()), 2, RoundingMode.HALF_UP);
             })
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         

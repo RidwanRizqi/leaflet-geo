@@ -20,6 +20,16 @@ import java.util.List;
 @AllArgsConstructor
 public class ObservationHistory {
     
+    // Inner class for sample transaction structure
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SampleTransaction {
+        private BigDecimal amount;
+        private String notes;
+    }
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,7 +55,7 @@ public class ObservationHistory {
     
     @Column(name = "sample_transactions", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<BigDecimal> sampleTransactions;
+    private List<SampleTransaction> sampleTransactions;
     
     @Column(name = "visitors_per_hour", precision = 10, scale = 2)
     private BigDecimal visitorsPerHour;

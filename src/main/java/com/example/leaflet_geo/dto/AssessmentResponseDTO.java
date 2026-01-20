@@ -44,6 +44,9 @@ public class AssessmentResponseDTO {
     // Location
     private LocationDetails location;
     
+    // Observations
+    private java.util.List<ObservationDetails> observations;
+    
     // Supporting documents
     private String[] photoUrls;
     private String supportingDocUrl;
@@ -87,5 +90,30 @@ public class AssessmentResponseDTO {
         private String kelurahan;
         private String kecamatan;
         private String kabupaten;
+    }
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ObservationDetails {
+        private Long id;
+        private LocalDateTime observationDate;
+        private String dayType;
+        private Integer visitors;
+        private BigDecimal durationHours;
+        private BigDecimal avgTransaction;
+        private BigDecimal visitorsPerHour;
+        private java.util.List<SampleTransactionDetails> sampleTransactions;
+        private String notes;
+    }
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SampleTransactionDetails {
+        private BigDecimal amount;
+        private String notes;
     }
 }

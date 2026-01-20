@@ -198,6 +198,24 @@ public class PbjtAssessmentService {
                 .kecamatan(assessment.getKecamatan())
                 .kabupaten(assessment.getKabupaten())
                 .build())
+            .observations(observationRepository.findByAssessmentIdOrderByDateDesc(assessment.getId()).stream()
+                .map(obs -> AssessmentResponseDTO.ObservationDetails.builder()
+                    .id(obs.getId())
+                    .observationDate(obs.getObservationDate())
+                    .dayType(obs.getDayType())
+                    .visitors(obs.getVisitors())
+                    .durationHours(obs.getDurationHours())
+                    .avgTransaction(obs.getAvgTransaction())
+                    .visitorsPerHour(obs.getVisitorsPerHour())
+                    .sampleTransactions(obs.getSampleTransactions().stream()
+                        .map(tx -> AssessmentResponseDTO.SampleTransactionDetails.builder()
+                            .amount(tx.getAmount())
+                            .notes(tx.getNotes())
+                            .build())
+                        .collect(java.util.stream.Collectors.toList()))
+                    .notes(obs.getNotes())
+                    .build())
+                .collect(java.util.stream.Collectors.toList()))
             .photoUrls(assessment.getPhotoUrls())
             .supportingDocUrl(assessment.getSupportingDocUrl())
             .createdAt(assessment.getCreatedAt())
@@ -206,17 +224,29 @@ public class PbjtAssessmentService {
     }
     
     private ObservationHistory convertToObservationHistory(ObservationDTO dto, PbjtAssessment assessment) {
+        // Calculate average from sample transactions
+        java.math.BigDecimal avgTransaction = dto.getSampleTransactions().stream()
+            .map(ObservationDTO.SampleTransactionDTO::getAmount)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+            .divide(java.math.BigDecimal.valueOf(dto.getSampleTransactions().size()), 
+                2, java.math.RoundingMode.HALF_UP);
+        
+        // Convert DTOs to entity SampleTransaction objects
+        List<ObservationHistory.SampleTransaction> sampleTransactions = dto.getSampleTransactions().stream()
+            .map(txDto -> ObservationHistory.SampleTransaction.builder()
+                .amount(txDto.getAmount())
+                .notes(txDto.getNotes())
+                .build())
+            .collect(java.util.stream.Collectors.toList());
+        
         return ObservationHistory.builder()
             .assessment(assessment)
             .observationDate(dto.getObservationDate())
             .dayType(dto.getDayType())
             .visitors(dto.getVisitors())
             .durationHours(dto.getDurationHours())
-            .avgTransaction(dto.getSampleTransactions().stream()
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
-                .divide(java.math.BigDecimal.valueOf(dto.getSampleTransactions().size()), 
-                    2, java.math.RoundingMode.HALF_UP))
-            .sampleTransactions(dto.getSampleTransactions())
+            .avgTransaction(avgTransaction)
+            .sampleTransactions(sampleTransactions)
             .visitorsPerHour(java.math.BigDecimal.valueOf(dto.getVisitors())
                 .divide(dto.getDurationHours(), 2, java.math.RoundingMode.HALF_UP))
             .notes(dto.getNotes())

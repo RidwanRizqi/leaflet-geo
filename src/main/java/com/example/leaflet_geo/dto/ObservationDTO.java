@@ -16,6 +16,19 @@ import java.util.List;
 @AllArgsConstructor
 public class ObservationDTO {
     
+    // Inner class for sample transaction with notes
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SampleTransactionDTO {
+        @NotNull(message = "Transaction amount is required")
+        @Min(value = 1000, message = "Minimum transaction is Rp 1,000")
+        private BigDecimal amount;
+        
+        private String notes; // Optional notes for this transaction
+    }
+    
     @NotNull(message = "Observation date is required")
     private LocalDateTime observationDate;
     
@@ -34,7 +47,7 @@ public class ObservationDTO {
     
     @NotNull(message = "Sample transactions are required")
     @Size(min = 5, max = 30, message = "Please provide 5-30 sample transaction values")
-    private List<BigDecimal> sampleTransactions;
+    private List<SampleTransactionDTO> sampleTransactions;
     
     private String notes;
 }
