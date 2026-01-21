@@ -53,6 +53,9 @@ public class AssessmentResponseDTO {
     private String[] photoUrls;
     private String supportingDocUrl;
     
+    // Audit trail
+    private String surveyorId;
+    
     // Timestamps
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

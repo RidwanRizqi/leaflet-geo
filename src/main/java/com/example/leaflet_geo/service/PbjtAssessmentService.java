@@ -148,14 +148,31 @@ public class PbjtAssessmentService {
         existing.setKecamatan(request.getKecamatan());
         existing.setKabupaten(request.getKabupaten());
         
-        // Update observations
-        observationRepository.deleteAll(existing.getObservationHistories());
+        // Update photo URLs if provided
+        if (request.getPhotoUrls() != null && !request.getPhotoUrls().isEmpty()) {
+            existing.setPhotoUrls(request.getPhotoUrls().toArray(new String[0]));
+        }
+        
+        // Update surveyor ID
+        if (request.getSurveyorId() != null) {
+            existing.setSurveyorId(request.getSurveyorId());
+        }
+        
+        // Save assessment first
+        PbjtAssessment savedAssessment = assessmentRepository.save(existing);
+        
+        // Update observations - delete old ones and create new ones
+        if (savedAssessment.getObservationHistories() != null && !savedAssessment.getObservationHistories().isEmpty()) {
+            observationRepository.deleteAll(savedAssessment.getObservationHistories());
+            observationRepository.flush(); // Force delete to complete before inserting new ones
+        }
+        
         List<ObservationHistory> newObservations = request.getObservations().stream()
-            .map(obs -> convertToObservationHistory(obs, existing))
+            .map(obs -> convertToObservationHistory(obs, savedAssessment))
             .collect(Collectors.toList());
         observationRepository.saveAll(newObservations);
         
-        return assessmentRepository.save(existing);
+        return savedAssessment;
     }
     
     public void deleteAssessment(Long id) {
@@ -220,6 +237,7 @@ public class PbjtAssessmentService {
                 .collect(java.util.stream.Collectors.toList()))
             .photoUrls(assessment.getPhotoUrls())
             .supportingDocUrl(assessment.getSupportingDocUrl())
+            .surveyorId(assessment.getSurveyorId())
             .createdAt(assessment.getCreatedAt())
             .updatedAt(assessment.getUpdatedAt())
             .build();
