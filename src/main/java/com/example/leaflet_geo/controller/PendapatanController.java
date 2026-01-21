@@ -5,6 +5,7 @@ import com.example.leaflet_geo.dto.DashboardSummaryDTO;
 import com.example.leaflet_geo.dto.TargetRealisasiDTO;
 import com.example.leaflet_geo.dto.TopKontributorDTO;
 import com.example.leaflet_geo.dto.TrendBulananDTO;
+import com.example.leaflet_geo.dto.PajakDataDTO;
 import com.example.leaflet_geo.service.PendapatanService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -111,6 +112,24 @@ public class PendapatanController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     ApiResponse.error("Gagal mengambil realisasi by jenis: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get Realisasi Bulanan per Kategori untuk Dashboard Pajak
+     * GET /api/pendapatan/pajak-bulanan?tahun=2025
+     */
+    @GetMapping("/pajak-bulanan")
+    public ResponseEntity<ApiResponse<List<PajakDataDTO>>> getPajakBulanan(
+            @RequestParam(defaultValue = "2025") Integer tahun) {
+        try {
+            List<PajakDataDTO> data = pendapatanService.getRealisasiBulananByKategori(tahun);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Data pajak bulanan tahun " + tahun + " berhasil diambil", data,
+                            (long) data.size()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Gagal mengambil data pajak bulanan: " + e.getMessage()));
         }
     }
 }

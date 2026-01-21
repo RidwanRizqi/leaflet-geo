@@ -5,6 +5,7 @@ import com.example.leaflet_geo.dto.RekeningDetailDTO;
 import com.example.leaflet_geo.dto.TargetRealisasiDTO;
 import com.example.leaflet_geo.dto.TopKontributorDTO;
 import com.example.leaflet_geo.dto.TrendBulananDTO;
+import com.example.leaflet_geo.dto.PajakDataDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,19 @@ public class PendapatanService {
             10, 15_000_000_000L // BPHTB (Bea Perolehan Hak atas Tanah dan Bangunan)
     // Pajak Sarang Burung Walet (ID 9) tidak ada target
     );
+
+    /**
+     * Static realisasi values for 2025 (temporary fix for incorrect SIMATDA data)
+     * Values provided by user from external website
+     */
+    private static final Map<String, Long> STATIC_REALISASI_2025 = Map.of(
+            "Perhotelan", 1_351_957_493L,
+            "Restoran", 5_541_244_585L,
+            "Kesenian dan Hiburan", 1_184_450_087L,
+            "Tenaga Listrik", 37_964_264_753L,
+            "Parkir", 475_171_141L,
+            "Reklame", 2_102_244_253L,
+            "Air Tanah", 1_185_226_386L);
 
     private long getTotalTargetHardcode() {
         return TARGET_HARDCODE.values().stream()
@@ -301,6 +315,9 @@ public class PendapatanService {
                     });
         }
 
+        // Remove Pajak Sarang Burung Walet (urutan 9) - tidak ada target
+        results.removeIf(dto -> dto.getUrutan() != null && dto.getUrutan() == 9);
+
         return results;
     }
 
@@ -428,5 +445,128 @@ public class PendapatanService {
                 "Juli", "Agustus", "September", "Oktober", "November", "Desember"
         };
         return namaBulan[bulan - 1];
+    }
+
+    /**
+     * Mapping dari nama jenis pajak di database ke nama kategori di frontend
+     * Names must match exactly what's in master-pajak.json
+     */
+    private static final Map<String, String> KATEGORI_MAPPING = Map.of(
+            "Pajak Hotel", "Perhotelan",
+            "Pajak Restoran", "Restoran",
+            "Pajak Hiburan", "Kesenian dan Hiburan",
+            "Pajak Reklame", "Reklame",
+            "Pajak Penerangan Jalan", "Tenaga Listrik",
+            "Pajak Parkir", "Parkir",
+            "Pajak Air Tanah", "Air Tanah",
+            "Pajak Mineral Bukan Logam dan Batuan", "Minerba");
+
+    /**
+     * Get Realisasi Bulanan per Kategori Pajak untuk Dashboard Pajak
+     * Returns data in the same format as master-pajak.json
+     */
+    public List<PajakDataDTO> getRealisasiBulananByKategori(Integer tahun) {
+        String sql = """
+                SELECT
+                    j.s_namajenis AS jenis_pajak,
+                    j.s_order AS urutan,
+                    MONTH(t.t_tglpembayaran) AS bulan,
+                    COALESCE(SUM(t.t_jmlhpembayaran), 0) AS total_realisasi
+                FROM t_transaksi t
+                JOIN s_jenisobjek j ON t.t_jenispajak = j.s_idjenis
+                WHERE YEAR(t.t_tglpembayaran) = ?
+                GROUP BY j.s_namajenis, j.s_order, MONTH(t.t_tglpembayaran)
+                ORDER BY j.s_order, bulan
+                """;
+
+        List<PajakDataDTO> results = executeSafely(() -> mysqlJdbcTemplate.query(sql, (rs, rowNum) -> {
+            PajakDataDTO dto = new PajakDataDTO();
+
+            // Map database jenis pajak name to frontend kategori name
+            String jenisPajak = rs.getString("jenis_pajak");
+            String kategori = KATEGORI_MAPPING.getOrDefault(jenisPajak, jenisPajak);
+
+            dto.setKategori(kategori);
+            dto.setTahun(tahun);
+            dto.setBulan(getNamaBulan(rs.getInt("bulan")));
+            dto.setValue(rs.getBigDecimal("total_realisasi"));
+            return dto;
+        }, tahun), new ArrayList<>(), "MySQL Pajak Bulanan");
+
+        System.out.println("✅ MySQL Pajak Bulanan returned " + results.size() + " records for year " + tahun);
+
+        // Add BPHTB monthly data from PostgreSQL
+        try {
+            List<Map<String, Object>> bphtbData = bphtbService.getRealisasiBulanan(tahun);
+            if (bphtbData != null) {
+                for (Map<String, Object> row : bphtbData) {
+                    PajakDataDTO dto = new PajakDataDTO();
+                    dto.setKategori("BPHTB");
+                    dto.setTahun(tahun);
+                    int bulanNum = ((Number) row.get("bulan")).intValue();
+                    dto.setBulan(getNamaBulan(bulanNum));
+                    dto.setValue(new BigDecimal(row.get("realisasi").toString()));
+                    results.add(dto);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not fetch BPHTB monthly data: " + e.getMessage());
+        }
+
+        // Add PBB P2 monthly data from Oracle SISMIOP
+        try {
+            List<Map<String, Object>> pbbData = sismiopService.getRealisasiPbbBulanan(tahun.toString());
+            if (pbbData != null) {
+                for (Map<String, Object> row : pbbData) {
+                    PajakDataDTO dto = new PajakDataDTO();
+                    dto.setKategori("PBB-P2");
+                    dto.setTahun(tahun);
+                    int bulanNum = ((Number) row.get("BULAN")).intValue();
+                    dto.setBulan(getNamaBulan(bulanNum));
+                    dto.setValue(new BigDecimal(row.get("REALISASI").toString()));
+                    results.add(dto);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not fetch PBB P2 monthly data: " + e.getMessage());
+        }
+
+        // For year 2025, use static values for categories with incorrect SIMATDA data
+        if (tahun == 2025) {
+            // Group by kategori and calculate sum
+            Map<String, BigDecimal> kategoriSum = new java.util.HashMap<>();
+            for (PajakDataDTO dto : results) {
+                kategoriSum.merge(dto.getKategori(), dto.getValue(), BigDecimal::add);
+            }
+
+            // Calculate adjustment factors for each kategori
+            Map<String, BigDecimal> adjustmentFactors = new java.util.HashMap<>();
+            for (Map.Entry<String, Long> entry : STATIC_REALISASI_2025.entrySet()) {
+                String kategori = entry.getKey();
+                BigDecimal staticValue = new BigDecimal(entry.getValue());
+                BigDecimal currentSum = kategoriSum.getOrDefault(kategori, BigDecimal.ZERO);
+
+                if (currentSum.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal factor = staticValue.divide(currentSum, 10, java.math.RoundingMode.HALF_UP);
+                    adjustmentFactors.put(kategori, factor);
+                    System.out.println("📊 Static adjustment for " + kategori + ": factor=" + factor);
+                }
+            }
+
+            // Apply adjustment factors to individual month values proportionally
+            for (PajakDataDTO dto : results) {
+                String kategori = dto.getKategori();
+                if (adjustmentFactors.containsKey(kategori)) {
+                    BigDecimal factor = adjustmentFactors.get(kategori);
+                    BigDecimal adjustedValue = dto.getValue().multiply(factor).setScale(0,
+                            java.math.RoundingMode.HALF_UP);
+                    dto.setValue(adjustedValue);
+                }
+            }
+
+            System.out.println("✅ Applied static value adjustments for 2025");
+        }
+
+        return results;
     }
 }
