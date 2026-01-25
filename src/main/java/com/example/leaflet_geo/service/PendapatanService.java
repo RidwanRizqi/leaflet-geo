@@ -54,19 +54,6 @@ public class PendapatanService {
     // Pajak Sarang Burung Walet (ID 9) tidak ada target
     );
 
-    /**
-     * Static realisasi values for 2025 (temporary fix for incorrect SIMATDA data)
-     * Values provided by user from external website
-     */
-    private static final Map<String, Long> STATIC_REALISASI_2025 = Map.of(
-            "Perhotelan", 1_351_957_493L,
-            "Restoran", 5_541_244_585L,
-            "Kesenian dan Hiburan", 1_184_450_087L,
-            "Tenaga Listrik", 37_964_264_753L,
-            "Parkir", 475_171_141L,
-            "Reklame", 2_102_244_253L,
-            "Air Tanah", 1_185_226_386L);
-
     private long getTotalTargetHardcode() {
         return TARGET_HARDCODE.values().stream()
                 .mapToLong(Long::longValue)
@@ -529,42 +516,6 @@ public class PendapatanService {
             }
         } catch (Exception e) {
             System.err.println("⚠️ Could not fetch PBB P2 monthly data: " + e.getMessage());
-        }
-
-        // For year 2025, use static values for categories with incorrect SIMATDA data
-        if (tahun == 2025) {
-            // Group by kategori and calculate sum
-            Map<String, BigDecimal> kategoriSum = new java.util.HashMap<>();
-            for (PajakDataDTO dto : results) {
-                kategoriSum.merge(dto.getKategori(), dto.getValue(), BigDecimal::add);
-            }
-
-            // Calculate adjustment factors for each kategori
-            Map<String, BigDecimal> adjustmentFactors = new java.util.HashMap<>();
-            for (Map.Entry<String, Long> entry : STATIC_REALISASI_2025.entrySet()) {
-                String kategori = entry.getKey();
-                BigDecimal staticValue = new BigDecimal(entry.getValue());
-                BigDecimal currentSum = kategoriSum.getOrDefault(kategori, BigDecimal.ZERO);
-
-                if (currentSum.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal factor = staticValue.divide(currentSum, 10, java.math.RoundingMode.HALF_UP);
-                    adjustmentFactors.put(kategori, factor);
-                    System.out.println("📊 Static adjustment for " + kategori + ": factor=" + factor);
-                }
-            }
-
-            // Apply adjustment factors to individual month values proportionally
-            for (PajakDataDTO dto : results) {
-                String kategori = dto.getKategori();
-                if (adjustmentFactors.containsKey(kategori)) {
-                    BigDecimal factor = adjustmentFactors.get(kategori);
-                    BigDecimal adjustedValue = dto.getValue().multiply(factor).setScale(0,
-                            java.math.RoundingMode.HALF_UP);
-                    dto.setValue(adjustedValue);
-                }
-            }
-
-            System.out.println("✅ Applied static value adjustments for 2025");
         }
 
         return results;
