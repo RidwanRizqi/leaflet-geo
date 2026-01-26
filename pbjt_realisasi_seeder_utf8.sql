@@ -1,0 +1,668 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.example:leaflet-geo >-----------------------
+[INFO] Building leaflet-geo 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.6.3:java (default-cli) @ leaflet-geo ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.6.0/commons-exec-1.6.0.pom
+Progress (1): 755 B
+Progress (1): 1.7 kB
+Progress (1): 3.4 kB
+Progress (1): 5.6 kB
+Progress (1): 7.8 kB
+Progress (1): 11 kB 
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.6.0/commons-exec-1.6.0.pom (11 kB at 5.2 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/93/commons-parent-93.pom
+Progress (1): 699 B
+Progress (1): 1.6 kB
+Progress (1): 2.9 kB
+Progress (1): 4.3 kB
+Progress (1): 5.4 kB
+Progress (1): 7.7 kB
+Progress (1): 10 kB 
+Progress (1): 11 kB
+Progress (1): 14 kB
+Progress (1): 16 kB
+Progress (1): 17 kB
+Progress (1): 20 kB
+Progress (1): 22 kB
+Progress (1): 24 kB
+Progress (1): 27 kB
+Progress (1): 30 kB
+Progress (1): 32 kB
+Progress (1): 37 kB
+Progress (1): 41 kB
+Progress (1): 43 kB
+Progress (1): 46 kB
+Progress (1): 49 kB
+Progress (1): 50 kB
+Progress (1): 53 kB
+Progress (1): 56 kB
+Progress (1): 58 kB
+Progress (1): 60 kB
+Progress (1): 63 kB
+Progress (1): 65 kB
+Progress (1): 70 kB
+Progress (1): 72 kB
+Progress (1): 73 kB
+Progress (1): 76 kB
+Progress (1): 79 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/93/commons-parent-93.pom (79 kB at 279 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.14.1/junit-bom-5.14.1.pom
+Progress (1): 908 B
+Progress (1): 2.3 kB
+Progress (1): 5.7 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.14.1/junit-bom-5.14.1.pom (5.7 kB at 11 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.pom
+Progress (1): 1.3 kB
+Progress (1): 2.4 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.pom (2.4 kB at 5.5 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.9.1/asm-commons-9.9.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.8 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.9.1/asm-commons-9.9.1.pom (2.8 kB at 14 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.9.1/asm-tree-9.9.1.pom
+Progress (1): 1.1 kB
+Progress (1): 2.6 kB
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.9.1/asm-tree-9.9.1.pom (2.6 kB at 13 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.6.0/commons-exec-1.6.0.jar
+Progress (1): 0.9/69 kB
+Progress (1): 2.3/69 kB
+Progress (1): 3.6/69 kB
+Progress (1): 5.0/69 kB
+Progress (1): 6.4/69 kB
+Progress (1): 7.7/69 kB
+Progress (1): 9.1/69 kB
+Progress (1): 10/69 kB 
+Progress (1): 12/69 kB
+Progress (1): 13/69 kB
+Progress (1): 15/69 kB
+Progress (1): 16/69 kB
+Progress (1): 17/69 kB
+Progress (1): 19/69 kB
+Progress (1): 20/69 kB
+Progress (1): 21/69 kB
+Progress (1): 26/69 kB
+Progress (1): 30/69 kB
+Progress (1): 34/69 kB
+Progress (1): 38/69 kB
+Progress (1): 43/69 kB
+Progress (1): 47/69 kB
+Progress (1): 51/69 kB
+Progress (1): 55/69 kB
+Progress (1): 59/69 kB
+Progress (1): 64/69 kB
+Progress (1): 68/69 kB
+Progress (1): 69 kB   
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.6.0/commons-exec-1.6.0.jar (69 kB at 271 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.9.1/asm-tree-9.9.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.9.1/asm-commons-9.9.1.jar
+Progress (1): 3.8/126 kB
+Progress (1): 8.0/126 kB
+Progress (1): 12/126 kB 
+Progress (1): 16/126 kB
+Progress (1): 21/126 kB
+Progress (1): 25/126 kB
+Progress (1): 29/126 kB
+Progress (1): 33/126 kB
+Progress (1): 37/126 kB
+Progress (1): 41/126 kB
+Progress (1): 46/126 kB
+Progress (1): 50/126 kB
+Progress (1): 54/126 kB
+Progress (1): 58/126 kB
+Progress (1): 63/126 kB
+Progress (1): 67/126 kB
+Progress (1): 71/126 kB
+Progress (1): 75/126 kB
+Progress (1): 79/126 kB
+Progress (1): 84/126 kB
+Progress (1): 88/126 kB
+Progress (1): 92/126 kB
+Progress (1): 96/126 kB
+Progress (1): 101/126 kB
+Progress (1): 105/126 kB
+Progress (1): 109/126 kB
+Progress (1): 113/126 kB
+Progress (1): 117/126 kB
+Progress (1): 126 kB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.9.1/asm-9.9.1.jar (126 kB at 524 kB/s)
+Progress (1): 0.9/75 kB
+Progress (1): 2.3/75 kB
+Progress (1): 3.6/75 kB
+Progress (1): 5.0/75 kB
+Progress (1): 6.4/75 kB
+Progress (1): 7.7/75 kB
+Progress (1): 9.1/75 kB
+Progress (1): 10/75 kB 
+Progress (1): 12/75 kB
+Progress (1): 13/75 kB
+Progress (1): 15/75 kB
+Progress (1): 16/75 kB
+Progress (1): 17/75 kB
+Progress (1): 19/75 kB
+Progress (1): 20/75 kB
+Progress (1): 21/75 kB
+Progress (1): 23/75 kB
+Progress (1): 24/75 kB
+Progress (1): 26/75 kB
+Progress (1): 27/75 kB
+Progress (1): 28/75 kB
+Progress (1): 30/75 kB
+Progress (1): 31/75 kB
+Progress (1): 32/75 kB
+Progress (1): 34/75 kB
+Progress (1): 35/75 kB
+Progress (1): 36/75 kB
+Progress (1): 38/75 kB
+Progress (1): 39/75 kB
+Progress (1): 41/75 kB
+Progress (1): 42/75 kB
+Progress (1): 43/75 kB
+Progress (1): 45/75 kB
+Progress (1): 46/75 kB
+Progress (1): 47/75 kB
+Progress (1): 49/75 kB
+Progress (1): 50/75 kB
+Progress (1): 52/75 kB
+Progress (1): 53/75 kB
+Progress (1): 54/75 kB
+Progress (1): 56/75 kB
+Progress (1): 60/75 kB
+Progress (1): 64/75 kB
+Progress (1): 68/75 kB
+Progress (1): 73/75 kB
+Progress (1): 75 kB   
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-commons/9.9.1/asm-commons-9.9.1.jar (75 kB at 128 kB/s)
+Progress (1): 0.9/52 kB
+Progress (1): 2.3/52 kB
+Progress (1): 3.6/52 kB
+Progress (1): 5.0/52 kB
+Progress (1): 6.4/52 kB
+Progress (1): 7.7/52 kB
+Progress (1): 9.1/52 kB
+Progress (1): 10/52 kB 
+Progress (1): 12/52 kB
+Progress (1): 13/52 kB
+Progress (1): 15/52 kB
+Progress (1): 16/52 kB
+Progress (1): 17/52 kB
+Progress (1): 19/52 kB
+Progress (1): 20/52 kB
+Progress (1): 21/52 kB
+Progress (1): 23/52 kB
+Progress (1): 24/52 kB
+Progress (1): 26/52 kB
+Progress (1): 27/52 kB
+Progress (1): 28/52 kB
+Progress (1): 30/52 kB
+Progress (1): 31/52 kB
+Progress (1): 32/52 kB
+Progress (1): 34/52 kB
+Progress (1): 35/52 kB
+Progress (1): 36/52 kB
+Progress (1): 38/52 kB
+Progress (1): 39/52 kB
+Progress (1): 41/52 kB
+Progress (1): 42/52 kB
+Progress (1): 43/52 kB
+Progress (1): 45/52 kB
+Progress (1): 46/52 kB
+Progress (1): 47/52 kB
+Progress (1): 49/52 kB
+Progress (1): 50/52 kB
+Progress (1): 52/52 kB
+Progress (1): 52 kB   
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ow2/asm/asm-tree/9.9.1/asm-tree-9.9.1.jar (52 kB at 4.9 kB/s)
+-- ================================================================
+-- PBJT REALISASI SEEDER (2021-2025)
+-- Generated from SIMATDA on: Tue Jan 20 18:08:29 WIB 2026
+-- ================================================================
+
+-- Loaded 100 assessments with tax_object_id
+
+-- Clear existing realisasi data
+TRUNCATE TABLE pbjt_realisasi CASCADE;
+
+-- Insert realisasi data
+-- ?? Skipped: tax_object_id=3 (not found in assessments) - RUMAH MAKAN BROMO
+-- ?? Skipped: tax_object_id=3 (not found in assessments) - RUMAH MAKAN BROMO
+-- ?? Skipped: tax_object_id=3 (not found in assessments) - RUMAH MAKAN BROMO
+-- ?? Skipped: tax_object_id=5 (not found in assessments) - TULUS TELUYAM
+-- ?? Skipped: tax_object_id=6 (not found in assessments) - CV. ARRACHMAN
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (81, '4', '02.00003.10.005', 'CV. LYA CATERING', 2021, 2487100.00, 4);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (81, '4', '02.00003.10.005', 'CV. LYA CATERING', 2022, 13590600.00, 36);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (81, '4', '02.00003.10.005', 'CV. LYA CATERING', 2023, 27854150.00, 30);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (81, '4', '02.00003.10.005', 'CV. LYA CATERING', 2024, 57952290.00, 83);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (81, '4', '02.00003.10.005', 'CV. LYA CATERING', 2025, 104326820.00, 188);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (109, '110', '02.00109.15.005', 'Warung Apung Pondok Asri', 2021, 1552500.00, 3);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (109, '110', '02.00109.15.005', 'Warung Apung Pondok Asri', 2022, 5895000.00, 7);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (109, '110', '02.00109.15.005', 'Warung Apung Pondok Asri', 2023, 81500.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (109, '110', '02.00109.15.005', 'Warung Apung Pondok Asri', 2024, 22000000.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (109, '110', '02.00109.15.005', 'Warung Apung Pondok Asri', 2025, 50500000.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (107, '195', '02.00196.15.005', 'LUSY INDRIYANTI', 2021, 5578500.00, 14);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (107, '195', '02.00196.15.005', 'LUSY INDRIYANTI', 2022, 41893500.00, 43);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (107, '195', '02.00196.15.005', 'LUSY INDRIYANTI', 2023, 28285400.00, 85);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (107, '195', '02.00196.15.005', 'LUSY INDRIYANTI', 2024, 5193000.00, 50);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (107, '195', '02.00196.15.005', 'LUSY INDRIYANTI', 2025, 4230200.00, 17);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (113, '292', '02.00286.10.009', 'ABDUL DJALIL / SIDOMORO CATERING', 2021, 8374500.00, 42);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (113, '292', '02.00286.10.009', 'ABDUL DJALIL / SIDOMORO CATERING', 2022, 13698500.00, 86);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (113, '292', '02.00286.10.009', 'ABDUL DJALIL / SIDOMORO CATERING', 2023, 28950000.00, 26);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (113, '292', '02.00286.10.009', 'ABDUL DJALIL / SIDOMORO CATERING', 2024, 15698500.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (113, '292', '02.00286.10.009', 'ABDUL DJALIL / SIDOMORO CATERING', 2025, 2110500.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (72, '360', '02.00359.10.005', 'RUDI HARIYANTO / CV KREASINDO PRIMA', 2021, 12775000.00, 38);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (72, '360', '02.00359.10.005', 'RUDI HARIYANTO / CV KREASINDO PRIMA', 2022, 75904920.00, 226);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (72, '360', '02.00359.10.005', 'RUDI HARIYANTO / CV KREASINDO PRIMA', 2023, 62025350.00, 426);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (72, '360', '02.00359.10.005', 'RUDI HARIYANTO / CV KREASINDO PRIMA', 2024, 52153500.00, 497);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (72, '360', '02.00359.10.005', 'RUDI HARIYANTO / CV KREASINDO PRIMA', 2025, 56937750.00, 370);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (97, '400', '02.00401.15.010', 'D''GOEN CATERING', 2021, 1491000.00, 8);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (97, '400', '02.00401.15.010', 'D''GOEN CATERING', 2022, 6315000.00, 27);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (97, '400', '02.00401.15.010', 'D''GOEN CATERING', 2023, 34774500.00, 101);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (97, '400', '02.00401.15.010', 'D''GOEN CATERING', 2024, 44544500.00, 158);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (97, '400', '02.00401.15.010', 'D''GOEN CATERING', 2025, 14779000.00, 42);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (68, '442', '02.00446.10.011', 'RESTO GM', 2021, 8075000.00, 8);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (68, '442', '02.00446.10.011', 'RESTO GM', 2022, 191351542.00, 62);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (68, '442', '02.00446.10.011', 'RESTO GM', 2023, 184239285.00, 53);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (68, '442', '02.00446.10.011', 'RESTO GM', 2024, 212743635.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (68, '442', '02.00446.10.011', 'RESTO GM', 2025, 208034659.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (90, '586', '02.00593.10.012', 'WAKUL BU TJIPTO', 2021, 600000.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (90, '586', '02.00593.10.012', 'WAKUL BU TJIPTO', 2022, 937500.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (90, '586', '02.00593.10.012', 'WAKUL BU TJIPTO', 2024, 33393000.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (90, '586', '02.00593.10.012', 'WAKUL BU TJIPTO', 2025, 103729835.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (111, '591', '02.00598.10.012', 'ROCKET CHICKEN VETERAN', 2024, 26327150.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (111, '591', '02.00598.10.012', 'ROCKET CHICKEN VETERAN', 2025, 44826500.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (112, '639', '02.00646.10.005', 'KHUZAINAH / CATERING MBAK KHUZ', 2021, 8079200.00, 120);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (112, '639', '02.00646.10.005', 'KHUZAINAH / CATERING MBAK KHUZ', 2022, 17083655.00, 421);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (112, '639', '02.00646.10.005', 'KHUZAINAH / CATERING MBAK KHUZ', 2023, 14987720.00, 322);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (112, '639', '02.00646.10.005', 'KHUZAINAH / CATERING MBAK KHUZ', 2024, 16088600.00, 315);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (112, '639', '02.00646.10.005', 'KHUZAINAH / CATERING MBAK KHUZ', 2025, 15922300.00, 296);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (101, '653', '02.00660.10.002', 'CV PUTRA DWIPANGGA', 2021, 4496750.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (101, '653', '02.00660.10.002', 'CV PUTRA DWIPANGGA', 2022, 39350800.00, 29);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (101, '653', '02.00660.10.002', 'CV PUTRA DWIPANGGA', 2023, 38957600.00, 15);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (101, '653', '02.00660.10.002', 'CV PUTRA DWIPANGGA', 2024, 9884400.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (101, '653', '02.00660.10.002', 'CV PUTRA DWIPANGGA', 2025, 405000.00, 3);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (145, '997', '02.01011.15.006', 'BIMO PERKOSO / CV BIMO PUTRA MANDIRI', 2021, 3168000.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (145, '997', '02.01011.15.006', 'BIMO PERKOSO / CV BIMO PUTRA MANDIRI', 2023, 750000.00, 2);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (145, '997', '02.01011.15.006', 'BIMO PERKOSO / CV BIMO PUTRA MANDIRI', 2024, 2076500.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (145, '997', '02.01011.15.006', 'BIMO PERKOSO / CV BIMO PUTRA MANDIRI', 2025, 35768250.00, 25);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (124, '1019', '02.01033.12.004', 'SUBAIDAH / WARUNG ASRI', 2021, 3108500.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (124, '1019', '02.01033.12.004', 'SUBAIDAH / WARUNG ASRI', 2022, 19663500.00, 49);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (124, '1019', '02.01033.12.004', 'SUBAIDAH / WARUNG ASRI', 2023, 22410000.00, 45);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (124, '1019', '02.01033.12.004', 'SUBAIDAH / WARUNG ASRI', 2024, 10852250.00, 29);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (135, '1042', '02.01056.10.003', 'SANTI SUTIANA', 2021, 270000.00, 2);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (135, '1042', '02.01056.10.003', 'SANTI SUTIANA', 2022, 7559500.00, 88);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (135, '1042', '02.01056.10.003', 'SANTI SUTIANA', 2023, 11154000.00, 169);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (135, '1042', '02.01056.10.003', 'SANTI SUTIANA', 2024, 21343000.00, 265);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (135, '1042', '02.01056.10.003', 'SANTI SUTIANA', 2025, 8130413.00, 72);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (74, '1165', '02.01179.10.009', 'CV MULYO DADI', 2021, 8318250.00, 9);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (74, '1165', '02.01179.10.009', 'CV MULYO DADI', 2022, 48862250.00, 33);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (74, '1165', '02.01179.10.009', 'CV MULYO DADI', 2023, 42418830.00, 39);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (74, '1165', '02.01179.10.009', 'CV MULYO DADI', 2024, 51378195.00, 45);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (74, '1165', '02.01179.10.009', 'CV MULYO DADI', 2025, 101791250.00, 58);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (85, '1199', '02.01213.10.010', 'MUHAMMAD MUSA / CV ARDHI', 2022, 40120500.00, 21);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (85, '1199', '02.01213.10.010', 'MUHAMMAD MUSA / CV ARDHI', 2023, 63827208.00, 29);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (85, '1199', '02.01213.10.010', 'MUHAMMAD MUSA / CV ARDHI', 2024, 34751508.00, 16);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (85, '1199', '02.01213.10.010', 'MUHAMMAD MUSA / CV ARDHI', 2025, 24400500.00, 25);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (116, '1203', '02.01217.10.009', 'CV WAHYU', 2022, 1500000.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (116, '1203', '02.01217.10.009', 'CV WAHYU', 2024, 38818500.00, 23);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (116, '1203', '02.01217.10.009', 'CV WAHYU', 2025, 22039500.00, 65);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (166, '1265', '02.01279.18.007', 'GAIN CATERING (KATERING)', 2021, 6697500.00, 22);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (166, '1265', '02.01279.18.007', 'GAIN CATERING (KATERING)', 2022, 22818500.00, 59);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (166, '1265', '02.01279.18.007', 'GAIN CATERING (KATERING)', 2023, 2254500.00, 7);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (166, '1265', '02.01279.18.007', 'GAIN CATERING (KATERING)', 2024, 102000.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (149, '1305', '02.01319.15.003', 'HALILA / CATERING ANDIKA', 2021, 2998500.00, 26);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (149, '1305', '02.01319.15.003', 'HALILA / CATERING ANDIKA', 2022, 11476600.00, 86);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (149, '1305', '02.01319.15.003', 'HALILA / CATERING ANDIKA', 2023, 5574750.00, 55);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (149, '1305', '02.01319.15.003', 'HALILA / CATERING ANDIKA', 2024, 7592200.00, 86);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (149, '1305', '02.01319.15.003', 'HALILA / CATERING ANDIKA', 2025, 11487500.00, 63);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (146, '1419', '02.01432.10.003', 'SANTI SUTIANA / BELA CAKE', 2021, 5990180.00, 45);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (146, '1419', '02.01432.10.003', 'SANTI SUTIANA / BELA CAKE', 2022, 14519000.00, 122);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (146, '1419', '02.01432.10.003', 'SANTI SUTIANA / BELA CAKE', 2023, 7637000.00, 74);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (146, '1419', '02.01432.10.003', 'SANTI SUTIANA / BELA CAKE', 2024, 6234000.00, 52);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (146, '1419', '02.01432.10.003', 'SANTI SUTIANA / BELA CAKE', 2025, 7211850.00, 39);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (99, '1620', '02.01631.10.011', 'NY LAILIA / WARUNG OREN', 2021, 3007500.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (99, '1620', '02.01631.10.011', 'NY LAILIA / WARUNG OREN', 2022, 19479000.00, 157);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (99, '1620', '02.01631.10.011', 'NY LAILIA / WARUNG OREN', 2023, 21657000.00, 183);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (99, '1620', '02.01631.10.011', 'NY LAILIA / WARUNG OREN', 2024, 25836500.00, 253);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (99, '1620', '02.01631.10.011', 'NY LAILIA / WARUNG OREN', 2025, 29160000.00, 281);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (108, '1861', '02.01872.10.012', 'CV GHANIYU', 2021, 6695100.00, 18);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (108, '1861', '02.01872.10.012', 'CV GHANIYU', 2022, 56239784.00, 52);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (108, '1861', '02.01872.10.012', 'CV GHANIYU', 2023, 16519200.00, 20);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (108, '1861', '02.01872.10.012', 'CV GHANIYU', 2024, 418000.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (108, '1861', '02.01872.10.012', 'CV GHANIYU', 2025, 3303500.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (161, '1924', '02.01939.15.004', 'CV DAWUH FAJAR', 2021, 1554000.00, 8);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (161, '1924', '02.01939.15.004', 'CV DAWUH FAJAR', 2022, 360000.00, 2);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (161, '1924', '02.01939.15.004', 'CV DAWUH FAJAR', 2023, 14628050.00, 22);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (161, '1924', '02.01939.15.004', 'CV DAWUH FAJAR', 2024, 11194800.00, 15);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (161, '1924', '02.01939.15.004', 'CV DAWUH FAJAR', 2025, 5302150.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (84, '1990', '02.02005.04.002', 'CV DAPUR MERTUA', 2021, 3285000.00, 9);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (84, '1990', '02.02005.04.002', 'CV DAPUR MERTUA', 2022, 39296300.00, 88);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (84, '1990', '02.02005.04.002', 'CV DAPUR MERTUA', 2023, 39291660.00, 138);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (84, '1990', '02.02005.04.002', 'CV DAPUR MERTUA', 2024, 48506500.00, 160);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (84, '1990', '02.02005.04.002', 'CV DAPUR MERTUA', 2025, 56865000.00, 364);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (120, '2004', '02.02019.10.004', 'RIFKI WIDASARANDI / RIFKI JAYA', 2021, 23535000.00, 23);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (120, '2004', '02.02019.10.004', 'RIFKI WIDASARANDI / RIFKI JAYA', 2022, 6252000.00, 43);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (120, '2004', '02.02019.10.004', 'RIFKI WIDASARANDI / RIFKI JAYA', 2023, 8034000.00, 23);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (120, '2004', '02.02019.10.004', 'RIFKI WIDASARANDI / RIFKI JAYA', 2024, 9876000.00, 51);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (120, '2004', '02.02019.10.004', 'RIFKI WIDASARANDI / RIFKI JAYA', 2025, 10074000.00, 52);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (96, '2034', '02.02050.10.003', 'PAWON BU SHODIQ / FITROTUL FADLILA FAHMAWATY', 2021, 23339500.00, 68);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (96, '2034', '02.02050.10.003', 'PAWON BU SHODIQ / FITROTUL FADLILA FAHMAWATY', 2022, 29567000.00, 101);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (96, '2034', '02.02050.10.003', 'PAWON BU SHODIQ / FITROTUL FADLILA FAHMAWATY', 2023, 24035000.00, 47);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (96, '2034', '02.02050.10.003', 'PAWON BU SHODIQ / FITROTUL FADLILA FAHMAWATY', 2024, 18877000.00, 31);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (96, '2034', '02.02050.10.003', 'PAWON BU SHODIQ / FITROTUL FADLILA FAHMAWATY', 2025, 8388500.00, 35);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (129, '2043', '02.02059.01.005', 'DWI SANTOSO / LILIK CATERING', 2022, 427500.00, 2);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (129, '2043', '02.02059.01.005', 'DWI SANTOSO / LILIK CATERING', 2023, 14745000.00, 65);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (129, '2043', '02.02059.01.005', 'DWI SANTOSO / LILIK CATERING', 2024, 20344500.00, 66);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (129, '2043', '02.02059.01.005', 'DWI SANTOSO / LILIK CATERING', 2025, 16642500.00, 66);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (86, '2124', '02.02140.15.010', 'SETIYA GUNAWAN', 2021, 2394000.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (86, '2124', '02.02140.15.010', 'SETIYA GUNAWAN', 2022, 31813500.00, 106);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (86, '2124', '02.02140.15.010', 'SETIYA GUNAWAN', 2023, 51702940.00, 220);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (86, '2124', '02.02140.15.010', 'SETIYA GUNAWAN', 2024, 58621000.00, 282);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (86, '2124', '02.02140.15.010', 'SETIYA GUNAWAN', 2025, 18783000.00, 71);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (70, '2212', '02.02232.16.004', 'SALSA CATERING (KATERING)', 2021, 10243500.00, 35);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (70, '2212', '02.02232.16.004', 'SALSA CATERING (KATERING)', 2022, 30564000.00, 118);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (70, '2212', '02.02232.16.004', 'SALSA CATERING (KATERING)', 2023, 49675900.00, 179);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (70, '2212', '02.02232.16.004', 'SALSA CATERING (KATERING)', 2024, 65284670.00, 248);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (70, '2212', '02.02232.16.004', 'SALSA CATERING (KATERING)', 2025, 105857700.00, 313);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (130, '2337', '02.02369.10.009', 'CV. MULYO DADI', 2022, 7809750.00, 8);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (130, '2337', '02.02369.10.009', 'CV. MULYO DADI', 2023, 33088325.00, 26);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (130, '2337', '02.02369.10.009', 'CV. MULYO DADI', 2024, 7360500.00, 15);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (130, '2337', '02.02369.10.009', 'CV. MULYO DADI', 2025, 3837500.00, 3);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (82, '2354', '02.02385.10.003', 'Restoran Vision Vista', 2022, 44699950.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (82, '2354', '02.02385.10.003', 'Restoran Vision Vista', 2023, 43341720.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (82, '2354', '02.02385.10.003', 'Restoran Vision Vista', 2024, 52594200.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (82, '2354', '02.02385.10.003', 'Restoran Vision Vista', 2025, 61897300.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (106, '2375', '02.02406.10.004', 'SULIKHA / MIRA CATERING', 2021, 5115000.00, 24);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (106, '2375', '02.02406.10.004', 'SULIKHA / MIRA CATERING', 2022, 34633500.00, 155);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (106, '2375', '02.02406.10.004', 'SULIKHA / MIRA CATERING', 2023, 21192000.00, 124);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (106, '2375', '02.02406.10.004', 'SULIKHA / MIRA CATERING', 2024, 17211000.00, 101);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (106, '2375', '02.02406.10.004', 'SULIKHA / MIRA CATERING', 2025, 10269000.00, 53);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (158, '2629', '02.02660.10.010', 'ADOLF PRIJATMO/ CV RAJAWALI', 2021, 5827500.00, 20);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (158, '2629', '02.02660.10.010', 'ADOLF PRIJATMO/ CV RAJAWALI', 2022, 5418000.00, 21);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (158, '2629', '02.02660.10.010', 'ADOLF PRIJATMO/ CV RAJAWALI', 2023, 2931000.00, 15);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (158, '2629', '02.02660.10.010', 'ADOLF PRIJATMO/ CV RAJAWALI', 2024, 7486500.00, 31);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (158, '2629', '02.02660.10.010', 'ADOLF PRIJATMO/ CV RAJAWALI', 2025, 11640000.00, 51);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (95, '2721', '02.02753.13.004', 'M VARID AS ADY', 2021, 14240000.00, 133);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (95, '2721', '02.02753.13.004', 'M VARID AS ADY', 2022, 33940500.00, 222);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (95, '2721', '02.02753.13.004', 'M VARID AS ADY', 2023, 30992000.00, 188);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (95, '2721', '02.02753.13.004', 'M VARID AS ADY', 2024, 25794000.00, 162);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (95, '2721', '02.02753.13.004', 'M VARID AS ADY', 2025, 1867000.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (142, '2744', '02.02776.05.005', 'CATERING KPK (KATERING)', 2021, 3109000.00, 41);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (142, '2744', '02.02776.05.005', 'CATERING KPK (KATERING)', 2022, 6133500.00, 73);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (142, '2744', '02.02776.05.005', 'CATERING KPK (KATERING)', 2023, 16414750.00, 131);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (142, '2744', '02.02776.05.005', 'CATERING KPK (KATERING)', 2024, 6757300.00, 48);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (142, '2744', '02.02776.05.005', 'CATERING KPK (KATERING)', 2025, 9985500.00, 63);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (148, '2779', '02.02812.15.006', 'PAON MADE CATERING / MADE', 2025, 40227000.00, 104);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (122, '2906', '02.02942.10.011', 'CATERING GAJAH MADA', 2021, 22356490.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (122, '2906', '02.02942.10.011', 'CATERING GAJAH MADA', 2022, 11813000.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (122, '2906', '02.02942.10.011', 'CATERING GAJAH MADA', 2023, 6236800.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (122, '2906', '02.02942.10.011', 'CATERING GAJAH MADA', 2024, 1789000.00, 4);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (122, '2906', '02.02942.10.011', 'CATERING GAJAH MADA', 2025, 14578090.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (131, '2978', '02.03011.07.005', 'WARUNG B. SUGINAH', 2021, 3300000.00, 23);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (131, '2978', '02.03011.07.005', 'WARUNG B. SUGINAH', 2022, 14924500.00, 109);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (131, '2978', '02.03011.07.005', 'WARUNG B. SUGINAH', 2023, 17667500.00, 65);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (131, '2978', '02.03011.07.005', 'WARUNG B. SUGINAH', 2024, 11539000.00, 56);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (131, '2978', '02.03011.07.005', 'WARUNG B. SUGINAH', 2025, 2629000.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (157, '2994', '02.03027.07.007', 'WARUNG HJ. RIRIN / HJ. RIRIN', 2021, 4518500.00, 21);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (157, '2994', '02.03027.07.007', 'WARUNG HJ. RIRIN / HJ. RIRIN', 2022, 8711183.00, 52);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (157, '2994', '02.03027.07.007', 'WARUNG HJ. RIRIN / HJ. RIRIN', 2023, 7827108.00, 49);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (157, '2994', '02.03027.07.007', 'WARUNG HJ. RIRIN / HJ. RIRIN', 2024, 7240500.00, 41);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (157, '2994', '02.03027.07.007', 'WARUNG HJ. RIRIN / HJ. RIRIN', 2025, 5440800.00, 58);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (132, '3072', '02.03107.07.002', 'PUJIATI / CATERING SEDERHANA', 2021, 3356000.00, 31);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (132, '3072', '02.03107.07.002', 'PUJIATI / CATERING SEDERHANA', 2022, 9854500.00, 275);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (132, '3072', '02.03107.07.002', 'PUJIATI / CATERING SEDERHANA', 2023, 11237000.00, 299);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (132, '3072', '02.03107.07.002', 'PUJIATI / CATERING SEDERHANA', 2024, 12282000.00, 288);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (132, '3072', '02.03107.07.002', 'PUJIATI / CATERING SEDERHANA', 2025, 12086500.00, 264);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (89, '3176', '02.03209.10.011', 'CV LINGKAR INDO RAYA', 2021, 5026300.00, 7);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (89, '3176', '02.03209.10.011', 'CV LINGKAR INDO RAYA', 2022, 36467000.00, 30);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (89, '3176', '02.03209.10.011', 'CV LINGKAR INDO RAYA', 2023, 32852000.00, 21);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (89, '3176', '02.03209.10.011', 'CV LINGKAR INDO RAYA', 2024, 35490600.00, 14);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (89, '3176', '02.03209.10.011', 'CV LINGKAR INDO RAYA', 2025, 40609400.00, 16);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (154, '3239', '02.03273.10.011', 'Pizza Rolland', 2024, 15665000.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (154, '3239', '02.03273.10.011', 'Pizza Rolland', 2025, 19820000.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (153, '3318', '02.03352.03.003', 'SIMIL', 2021, 5667180.00, 29);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (153, '3318', '02.03352.03.003', 'SIMIL', 2022, 14895753.00, 51);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (153, '3318', '02.03352.03.003', 'SIMIL', 2023, 5156060.00, 19);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (153, '3318', '02.03352.03.003', 'SIMIL', 2024, 12592533.00, 19);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (92, '3324', '02.03357.10.010', 'CV RAHMA JAYA/SAIFUR ROHMAN', 2021, 39896000.00, 19);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (92, '3324', '02.03357.10.010', 'CV RAHMA JAYA/SAIFUR ROHMAN', 2022, 40036050.00, 39);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (92, '3324', '02.03357.10.010', 'CV RAHMA JAYA/SAIFUR ROHMAN', 2023, 42159300.00, 31);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (92, '3324', '02.03357.10.010', 'CV RAHMA JAYA/SAIFUR ROHMAN', 2024, 4122050.00, 2);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (115, '3329', '02.03362.10.011', 'SAFITRI CATERING', 2021, 9131500.00, 25);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (115, '3329', '02.03362.10.011', 'SAFITRI CATERING', 2022, 18843800.00, 83);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (115, '3329', '02.03362.10.011', 'SAFITRI CATERING', 2023, 11174000.00, 85);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (115, '3329', '02.03362.10.011', 'SAFITRI CATERING', 2024, 23546500.00, 154);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (115, '3329', '02.03362.10.011', 'SAFITRI CATERING', 2025, 202500.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (71, '3358', '02.03392.10.002', 'CFC GRAHA MULIA PLAZA LUMAJANG', 2022, 170164634.00, 33);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (71, '3358', '02.03392.10.002', 'CFC GRAHA MULIA PLAZA LUMAJANG', 2023, 61849782.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (71, '3358', '02.03392.10.002', 'CFC GRAHA MULIA PLAZA LUMAJANG', 2024, 28705658.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (156, '3412', '02.03446.18.007', 'CATERING SRI KANTI (KATERING)', 2021, 4630550.00, 20);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (156, '3412', '02.03446.18.007', 'CATERING SRI KANTI (KATERING)', 2022, 4769500.00, 19);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (156, '3412', '02.03446.18.007', 'CATERING SRI KANTI (KATERING)', 2023, 3395450.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (156, '3412', '02.03446.18.007', 'CATERING SRI KANTI (KATERING)', 2024, 7518218.00, 18);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (156, '3412', '02.03446.18.007', 'CATERING SRI KANTI (KATERING)', 2025, 13651790.00, 28);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (104, '3473', '02.03509.07.006', 'MUFASIL/CV WAFI', 2021, 67500.00, 2);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (104, '3473', '02.03509.07.006', 'MUFASIL/CV WAFI', 2022, 8345950.00, 40);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (104, '3473', '02.03509.07.006', 'MUFASIL/CV WAFI', 2023, 11267000.00, 58);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (104, '3473', '02.03509.07.006', 'MUFASIL/CV WAFI', 2024, 19850000.00, 70);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (104, '3473', '02.03509.07.006', 'MUFASIL/CV WAFI', 2025, 53020500.00, 164);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (152, '3601', '02.03636.10.003', 'EKA MAGHFIROH/HOME MADE CANTIQUE', 2022, 202500.00, 3);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (152, '3601', '02.03636.10.003', 'EKA MAGHFIROH/HOME MADE CANTIQUE', 2023, 18057480.00, 47);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (152, '3601', '02.03636.10.003', 'EKA MAGHFIROH/HOME MADE CANTIQUE', 2024, 6178050.00, 38);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (152, '3601', '02.03636.10.003', 'EKA MAGHFIROH/HOME MADE CANTIQUE', 2025, 13961400.00, 56);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (77, '3760', '02.03794.07.011', 'CV WAFI', 2021, 13184440.00, 83);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (77, '3760', '02.03794.07.011', 'CV WAFI', 2022, 30685400.00, 160);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (77, '3760', '02.03794.07.011', 'CV WAFI', 2023, 40696935.00, 282);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (77, '3760', '02.03794.07.011', 'CV WAFI', 2024, 58109200.00, 426);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (77, '3760', '02.03794.07.011', 'CV WAFI', 2025, 85818500.00, 374);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (138, '3786', '02.03820.11.006', 'WARUNG SEDERHANA', 2021, 3258050.00, 39);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (138, '3786', '02.03820.11.006', 'WARUNG SEDERHANA', 2022, 10935600.00, 106);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (138, '3786', '02.03820.11.006', 'WARUNG SEDERHANA', 2023, 10336500.00, 67);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (138, '3786', '02.03820.11.006', 'WARUNG SEDERHANA', 2024, 6871500.00, 57);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (138, '3786', '02.03820.11.006', 'WARUNG SEDERHANA', 2025, 15555000.00, 73);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (67, '3869', '02.03902.16.003', 'ENDANG SUSILOWATI / CV DINASTY MAHARANI', 2021, 89520818.00, 264);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (67, '3869', '02.03902.16.003', 'ENDANG SUSILOWATI / CV DINASTY MAHARANI', 2022, 177661550.00, 574);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (67, '3869', '02.03902.16.003', 'ENDANG SUSILOWATI / CV DINASTY MAHARANI', 2023, 207199260.00, 570);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (67, '3869', '02.03902.16.003', 'ENDANG SUSILOWATI / CV DINASTY MAHARANI', 2024, 241491040.00, 559);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (67, '3869', '02.03902.16.003', 'ENDANG SUSILOWATI / CV DINASTY MAHARANI', 2025, 278460600.00, 721);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (128, '3929', '02.03960.10.003', 'ANIK WININGSIH / RAZANA  CATERING', 2021, 630000.00, 8);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (128, '3929', '02.03960.10.003', 'ANIK WININGSIH / RAZANA  CATERING', 2022, 2839000.00, 16);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (128, '3929', '02.03960.10.003', 'ANIK WININGSIH / RAZANA  CATERING', 2023, 39690875.00, 39);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (128, '3929', '02.03960.10.003', 'ANIK WININGSIH / RAZANA  CATERING', 2024, 7247000.00, 44);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (128, '3929', '02.03960.10.003', 'ANIK WININGSIH / RAZANA  CATERING', 2025, 1960900.00, 26);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (83, '4235', '02.04127.05.001', 'CV. Lilik Hakim Sukses Abadi', 2021, 1279500.00, 7);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (83, '4235', '02.04127.05.001', 'CV. Lilik Hakim Sukses Abadi', 2022, 22427200.00, 129);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (83, '4235', '02.04127.05.001', 'CV. Lilik Hakim Sukses Abadi', 2023, 43540770.00, 273);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (83, '4235', '02.04127.05.001', 'CV. Lilik Hakim Sukses Abadi', 2024, 47654050.00, 297);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (83, '4235', '02.04127.05.001', 'CV. Lilik Hakim Sukses Abadi', 2025, 77153000.00, 344);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (165, '4245', '02.04137.13.005', 'catering QQ', 2021, 7906660.00, 38);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (165, '4245', '02.04137.13.005', 'catering QQ', 2022, 19504400.00, 143);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (165, '4245', '02.04137.13.005', 'catering QQ', 2023, 352300.00, 8);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (165, '4245', '02.04137.13.005', 'catering QQ', 2024, 2045300.00, 59);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (165, '4245', '02.04137.13.005', 'catering QQ', 2025, 2165300.00, 61);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (151, '4246', '02.04138.09.005', 'CV. PRANAJA MUDA PERKASA', 2021, 5638250.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (151, '4246', '02.04138.09.005', 'CV. PRANAJA MUDA PERKASA', 2022, 33435600.00, 33);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (121, '4247', '02.04139.04.008', 'AKIRA KITCHEN', 2021, 2628000.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (121, '4247', '02.04139.04.008', 'AKIRA KITCHEN', 2022, 1434900.00, 19);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (121, '4247', '02.04139.04.008', 'AKIRA KITCHEN', 2023, 1087000.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (121, '4247', '02.04139.04.008', 'AKIRA KITCHEN', 2024, 16001700.00, 121);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (121, '4247', '02.04139.04.008', 'AKIRA KITCHEN', 2025, 35626400.00, 135);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (136, '4255', '02.04145.10.005', 'ROCKET CHICKEN SUWANDAK', 2024, 19870900.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (136, '4255', '02.04145.10.005', 'ROCKET CHICKEN SUWANDAK', 2025, 25088810.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (105, '4256', '02.04146.21.002', 'MAMA DAFARA KUE', 2021, 900000.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (105, '4256', '02.04146.21.002', 'MAMA DAFARA KUE', 2022, 28800000.00, 32);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (105, '4256', '02.04146.21.002', 'MAMA DAFARA KUE', 2023, 21600000.00, 24);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (105, '4256', '02.04146.21.002', 'MAMA DAFARA KUE', 2024, 17100000.00, 19);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (105, '4256', '02.04146.21.002', 'MAMA DAFARA KUE', 2025, 20700000.00, 23);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (137, '4275', '02.04155.07.001', 'RESTY CATERING', 2021, 5293000.00, 45);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (137, '4275', '02.04155.07.001', 'RESTY CATERING', 2022, 9520000.00, 101);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (137, '4275', '02.04155.07.001', 'RESTY CATERING', 2023, 10252000.00, 113);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (137, '4275', '02.04155.07.001', 'RESTY CATERING', 2024, 11242500.00, 77);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (137, '4275', '02.04155.07.001', 'RESTY CATERING', 2025, 10775000.00, 74);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (133, '4286', '02.04159.02.003', 'CV JOLALI', 2021, 4474500.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (133, '4286', '02.04159.02.003', 'CV JOLALI', 2022, 15868500.00, 28);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (133, '4286', '02.04159.02.003', 'CV JOLALI', 2023, 15095000.00, 37);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (133, '4286', '02.04159.02.003', 'CV JOLALI', 2024, 12869500.00, 9);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (133, '4286', '02.04159.02.003', 'CV JOLALI', 2025, 502500.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (139, '4296', '02.04161.15.001', 'CATERING de''Pawon Inara', 2021, 2767500.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (139, '4296', '02.04161.15.001', 'CATERING de''Pawon Inara', 2022, 7105000.00, 30);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (139, '4296', '02.04161.15.001', 'CATERING de''Pawon Inara', 2023, 9889500.00, 50);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (139, '4296', '02.04161.15.001', 'CATERING de''Pawon Inara', 2024, 12207000.00, 53);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (139, '4296', '02.04161.15.001', 'CATERING de''Pawon Inara', 2025, 11129601.00, 75);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (87, '4309', '02.04163.16.004', 'CV. AN-NISA', 2021, 2476500.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (87, '4309', '02.04163.16.004', 'CV. AN-NISA', 2022, 45881150.00, 22);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (87, '4309', '02.04163.16.004', 'CV. AN-NISA', 2023, 42275600.00, 19);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (87, '4309', '02.04163.16.004', 'CV. AN-NISA', 2024, 61019400.00, 42);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (87, '4309', '02.04163.16.004', 'CV. AN-NISA', 2025, 5775200.00, 16);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (114, '4365', '02.04192.10.011', 'JEJE CATERING', 2022, 16200000.00, 18);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (114, '4365', '02.04192.10.011', 'JEJE CATERING', 2023, 9900000.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (114, '4365', '02.04192.10.011', 'JEJE CATERING', 2024, 14400000.00, 16);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (114, '4365', '02.04192.10.011', 'JEJE CATERING', 2025, 27000000.00, 30);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (80, '4388', '02.04202.10.005', 'Steak and Bowl Lumajang ', 2022, 139496370.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (80, '4388', '02.04202.10.005', 'Steak and Bowl Lumajang ', 2023, 40144252.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (80, '4388', '02.04202.10.005', 'Steak and Bowl Lumajang ', 2024, 21408924.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (80, '4388', '02.04202.10.005', 'Steak and Bowl Lumajang ', 2025, 14720421.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (159, '4439', '02.04207.05.013', 'PUTRI PRATAMA CATERING', 2022, 10800000.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (159, '4439', '02.04207.05.013', 'PUTRI PRATAMA CATERING', 2023, 5400000.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (159, '4439', '02.04207.05.013', 'PUTRI PRATAMA CATERING', 2024, 7200000.00, 8);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (159, '4439', '02.04207.05.013', 'PUTRI PRATAMA CATERING', 2025, 9900000.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (141, '4544', '02.04256.04.003', 'ERIK CATERING', 2022, 5005000.00, 33);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (141, '4544', '02.04256.04.003', 'ERIK CATERING', 2023, 13347000.00, 35);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (141, '4544', '02.04256.04.003', 'ERIK CATERING', 2024, 17556000.00, 44);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (141, '4544', '02.04256.04.003', 'ERIK CATERING', 2025, 6796650.00, 36);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (144, '4607', '02.04269.02.002', 'DAPUR MAMA OCHA', 2022, 10004000.00, 104);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (144, '4607', '02.04269.02.002', 'DAPUR MAMA OCHA', 2023, 10256450.00, 83);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (144, '4607', '02.04269.02.002', 'DAPUR MAMA OCHA', 2024, 9357600.00, 94);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (144, '4607', '02.04269.02.002', 'DAPUR MAMA OCHA', 2025, 12329000.00, 109);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (93, '4727', '02.04282.05.001', 'CV. LILIK HAKIM SUKSES ABADI', 2022, 26314340.00, 98);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (93, '4727', '02.04282.05.001', 'CV. LILIK HAKIM SUKSES ABADI', 2023, 23522800.00, 116);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (93, '4727', '02.04282.05.001', 'CV. LILIK HAKIM SUKSES ABADI', 2024, 26006000.00, 75);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (93, '4727', '02.04282.05.001', 'CV. LILIK HAKIM SUKSES ABADI', 2025, 43863000.00, 123);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (147, '4761', '02.04299.04.010', 'CV BEJO SUMBER MAKMUR', 2022, 23602730.00, 161);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (147, '4761', '02.04299.04.010', 'CV BEJO SUMBER MAKMUR', 2023, 11343120.00, 25);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (147, '4761', '02.04299.04.010', 'CV BEJO SUMBER MAKMUR', 2024, 5605000.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (125, '4817', '02.04308.10.005', 'BELI KOPI', 2024, 19411750.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (125, '4817', '02.04308.10.005', 'BELI KOPI', 2025, 32554695.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (164, '4819', '02.04309.07.009', 'CATERING KEDAI CLASSIC', 2022, 12989700.00, 239);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (164, '4819', '02.04309.07.009', 'CATERING KEDAI CLASSIC', 2023, 6828050.00, 132);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (164, '4819', '02.04309.07.009', 'CATERING KEDAI CLASSIC', 2024, 10569610.00, 118);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (164, '4819', '02.04309.07.009', 'CATERING KEDAI CLASSIC', 2025, 1794500.00, 18);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (75, '4885', '02.04341.21.001', 'CV. Dilya Karya Abadi (CATTERING)', 2022, 18552400.00, 34);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (75, '4885', '02.04341.21.001', 'CV. Dilya Karya Abadi (CATTERING)', 2023, 1053000.00, 3);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (75, '4885', '02.04341.21.001', 'CV. Dilya Karya Abadi (CATTERING)', 2024, 117057044.00, 17);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (75, '4885', '02.04341.21.001', 'CV. Dilya Karya Abadi (CATTERING)', 2025, 106892862.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (102, '4922', '02.04351.05.007', 'KIKI KATERING', 2022, 24655816.00, 609);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (102, '4922', '02.04351.05.007', 'KIKI KATERING', 2023, 26097560.00, 414);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (102, '4922', '02.04351.05.007', 'KIKI KATERING', 2024, 19423600.00, 323);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (102, '4922', '02.04351.05.007', 'KIKI KATERING', 2025, 22580000.00, 379);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (110, '4925', '02.04354.12.006', 'CV. BUMI GLAGAH ARUM', 2024, 29693780.00, 7);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (110, '4925', '02.04354.12.006', 'CV. BUMI GLAGAH ARUM', 2025, 41648300.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (73, '4963', '02.04363.10.004', 'CV. RESTURIA', 2022, 11496500.00, 15);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (73, '4963', '02.04363.10.004', 'CV. RESTURIA', 2023, 69335500.00, 55);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (73, '4963', '02.04363.10.004', 'CV. RESTURIA', 2024, 123831541.00, 107);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (73, '4963', '02.04363.10.004', 'CV. RESTURIA', 2025, 54721721.00, 96);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (134, '5056', '02.04386.10.004', 'RAMEN MASTER', 2024, 14303931.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (134, '5056', '02.04386.10.004', 'RAMEN MASTER', 2025, 31327775.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (162, '5120', '02.04392.06.009', 'Assyifa Catering', 2022, 439700.00, 10);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (162, '5120', '02.04392.06.009', 'Assyifa Catering', 2023, 6279500.00, 35);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (162, '5120', '02.04392.06.009', 'Assyifa Catering', 2024, 11858750.00, 86);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (162, '5120', '02.04392.06.009', 'Assyifa Catering', 2025, 14191320.00, 122);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (79, '5637', '02.04458.19.008', 'CV. ABHINAYA MUGHNI SEJAHTERA', 2023, 41168100.00, 117);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (79, '5637', '02.04458.19.008', 'CV. ABHINAYA MUGHNI SEJAHTERA', 2024, 61875200.00, 179);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (79, '5637', '02.04458.19.008', 'CV. ABHINAYA MUGHNI SEJAHTERA', 2025, 118236412.00, 270);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (100, '6084', '02.04483.15.005', 'ALKA CAFE', 2023, 180000.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (100, '6084', '02.04483.15.005', 'ALKA CAFE', 2024, 50830000.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (100, '6084', '02.04483.15.005', 'ALKA CAFE', 2025, 46350000.00, 13);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (88, '6164', '02.04518.10.012', 'CV. SAKTI MAHAMERU JAYA', 2023, 70306050.00, 61);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (88, '6164', '02.04518.10.012', 'CV. SAKTI MAHAMERU JAYA', 2024, 30926850.00, 41);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (88, '6164', '02.04518.10.012', 'CV. SAKTI MAHAMERU JAYA', 2025, 50551500.00, 9);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (140, '6360', '02.04556.09.001', 'SAS CATERING', 2023, 11062093.00, 21);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (140, '6360', '02.04556.09.001', 'SAS CATERING', 2024, 15945152.00, 32);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (140, '6360', '02.04556.09.001', 'SAS CATERING', 2025, 16070080.00, 33);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (103, '6388', '02.04566.10.012', 'MAGNOLIA CAFE', 2024, 20835010.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (103, '6388', '02.04566.10.012', 'MAGNOLIA CAFE', 2025, 63294970.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (127, '6546', '02.04595.05.009', 'CV. LAKSITA ARYA ABADI CATERING', 2023, 4348700.00, 9);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (127, '6546', '02.04595.05.009', 'CV. LAKSITA ARYA ABADI CATERING', 2024, 26968636.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (127, '6546', '02.04595.05.009', 'CV. LAKSITA ARYA ABADI CATERING', 2025, 21214900.00, 20);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (117, '6669', '02.04639.03.007', 'Catering Riami', 2023, 1737000.00, 4);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (117, '6669', '02.04639.03.007', 'Catering Riami', 2024, 27110500.00, 107);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (117, '6669', '02.04639.03.007', 'Catering Riami', 2025, 33009000.00, 130);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (123, '6892', '02.04675.09.006', 'ES NESYA SE - KAB LUMAJANG (16 OBJEK)', 2024, 16000000.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (123, '6892', '02.04675.09.006', 'ES NESYA SE - KAB LUMAJANG (16 OBJEK)', 2025, 36694468.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (118, '6904', '02.04681.12.004', 'CV ASRI BERKAH JAYA/ ROHMATUN AHADIYAH', 2024, 18524000.00, 107);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (118, '6904', '02.04681.12.004', 'CV ASRI BERKAH JAYA/ ROHMATUN AHADIYAH', 2025, 41381500.00, 133);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (163, '6949', '02.04691.06.007', 'MIXUE KUNIR', 2024, 9882000.00, 5);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (163, '6949', '02.04691.06.007', 'MIXUE KUNIR', 2025, 22512300.00, 11);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (69, '7065', '02.04707.05.009', 'CV.LAKSITA ARYA ABADI RESTO', 2024, 177895537.00, 7);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (69, '7065', '02.04707.05.009', 'CV.LAKSITA ARYA ABADI RESTO', 2025, 187323737.00, 9);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (94, '7081', '02.04711.10.012', 'Armeed Jaya Gemilang', 2024, 28382500.00, 38);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (94, '7081', '02.04711.10.012', 'Armeed Jaya Gemilang', 2025, 86296435.00, 233);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (98, '7096', '02.04724.10.011', 'WARUNG MBOK SUL', 2024, 25350909.00, 7);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (98, '7096', '02.04724.10.011', 'WARUNG MBOK SUL', 2025, 65824762.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (91, '7410', '02.04763.15.007', 'CV RAMADHANI RAYA (KATERING)', 2024, 14436000.00, 17);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (91, '7410', '02.04763.15.007', 'CV RAMADHANI RAYA (KATERING)', 2025, 103258024.00, 46);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (150, '7486', '02.04788.06.011', 'ADARA COFFEE & EATERY', 2024, 3941150.00, 1);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (150, '7486', '02.04788.06.011', 'ADARA COFFEE & EATERY', 2025, 33830070.00, 12);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (78, '7624', '02.04819.10.011', 'MIE GACOAN', 2025, 205954800.00, 9);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (160, '7762', '02.04853.10.009', 'CV ASIH JAYA ABADI', 2025, 33082800.00, 35);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (119, '7844', '02.04867.04.008', 'POINT COFFEE INDOMARET FRESH PASIRIAN 2 ', 2025, 59302421.00, 6);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (126, '7850', '02.04869.03.005', 'CV. GERAK CEPAT CATERING', 2025, 53265600.00, 26);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (76, '7879', '02.04877.10.011', 'HOTEL ASTON INN RESTO', 2025, 236862226.00, 4);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (143, '7923', '02.04887.10.003', 'POINT COFFEE INDOMARET SLAMET RIYADI', 2025, 42145264.00, 3);
+INSERT INTO pbjt_realisasi (assessment_id, tax_object_id, nop, business_name, tahun, realisasi_amount, jumlah_transaksi) VALUES (155, '7953', '02.04899.21.001', 'CV. Dilya Karya Abadi ( RESTO)', 2025, 35294136.00, 2);
+
+-- ================================================================
+-- SUMMARY
+-- ================================================================
+-- Total records from SIMATDA: 3389
+-- Matched with assessments: 380
+-- Skipped (no assessment): 3009
+-- ================================================================
+
+-- ================================================================
+-- QUERY TO VERIFY REALISASI DATA
+-- ================================================================
+/*
+SELECT 
+    tahun,
+    COUNT(*) as jumlah_objek,
+    SUM(realisasi_amount) as total_realisasi,
+    SUM(jumlah_transaksi) as total_transaksi,
+    AVG(realisasi_amount) as avg_realisasi
+FROM pbjt_realisasi
+GROUP BY tahun
+ORDER BY tahun;
+*/
+
+/*
+-- View realisasi per assessment
+SELECT 
+    a.business_id,
+    a.business_name,
+    r.tahun,
+    r.realisasi_amount,
+    r.jumlah_transaksi
+FROM pbjt_assessments a
+JOIN pbjt_realisasi r ON a.id = r.assessment_id
+WHERE a.business_id = 'SIM-0001'
+ORDER BY r.tahun;
+*/
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  19.111 s
+[INFO] Finished at: 2026-01-20T18:08:31+07:00
+[INFO] ------------------------------------------------------------------------

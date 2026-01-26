@@ -1,0 +1,98 @@
+{
+  "TOMPOKERSAN": {
+    "latitude": -8.12513321,
+    "longitude": 113.2226863,
+    "kd_kec": "060",
+    "kd_kel": "018"
+  },
+  "ROGOTRUNAN": {
+    "latitude": -8.12802648,
+    "longitude": 113.23716175,
+    "kd_kec": "060",
+    "kd_kel": "017"
+  },
+  "JOGOYUDAN": {
+    "latitude": -8.13637158,
+    "longitude": 113.23832775,
+    "kd_kec": "060",
+    "kd_kel": "016"
+  },
+  "DITOTRUNAN": {
+    "latitude": -8.14503533,
+    "longitude": 113.22073521,
+    "kd_kec": "060",
+    "kd_kel": "011"
+  },
+  "LABRUK LOR": {
+    "latitude": -8.139063,
+    "longitude": 113.19836497,
+    "kd_kec": "060",
+    "kd_kel": "009"
+  },
+  "CITRODIWANGSAN": {
+    "latitude": -8.12930973,
+    "longitude": 113.21269721,
+    "kd_kec": "060",
+    "kd_kel": "010"
+  },
+  "DENOK": {
+    "latitude": -8.15245677,
+    "longitude": 113.2650347,
+    "kd_kec": "060",
+    "kd_kel": "013"
+  },
+  "BLUKON": {
+    "latitude": -8.13911679,
+    "longitude": 113.268652,
+    "kd_kec": "060",
+    "kd_kel": "014"
+  },
+  "BORENG": {
+    "latitude": -8.13423799,
+    "longitude": 113.2595433,
+    "kd_kec": "060",
+    "kd_kel": "015"
+  },
+  "KEPUHARJO": {
+    "latitude": -8.11014088,
+    "longitude": 113.23724251,
+    "kd_kec": "060",
+    "kd_kel": "019"
+  },
+  "YUGOSARI": {
+    "latitude": -8.22328836,
+    "longitude": 113.05461509,
+    "kd_kec": "030",
+    "kd_kel": "001"
+  },
+  "SUMBER REJO": {
+    "latitude": -8.16695331,
+    "longitude": 113.0505413,
+    "kd_kec": "030",
+    "kd_kel": "004"
+  },
+  "J A R I T": {
+    "latitude": -8.20500541,
+    "longitude": 113.09243862,
+    "kd_kec": "030",
+    "kd_kel": "002"
+  },
+  "SUMBERWULUH": {
+    "latitude": -8.1837973,
+    "longitude": 113.03427949,
+    "kd_kec": "030",
+    "kd_kel": "005"
+  },
+  "PENANGGAL": {
+    "latitude": -8.14167076,
+    "longitude": 113.04077527,
+    "kd_kec": "030",
+    "kd_kel": "007"
+  },
+  "CANDIPURO": {
+    "latitude": -8.19194378,
+    "longitude": 113.07892072,
+    "kd_kec": "030",
+    "kd_kel": "003"
+  }
+}

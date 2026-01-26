@@ -1,0 +1,13 @@
+# Copy this file to application-local.properties and modify for your local environment
+# This file is ignored by git so each developer can have their own configuration
+
+# PostgreSQL Database Configuration (Primary - PBJT Assessment)
+# Change these values to match your local PostgreSQL setup
+spring.datasource.url=jdbc:postgresql://localhost:5432/pbjt_assessment_db
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_PASSWORD_HERE
+
+# PBJT Database
+spring.datasource.pbjt.url=jdbc:postgresql://localhost:5432/pbjt_assessment_db
+spring.datasource.pbjt.username=postgres
+spring.datasource.pbjt.password=YOUR_PASSWORD_HERE
