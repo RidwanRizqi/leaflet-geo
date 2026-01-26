@@ -1,7 +1,6 @@
 package com.example.leaflet_geo.repository;
 
 import com.example.leaflet_geo.entity.DatObjekPajak;
-import com.example.leaflet_geo.model.DatObjekPajak;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

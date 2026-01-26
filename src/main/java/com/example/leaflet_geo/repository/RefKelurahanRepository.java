@@ -1,6 +1,5 @@
 package com.example.leaflet_geo.repository;
 
-import com.example.leaflet_geo.model.RefKelurahan;
 import com.example.leaflet_geo.entity.RefKelurahan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

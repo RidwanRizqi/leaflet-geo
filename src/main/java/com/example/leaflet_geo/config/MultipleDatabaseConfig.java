@@ -1,6 +1,7 @@
 package com.example.leaflet_geo.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -13,16 +14,27 @@ import javax.sql.DataSource;
 @Configuration
 public class MultipleDatabaseConfig {
 
+    @Value("${spring.datasource.url}")
+    private String postgresUrl;
+    
+    @Value("${spring.datasource.username}")
+    private String postgresUsername;
+    
+    @Value("${spring.datasource.password}")
+    private String postgresPassword;
+    
+    @Value("${spring.datasource.driver-class-name}")
+    private String postgresDriver;
+
     // PostgreSQL tetap sebagai primary untuk JPA
     @Primary
     @Bean(name = "postgresDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource postgresDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:postgresql://localhost:5432/sig")
-                .username("postgres")
-                .password("root")
-                .driverClassName("org.postgresql.Driver")
+                .url(postgresUrl)
+                .username(postgresUsername)
+                .password(postgresPassword)
+                .driverClassName(postgresDriver)
                 .build();
     }
 

@@ -1,7 +1,6 @@
 package com.example.leaflet_geo.controller;
 
 import com.example.leaflet_geo.dto.ApiResponse;
-import com.example.leaflet_geo.model.RefKecamatan;
 import com.example.leaflet_geo.entity.RefKecamatan;
 import com.example.leaflet_geo.repository.RefKecamatanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,6 @@ public class RefKecamatanController {
         try {
             RefKecamatan kecamatan = refKecamatanRepository.findByPrimaryKey(kdPropinsi, kdDati2, kdKecamatan);
 
-            Map<String, Object> response = new HashMap<>();
             if (kecamatan != null) {
                 return ResponseEntity.ok(
                         ApiResponse.success("Data kecamatan ditemukan", kecamatan));
@@ -98,8 +96,6 @@ public class RefKecamatanController {
                 return ResponseEntity.ok(
                         ApiResponse.error("Data kecamatan tidak ditemukan"));
             }
-
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     ApiResponse.error("Gagal mengambil data kecamatan: " + e.getMessage()));
@@ -174,28 +170,4 @@ public class RefKecamatanController {
         }
     }
 
-    /**
-     * Get kecamatan count
-     * GET /api/ref-kecamatan/count
-     */
-    @GetMapping("/count")
-    public ResponseEntity<Map<String, Object>> getKecamatanCount() {
-        try {
-            long count = refKecamatanRepository.count();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Jumlah data kecamatan berhasil diambil");
-            response.put("count", count);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Gagal mengambil jumlah data kecamatan: " + e.getMessage());
-            response.put("count", 0);
-
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
 }

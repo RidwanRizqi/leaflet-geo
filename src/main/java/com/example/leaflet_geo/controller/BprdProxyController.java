@@ -911,7 +911,7 @@ public class BprdProxyController {
                 System.out.println("✅ Successfully got tematik data from BPRD API");
 
                 // Process and convert WKB geometries to GeoJSON
-                Map<String, Object> processedResponse = processTematikResponse(tematikResponse);
+                Map<String, Object> processedResponse = processTematikResponse(tematikResponse, tematikRequest);
 
                 return ResponseEntity.ok(processedResponse);
             } else {

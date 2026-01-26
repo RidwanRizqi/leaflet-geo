@@ -1,6 +1,5 @@
 package com.example.leaflet_geo.repository;
 
-import com.example.leaflet_geo.entity.Bidang;
 import com.example.leaflet_geo.model.Bidang;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -93,4 +92,3 @@ public interface BidangRepository extends JpaRepository<Bidang, UUID> {
     @Query("SELECT COUNT(b) FROM Bidang b WHERE b.kdProp = :kdProp AND b.kdDati2 = :kdDati2 AND b.kdKec = :kdKec AND b.kdKel = :kdKel AND b.isActive = true")
     Long countByKelurahan(@Param("kdProp") String kdProp, @Param("kdDati2") String kdDati2, @Param("kdKec") String kdKec, @Param("kdKel") String kdKel);
 }
-

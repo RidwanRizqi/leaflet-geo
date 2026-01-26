@@ -1,7 +1,7 @@
 package com.example.leaflet_geo.controller;
 
 import com.example.leaflet_geo.dto.ApiResponse;
-import com.example.leaflet_geo.model.DatSubjekPajak;
+import com.example.leaflet_geo.entity.DatSubjekPajak;
 import com.example.leaflet_geo.repository.DatSubjekPajakRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
