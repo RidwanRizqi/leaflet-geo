@@ -1,6 +1,7 @@
 package com.example.leaflet_geo.repository;
 
 import com.example.leaflet_geo.entity.DatSubjekPajak;
+import com.example.leaflet_geo.model.DatSubjekPajak;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -33,13 +34,13 @@ public class DatSubjekPajakRepository {
         subjekPajak.setStatusPekerjaanWp(rs.getString("STATUS_PEKERJAAN_WP"));
         subjekPajak.setNpwpd(rs.getString("NPWPD"));
         subjekPajak.setEmail(rs.getString("EMAIL"));
-        
+
         // Reference data (nullable)
         subjekPajak.setNmKecamatan(rs.getString("NM_KECAMATAN"));
         subjekPajak.setNmKelurahan(rs.getString("NM_KELURAHAN"));
         subjekPajak.setNmPropinsi(rs.getString("NM_PROPINSI"));
         subjekPajak.setNmDati2(rs.getString("NM_DATI2"));
-        
+
         return subjekPajak;
     }
 
@@ -99,7 +100,7 @@ public class DatSubjekPajakRepository {
      */
     public Optional<DatSubjekPajak> findByIdWithReferences(String subjekPajakId) {
         String sql = """
-            SELECT sp.*, 
+            SELECT sp.*,
                    kec.NM_KECAMATAN,
                    kel.NM_KELURAHAN,
                    prop.NM_PROPINSI,
@@ -111,7 +112,7 @@ public class DatSubjekPajakRepository {
             LEFT JOIN SYSTEM.REF_DATI2 dati2 ON sp.KOTA_WP = dati2.NM_DATI2
             WHERE sp.SUBJEK_PAJAK_ID = ?
             """;
-        
+
         List<DatSubjekPajak> result = oracleJdbcTemplate.query(sql, this::mapRowToDatSubjekPajak, subjekPajakId);
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }

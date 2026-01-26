@@ -1,10 +1,10 @@
 package com.example.leaflet_geo.controller;
 
+import com.example.leaflet_geo.dto.ApiResponse;
 import com.example.leaflet_geo.service.EpasirService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,17 +24,14 @@ public class EpasirController {
      * GET /api/epasir/test
      */
     @GetMapping("/test")
-    public ResponseEntity<Map<String, Object>> testConnection() {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<String>> testConnection() {
         try {
             String result = epasirService.testConnection();
-            response.put("status", "success");
-            response.put("message", result);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Test connection to E-PASIR database berhasil", result));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Connection failed: " + e.getMessage()));
         }
     }
 
@@ -43,18 +40,15 @@ public class EpasirController {
      * GET /api/epasir/analyze
      */
     @GetMapping("/analyze")
-    public ResponseEntity<Map<String, Object>> analyzeDatabase() {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> analyzeDatabase() {
         try {
             List<Map<String, Object>> tables = epasirService.getAllTables();
-            response.put("status", "success");
-            response.put("totalTables", tables.size());
-            response.put("tables", tables);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Database analysis completed. Total tables: " + tables.size(), tables,
+                            (long) tables.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to analyze database: " + e.getMessage()));
         }
     }
 
@@ -63,20 +57,16 @@ public class EpasirController {
      * GET /api/epasir/tables/{tableName}/structure
      */
     @GetMapping("/tables/{tableName}/structure")
-    public ResponseEntity<Map<String, Object>> getTableStructure(@PathVariable String tableName) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getTableStructure(@PathVariable String tableName) {
         try {
             List<Map<String, Object>> columns = epasirService.getTableStructure(tableName);
-            
-            response.put("status", "success");
-            response.put("tableName", tableName);
-            response.put("columnCount", columns.size());
-            response.put("columns", columns);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "Structure for table " + tableName + " retrieved. Column count: " + columns.size(), columns,
+                            (long) columns.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to get table structure: " + e.getMessage()));
         }
     }
 
@@ -85,22 +75,17 @@ public class EpasirController {
      * GET /api/epasir/tables/{tableName}/data?limit=10
      */
     @GetMapping("/tables/{tableName}/data")
-    public ResponseEntity<Map<String, Object>> getTableData(
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getTableData(
             @PathVariable String tableName,
             @RequestParam(defaultValue = "10") Integer limit) {
-        Map<String, Object> response = new HashMap<>();
         try {
             List<Map<String, Object>> data = epasirService.getSampleData(tableName, limit);
-            response.put("status", "success");
-            response.put("tableName", tableName);
-            response.put("limit", limit);
-            response.put("resultCount", data.size());
-            response.put("data", data);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Sample data from " + tableName + " retrieved (limit: " + limit + ")", data,
+                            (long) data.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to get sample data: " + e.getMessage()));
         }
     }
 }

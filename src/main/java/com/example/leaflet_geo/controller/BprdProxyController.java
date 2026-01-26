@@ -7,7 +7,9 @@ import com.example.leaflet_geo.dto.BidangBoundaryDTO;
 import com.example.leaflet_geo.util.WkbToGeoJsonConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/api/bprd")
 @CrossOrigin(origins = "*")
 public class BprdProxyController {
-    
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -28,90 +30,94 @@ public class BprdProxyController {
     private ObjectMapper objectMapper;
 
     @Autowired
+    @Qualifier("postgresJdbcTemplate")
+    private JdbcTemplate postgresJdbcTemplate;
     private com.example.leaflet_geo.service.SismiopService sismiopService;
 
     private String cachedToken = null;
     private final String BPRD_BASE_URL = "https://bprd.lumajangkab.go.id:1151/api";
-    
+
     public BprdProxyController() {
         System.out.println("🏗️ BprdProxyController initialized!");
-    }    /**
+    }
+
+    /**
      * Simple endpoint that handles login and get boundaries in one call
      * Converts WKB hex string to GeoJSON for Leaflet consumption
      */
     @GetMapping("/boundaries")
     public ResponseEntity<?> getBoundaries() {
         System.out.println("🗺️ Boundaries request received");
-        
+
         try {
             // Step 1: Login if no token
             if (cachedToken == null) {
                 System.out.println("🔑 No token found, logging in...");
-                
+
                 Map<String, String> credentials = new HashMap<>();
                 credentials.put("username", "user");
                 credentials.put("password", "user");
-                
+
                 HttpHeaders loginHeaders = new HttpHeaders();
                 loginHeaders.setContentType(MediaType.APPLICATION_JSON);
-                
+
                 HttpEntity<Map<String, String>> loginRequest = new HttpEntity<>(credentials, loginHeaders);
-                
+
                 ResponseEntity<String> loginResponse = restTemplate.exchange(
                     BPRD_BASE_URL + "/user/login",
                     HttpMethod.POST,
                     loginRequest,
                     String.class
                 );
-                
+
                 if (loginResponse.getStatusCode() == HttpStatus.OK) {
                     Map<String, Object> loginResult = objectMapper.readValue(loginResponse.getBody(), Map.class);
                     Map<String, Object> user = (Map<String, Object>) loginResult.get("user");
-                    
+
                     if (user != null && user.get("token") != null) {
                         cachedToken = (String) user.get("token");
                         System.out.println("✅ Login successful, token: " + cachedToken.substring(0, 10) + "...");
                     } else {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "Login failed - no token received"));
+                                .body(Map.of("error", "Login failed - no token received"));
                     }
                 } else {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
+                            .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
                 }
             }
-            
+
             // Step 2: Get boundaries
             System.out.println("🗺️ Getting boundaries with token...");
-            
+
             HttpHeaders boundariesHeaders = new HttpHeaders();
             boundariesHeaders.set("Authorization", "Bearer " + cachedToken);
             boundariesHeaders.setContentType(MediaType.APPLICATION_JSON);
-            
+
             HttpEntity<?> boundariesRequest = new HttpEntity<>(boundariesHeaders);
-            
+
             ResponseEntity<String> boundariesResponse = restTemplate.exchange(
                 BPRD_BASE_URL + "/kecamatan/list?option=false",
                 HttpMethod.GET,
                 boundariesRequest,
                 String.class
             );
-            
+
             if (boundariesResponse.getStatusCode() == HttpStatus.OK) {
                 // Parse response as array of boundary objects
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> rawBoundaries = objectMapper.readValue(
-                    boundariesResponse.getBody(), 
+                    boundariesResponse.getBody(),
                     List.class
                 );
-                
+
                 System.out.println("📡 Received " + rawBoundaries.size() + " raw boundaries from BPRD API");
-                
+
                 // Convert WKB to GeoJSON for each boundary
                 List<KecamatanBoundaryDTO> convertedBoundaries = new ArrayList<>();
                 int successCount = 0;
                 int failCount = 0;
-                
+
                 for (Map<String, Object> rawBoundary : rawBoundaries) {
                     try {
                         String id = (String) rawBoundary.get("id");
@@ -120,16 +126,16 @@ public class BprdProxyController {
                         String color = (String) rawBoundary.get("color");
                         Boolean isActive = (Boolean) rawBoundary.get("is_active");
                         String geomWkbHex = (String) rawBoundary.get("geom");
-                        
+
                         // Create DTO
                         KecamatanBoundaryDTO dto = new KecamatanBoundaryDTO(
                             id, kdKec, nama, color, isActive, geomWkbHex
                         );
-                        
+
                         // Convert WKB hex to GeoJSON
                         if (geomWkbHex != null && !geomWkbHex.isEmpty()) {
                             Map<String, Object> geoJson = WkbToGeoJsonConverter.convertWkbHexToGeoJson(geomWkbHex);
-                            
+
                             if (geoJson != null) {
                                 dto.setGeojson(geoJson);
                                 successCount++;
@@ -143,35 +149,35 @@ public class BprdProxyController {
                             failCount++;
                             System.err.println("⚠️ No geometry data for " + nama);
                         }
-                        
+
                         convertedBoundaries.add(dto);
-                        
+
                     } catch (Exception e) {
                         failCount++;
                         System.err.println("❌ Error processing boundary: " + e.getMessage());
                         e.printStackTrace();
                     }
                 }
-                
+
                 System.out.println("📊 Conversion complete: " + successCount + " success, " + failCount + " failed");
                 System.out.println("✅ Successfully processed " + convertedBoundaries.size() + " boundaries");
-                
+
                 return ResponseEntity.ok(convertedBoundaries);
             } else {
                 // Token might be expired, clear it
                 cachedToken = null;
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to fetch boundaries: " + boundariesResponse.getStatusCode()));
+                        .body(Map.of("error", "Failed to fetch boundaries: " + boundariesResponse.getStatusCode()));
             }
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Clear token on error and try to return useful info
             cachedToken = null;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Exception: " + e.getMessage()));
+                    .body(Map.of("error", "Exception: " + e.getMessage()));
         }
     }
 
@@ -195,79 +201,79 @@ public class BprdProxyController {
     @GetMapping("/kelurahan")
     public ResponseEntity<?> getKelurahanBoundaries(@RequestParam("kd_kec") String kdKec) {
         System.out.println("🏘️ Kelurahan boundaries request received for kecamatan: " + kdKec);
-        
+
         try {
             // Step 1: Login if no token
             if (cachedToken == null) {
                 System.out.println("🔑 No token found, logging in...");
-                
+
                 Map<String, String> credentials = new HashMap<>();
                 credentials.put("username", "user");
                 credentials.put("password", "user");
-                
+
                 HttpHeaders loginHeaders = new HttpHeaders();
                 loginHeaders.setContentType(MediaType.APPLICATION_JSON);
-                
+
                 HttpEntity<Map<String, String>> loginRequest = new HttpEntity<>(credentials, loginHeaders);
-                
+
                 ResponseEntity<String> loginResponse = restTemplate.exchange(
                     BPRD_BASE_URL + "/user/login",
                     HttpMethod.POST,
                     loginRequest,
                     String.class
                 );
-                
+
                 if (loginResponse.getStatusCode() == HttpStatus.OK) {
                     Map<String, Object> loginResult = objectMapper.readValue(loginResponse.getBody(), Map.class);
                     Map<String, Object> user = (Map<String, Object>) loginResult.get("user");
-                    
+
                     if (user != null && user.get("token") != null) {
                         cachedToken = (String) user.get("token");
                         System.out.println("✅ Login successful for kelurahan request");
                     } else {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "Login failed - no token received"));
+                                .body(Map.of("error", "Login failed - no token received"));
                     }
                 } else {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
+                            .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
                 }
             }
-            
+
             // Step 2: Get kelurahan boundaries
             System.out.println("🏘️ Getting kelurahan boundaries for kecamatan " + kdKec + " with token...");
-            
+
             HttpHeaders boundariesHeaders = new HttpHeaders();
             boundariesHeaders.set("Authorization", "Bearer " + cachedToken);
             boundariesHeaders.setContentType(MediaType.APPLICATION_JSON);
-            
+
             HttpEntity<?> boundariesRequest = new HttpEntity<>(boundariesHeaders);
-            
+
             String url = BPRD_BASE_URL + "/kelurahan/list?kd_kec=" + kdKec + "&option=false";
             System.out.println("🌐 Requesting: " + url);
-            
+
             ResponseEntity<String> boundariesResponse = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 boundariesRequest,
                 String.class
             );
-            
+
             if (boundariesResponse.getStatusCode() == HttpStatus.OK) {
                 // Parse response as array of boundary objects
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> rawBoundaries = objectMapper.readValue(
-                    boundariesResponse.getBody(), 
+                    boundariesResponse.getBody(),
                     List.class
                 );
-                
+
                 System.out.println("📡 Received " + rawBoundaries.size() + " kelurahan boundaries from BPRD API");
-                
+
                 // Convert WKB to GeoJSON for each boundary
                 List<KelurahanBoundaryDTO> convertedBoundaries = new ArrayList<>();
                 int successCount = 0;
                 int failCount = 0;
-                
+
                 for (Map<String, Object> rawBoundary : rawBoundaries) {
                     try {
                         String id = (String) rawBoundary.get("id");
@@ -276,16 +282,16 @@ public class BprdProxyController {
                         String nama = (String) rawBoundary.get("nama");
                         Boolean isActive = (Boolean) rawBoundary.get("is_active");
                         String geomWkbHex = (String) rawBoundary.get("geom");
-                        
+
                         // Create DTO
                         KelurahanBoundaryDTO dto = new KelurahanBoundaryDTO(
                             id, kecId, kelId, nama, isActive, geomWkbHex
                         );
-                        
+
                         // Convert WKB hex to GeoJSON
                         if (geomWkbHex != null && !geomWkbHex.isEmpty()) {
                             Map<String, Object> geoJson = WkbToGeoJsonConverter.convertWkbHexToGeoJson(geomWkbHex);
-                            
+
                             if (geoJson != null) {
                                 dto.setGeojson(geoJson);
                                 successCount++;
@@ -299,19 +305,19 @@ public class BprdProxyController {
                             failCount++;
                             System.err.println("⚠️ No geometry data for kelurahan " + nama);
                         }
-                        
+
                         convertedBoundaries.add(dto);
-                        
+
                     } catch (Exception e) {
                         failCount++;
                         System.err.println("❌ Error processing kelurahan boundary: " + e.getMessage());
                         e.printStackTrace();
                     }
                 }
-                
+
                 System.out.println("📊 Kelurahan conversion complete: " + successCount + " success, " + failCount + " failed");
                 System.out.println("✅ Successfully processed " + convertedBoundaries.size() + " kelurahan boundaries");
-                
+
                 return ResponseEntity.ok(convertedBoundaries);
             } else {
                 // Token might be expired, clear it
@@ -319,21 +325,21 @@ public class BprdProxyController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to fetch kelurahan boundaries: " + boundariesResponse.getStatusCode()));
             }
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error fetching kelurahan boundaries: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Clear token on error
             cachedToken = null;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Exception: " + e.getMessage()));
+                    .body(Map.of("error", "Exception: " + e.getMessage()));
         }
     }
 
     /**
      * Get blok boundaries for specific kecamatan and kelurahan from BPRD API
-     * 
+     *
      * @param kdKec Kode Kecamatan
      * @param kdKel Kode Kelurahan
      * @return List of blok boundaries with WKB converted to GeoJSON
@@ -342,32 +348,32 @@ public class BprdProxyController {
     public ResponseEntity<?> getBlokBoundaries(
             @RequestParam("kd_kec") String kdKec,
             @RequestParam("kd_kel") String kdKel) {
-        
+
         System.out.println("🏗️ Getting blok boundaries for kd_kec=" + kdKec + ", kd_kel=" + kdKel);
-        
+
         try {
             // Step 1: Login if no token
             if (cachedToken == null) {
                 System.out.println("� No token found, logging in...");
-                
+
                 Map<String, String> credentials = new HashMap<>();
                 credentials.put("username", "user");
                 credentials.put("password", "user");
-                
+
                 HttpHeaders loginHeaders = new HttpHeaders();
                 loginHeaders.setContentType(MediaType.APPLICATION_JSON);
                 HttpEntity<Map<String, String>> loginRequest = new HttpEntity<>(credentials, loginHeaders);
-                
+
                 String loginUrl = BPRD_BASE_URL + "/auth/signin";
                 System.out.println("📡 Calling login API: " + loginUrl);
-                
+
                 ResponseEntity<Map> loginResponse = restTemplate.exchange(
                     loginUrl,
                     HttpMethod.POST,
                     loginRequest,
                     Map.class
                 );
-                
+
                 if (loginResponse.getStatusCode() == HttpStatus.OK) {
                     Map<String, Object> responseBody = loginResponse.getBody();
                     if (responseBody != null && responseBody.containsKey("token")) {
@@ -376,18 +382,18 @@ public class BprdProxyController {
                     } else {
                         System.err.println("❌ Login response missing token");
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "Authentication failed - no token in response"));
+                                .body(Map.of("error", "Authentication failed - no token in response"));
                     }
                 } else {
                     System.err.println("❌ Login failed with status: " + loginResponse.getStatusCode());
                     return ResponseEntity.status(loginResponse.getStatusCode())
-                        .body(Map.of("error", "Authentication failed"));
+                            .body(Map.of("error", "Authentication failed"));
                 }
             }
 
             if (cachedToken == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Failed to authenticate with BPRD API"));
+                        .body(Map.of("error", "Failed to authenticate with BPRD API"));
             }
 
             // Call BPRD blok API
@@ -408,7 +414,7 @@ public class BprdProxyController {
             if (response.getStatusCode() != HttpStatus.OK) {
                 System.err.println("❌ BPRD blok API returned status: " + response.getStatusCode());
                 return ResponseEntity.status(response.getStatusCode())
-                    .body(Map.of("error", "BPRD API error: " + response.getStatusCode()));
+                        .body(Map.of("error", "BPRD API error: " + response.getStatusCode()));
             }
 
             // Parse response
@@ -438,7 +444,7 @@ public class BprdProxyController {
 
                     // Create DTO
                     BlokBoundaryDTO dto = new BlokBoundaryDTO(
-                        id, kdKecResp, kdKelResp, kdBlok, geomWkbHex, isActive);
+                            id, kdKecResp, kdKelResp, kdBlok, geomWkbHex, isActive);
 
                     // Convert WKB hex to GeoJSON
                     if (geomWkbHex != null && !geomWkbHex.trim().isEmpty()) {
@@ -466,19 +472,19 @@ public class BprdProxyController {
         } catch (Exception e) {
             System.err.println("❌ Error getting blok boundaries: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Clear token on error
             cachedToken = null;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Exception: " + e.getMessage()));
+                    .body(Map.of("error", "Exception: " + e.getMessage()));
         }
     }
 
     /**
      * Get bidang boundaries for specific kecamatan, kelurahan, and blok from BPRD API
-     * 
-     * @param kdKec Kode Kecamatan
-     * @param kdKel Kode Kelurahan
+     *
+     * @param kdKec  Kode Kecamatan
+     * @param kdKel  Kode Kelurahan
      * @param kdBlok Kode Blok
      * @return List of bidang boundaries with WKB converted to GeoJSON
      */
@@ -487,32 +493,32 @@ public class BprdProxyController {
             @RequestParam("kd_kec") String kdKec,
             @RequestParam("kd_kel") String kdKel,
             @RequestParam("kd_blok") String kdBlok) {
-        
+
         System.out.println("📦 Getting bidang boundaries for kd_kec=" + kdKec + ", kd_kel=" + kdKel + ", kd_blok=" + kdBlok);
-        
+
         try {
             // Step 1: Login if no token
             if (cachedToken == null) {
                 System.out.println("🔑 No token found, logging in...");
-                
+
                 Map<String, String> credentials = new HashMap<>();
                 credentials.put("username", "user");
                 credentials.put("password", "user");
-                
+
                 HttpHeaders loginHeaders = new HttpHeaders();
                 loginHeaders.setContentType(MediaType.APPLICATION_JSON);
                 HttpEntity<Map<String, String>> loginRequest = new HttpEntity<>(credentials, loginHeaders);
-                
+
                 String loginUrl = BPRD_BASE_URL + "/auth/signin";
                 System.out.println("📡 Calling login API: " + loginUrl);
-                
+
                 ResponseEntity<Map> loginResponse = restTemplate.exchange(
                     loginUrl,
                     HttpMethod.POST,
                     loginRequest,
                     Map.class
                 );
-                
+
                 if (loginResponse.getStatusCode() == HttpStatus.OK) {
                     Map<String, Object> responseBody = loginResponse.getBody();
                     if (responseBody != null && responseBody.containsKey("token")) {
@@ -521,18 +527,18 @@ public class BprdProxyController {
                     } else {
                         System.err.println("❌ Login response missing token");
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "Authentication failed - no token in response"));
+                                .body(Map.of("error", "Authentication failed - no token in response"));
                     }
                 } else {
                     System.err.println("❌ Login failed with status: " + loginResponse.getStatusCode());
                     return ResponseEntity.status(loginResponse.getStatusCode())
-                        .body(Map.of("error", "Authentication failed"));
+                            .body(Map.of("error", "Authentication failed"));
                 }
             }
 
             if (cachedToken == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Failed to authenticate with BPRD API"));
+                        .body(Map.of("error", "Failed to authenticate with BPRD API"));
             }
 
             // Call BPRD bidang API
@@ -553,7 +559,7 @@ public class BprdProxyController {
             if (response.getStatusCode() != HttpStatus.OK) {
                 System.err.println("❌ BPRD bidang API returned status: " + response.getStatusCode());
                 return ResponseEntity.status(response.getStatusCode())
-                    .body(Map.of("error", "BPRD API error: " + response.getStatusCode()));
+                        .body(Map.of("error", "BPRD API error: " + response.getStatusCode()));
             }
 
             // Parse response
@@ -579,7 +585,7 @@ public class BprdProxyController {
                         System.out.println("🔍 Available keys in raw bidang boundary: " + rawBidangBoundary.keySet());
                         System.out.println("📋 Sample raw bidang boundary: " + rawBidangBoundary);
                     }
-                    
+
                     String id = (String) rawBidangBoundary.get("id");
                     String kdProp = (String) rawBidangBoundary.get("kd_prop");
                     String kdDati2 = (String) rawBidangBoundary.get("kd_dati2");
@@ -589,7 +595,7 @@ public class BprdProxyController {
                     String noUrut = (String) rawBidangBoundary.get("no_urut");
                     String kdJnsOp = (String) rawBidangBoundary.get("kd_jns_op");
                     String nop = (String) rawBidangBoundary.get("nop");
-                    
+
                     // Debug: Log no_urut extraction for first few records
                     if (successCount < 3) {
                         System.out.println("🔍 Extracted no_urut: '" + noUrut + "' from NOP: " + nop);
@@ -599,8 +605,8 @@ public class BprdProxyController {
 
                     // Create DTO
                     BidangBoundaryDTO dto = new BidangBoundaryDTO(
-                        id, kdProp, kdDati2, kdKecResp, kdKelResp, kdBlokResp, 
-                        noUrut, kdJnsOp, nop, geomWkbHex, isActive);
+                            id, kdProp, kdDati2, kdKecResp, kdKelResp, kdBlokResp,
+                            noUrut, kdJnsOp, nop, geomWkbHex, isActive);
 
                     // Convert WKB hex to GeoJSON
                     if (geomWkbHex != null && !geomWkbHex.trim().isEmpty()) {
@@ -627,11 +633,11 @@ public class BprdProxyController {
                 // Collect kode components for each bidang
                 List<Map<String, String>> kodeList = new ArrayList<>();
                 for (BidangBoundaryDTO dto : convertedBidangBoundaries) {
-                    if (dto.getKdProp() != null && dto.getKdDati2() != null && 
-                        dto.getKdKec() != null && dto.getKdKel() != null && 
-                        dto.getKdBlok() != null && dto.getNoUrut() != null && 
+                    if (dto.getKdProp() != null && dto.getKdDati2() != null &&
+                        dto.getKdKec() != null && dto.getKdKel() != null &&
+                        dto.getKdBlok() != null && dto.getNoUrut() != null &&
                         dto.getKdJnsOp() != null) {
-                        
+
                         Map<String, String> kodes = new HashMap<>();
                         kodes.put("kd_prop", dto.getKdProp());
                         kodes.put("kd_dati2", dto.getKdDati2());
@@ -643,40 +649,40 @@ public class BprdProxyController {
                         kodeList.add(kodes);
                     }
                 }
-                
+
                 System.out.println("📋 Collected " + kodeList.size() + " kode sets for payment status check");
                 if (!kodeList.isEmpty()) {
                     Map<String, String> sample = kodeList.get(0);
-                    System.out.println("🔍 Sample kode: " + sample.get("kd_prop") + "-" + sample.get("kd_dati2") + 
-                                     "-" + sample.get("kd_kec") + "-" + sample.get("kd_kel") + "-" + 
+                    System.out.println("🔍 Sample kode: " + sample.get("kd_prop") + "-" + sample.get("kd_dati2") +
+                                     "-" + sample.get("kd_kec") + "-" + sample.get("kd_kel") + "-" +
                                      sample.get("kd_blok") + "-" + sample.get("no_urut") + "-" + sample.get("kd_jns_op"));
                 }
 
                 if (!kodeList.isEmpty()) {
                     System.out.println("💰 Fetching payment status using individual kode components...");
-                    
+
                     // Use 2025 as default year for PBB data (most recent complete year)
                     // TODO: Make this configurable or dynamic based on available data
                     String tahunPajak = "2025";
                     System.out.println("📅 Using tahun pajak: " + tahunPajak);
-                    
+
                     Map<String, Map<String, Object>> paymentStatusMap = sismiopService.getPaymentStatusByKodes(kodeList, tahunPajak);
-                    
+
                     System.out.println("📋 Payment status map returned " + paymentStatusMap.size() + " entries");
-                    
+
                     // Enrich DTOs
                     int enrichedCount = 0;
                     int matchCount = 0;
                     for (BidangBoundaryDTO dto : convertedBidangBoundaries) {
                         if (dto.getGeojson() != null) {
                             // Build composite key for lookup
-                            String key = dto.getKdProp() + "-" + dto.getKdDati2() + "-" + 
-                                       dto.getKdKec() + "-" + dto.getKdKel() + "-" + 
-                                       dto.getKdBlok() + "-" + dto.getNoUrut() + "-" + 
+                            String key = dto.getKdProp() + "-" + dto.getKdDati2() + "-" +
+                                       dto.getKdKec() + "-" + dto.getKdKel() + "-" +
+                                       dto.getKdBlok() + "-" + dto.getNoUrut() + "-" +
                                        dto.getKdJnsOp();
-                            
+
                             Map<String, Object> statusData = paymentStatusMap.get(key);
-                            
+
                             if (statusData != null) {
                                 matchCount++;
                             } else {
@@ -685,12 +691,12 @@ public class BprdProxyController {
                                     System.out.println("⚠️ No match found for key: " + key + " (NOP: " + dto.getNop() + ")");
                                 }
                             }
-                            
+
                             @SuppressWarnings("unchecked")
                             Map<String, Object> geoJsonMap = (Map<String, Object>) dto.getGeojson();
                             @SuppressWarnings("unchecked")
                             Map<String, Object> properties = (Map<String, Object>) geoJsonMap.get("properties");
-                            
+
                             if (properties == null) {
                                 properties = new HashMap<>();
                                 geoJsonMap.put("properties", properties);
@@ -720,11 +726,11 @@ public class BprdProxyController {
         } catch (Exception e) {
             System.err.println("❌ Error getting bidang boundaries: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Clear token on error
             cachedToken = null;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Exception: " + e.getMessage()));
+                    .body(Map.of("error", "Exception: " + e.getMessage()));
         }
     }
 
@@ -734,7 +740,7 @@ public class BprdProxyController {
     @GetMapping("/infonop")
     public ResponseEntity<?> getBidangDetail(
             @RequestParam String id,
-            @RequestParam String kd_prop, 
+            @RequestParam String kd_prop,
             @RequestParam String kd_dati2,
             @RequestParam String kd_kec,
             @RequestParam String kd_kel,
@@ -744,57 +750,57 @@ public class BprdProxyController {
     ) {
         try {
             System.out.println("🏠 Getting bidang detail from BPRD API...");
-            System.out.println("Parameters: id=" + id + ", kd_prop=" + kd_prop + ", kd_dati2=" + kd_dati2 + 
-                             ", kd_kec=" + kd_kec + ", kd_kel=" + kd_kel + ", kd_blok=" + kd_blok + 
-                             ", no_urut=" + no_urut + ", kd_jns_op=" + kd_jns_op);
+            System.out.println("Parameters: id=" + id + ", kd_prop=" + kd_prop + ", kd_dati2=" + kd_dati2 +
+                    ", kd_kec=" + kd_kec + ", kd_kel=" + kd_kel + ", kd_blok=" + kd_blok +
+                    ", no_urut=" + no_urut + ", kd_jns_op=" + kd_jns_op);
 
             // Step 1: Ensure we have a valid token (login if needed)
             if (cachedToken == null) {
                 System.out.println("🔐 No cached token found, performing login...");
-                
+
                 Map<String, String> credentials = new HashMap<>();
                 credentials.put("username", "user");
                 credentials.put("password", "user");
-                
+
                 HttpHeaders loginHeaders = new HttpHeaders();
                 loginHeaders.setContentType(MediaType.APPLICATION_JSON);
-                
+
                 HttpEntity<Map<String, String>> loginRequest = new HttpEntity<>(credentials, loginHeaders);
-                
+
                 ResponseEntity<String> loginResponse = restTemplate.exchange(
                     BPRD_BASE_URL + "/user/login",
                     HttpMethod.POST,
                     loginRequest,
                     String.class
                 );
-                
+
                 if (loginResponse.getStatusCode() == HttpStatus.OK) {
                     Map<String, Object> loginResult = objectMapper.readValue(loginResponse.getBody(), Map.class);
                     Map<String, Object> user = (Map<String, Object>) loginResult.get("user");
-                    
+
                     if (user != null && user.get("token") != null) {
                         cachedToken = (String) user.get("token");
                         System.out.println("✅ Login successful for bidang detail request");
                     } else {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "Login failed - no token received"));
+                                .body(Map.of("error", "Login failed - no token received"));
                     }
                 } else {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
+                            .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
                 }
             }
 
             // Build the infonop API URL
             String infonopUrl = BPRD_BASE_URL + "/map/infonop" +
-                "?id=" + id +
-                "&kd_prop=" + kd_prop +
-                "&kd_dati2=" + kd_dati2 +
-                "&kd_kec=" + kd_kec +
-                "&kd_kel=" + kd_kel +
-                "&kd_blok=" + kd_blok +
-                "&no_urut=" + no_urut +
-                "&kd_jns_op=" + kd_jns_op;
+                    "?id=" + id +
+                    "&kd_prop=" + kd_prop +
+                    "&kd_dati2=" + kd_dati2 +
+                    "&kd_kec=" + kd_kec +
+                    "&kd_kel=" + kd_kel +
+                    "&kd_blok=" + kd_blok +
+                    "&no_urut=" + no_urut +
+                    "&kd_jns_op=" + kd_jns_op;
 
             System.out.println("📡 Calling BPRD infonop API: " + infonopUrl);
 
@@ -818,17 +824,17 @@ public class BprdProxyController {
             } else {
                 System.err.println("❌ Failed to get bidang detail: " + response.getStatusCode());
                 return ResponseEntity.status(response.getStatusCode())
-                    .body(Map.of("error", "Failed to get bidang detail from BPRD API"));
+                        .body(Map.of("error", "Failed to get bidang detail from BPRD API"));
             }
 
         } catch (Exception e) {
             System.err.println("❌ Error getting bidang detail: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Clear token on error
             cachedToken = null;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Exception: " + e.getMessage()));
+                    .body(Map.of("error", "Exception: " + e.getMessage()));
         }
     }
 
@@ -844,37 +850,37 @@ public class BprdProxyController {
             // Step 1: Ensure we have a valid token (login if needed)
             if (cachedToken == null) {
                 System.out.println("🔐 No cached token found, performing login...");
-                
+
                 Map<String, String> credentials = new HashMap<>();
                 credentials.put("username", "user");
                 credentials.put("password", "user");
-                
+
                 HttpHeaders loginHeaders = new HttpHeaders();
                 loginHeaders.setContentType(MediaType.APPLICATION_JSON);
-                
+
                 HttpEntity<Map<String, String>> loginRequest = new HttpEntity<>(credentials, loginHeaders);
-                
+
                 ResponseEntity<String> loginResponse = restTemplate.exchange(
                     BPRD_BASE_URL + "/user/login",
                     HttpMethod.POST,
                     loginRequest,
                     String.class
                 );
-                
+
                 if (loginResponse.getStatusCode() == HttpStatus.OK) {
                     Map<String, Object> loginResult = objectMapper.readValue(loginResponse.getBody(), Map.class);
                     Map<String, Object> user = (Map<String, Object>) loginResult.get("user");
-                    
+
                     if (user != null && user.get("token") != null) {
                         cachedToken = (String) user.get("token");
                         System.out.println("✅ Login successful for tematik request");
                     } else {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "Login failed - no token received"));
+                                .body(Map.of("error", "Login failed - no token received"));
                     }
                 } else {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
+                            .body(Map.of("error", "Login failed with status: " + loginResponse.getStatusCode()));
                 }
             }
 
@@ -886,7 +892,7 @@ public class BprdProxyController {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + cachedToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
-            
+
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(tematikRequest, headers);
 
             // Make the API call
@@ -901,93 +907,136 @@ public class BprdProxyController {
                 // Parse the tematik response
                 @SuppressWarnings("unchecked")
                 Map<String, Object> tematikResponse = objectMapper.readValue(response.getBody(), Map.class);
-                
+
                 System.out.println("✅ Successfully got tematik data from BPRD API");
-                
+
                 // Process and convert WKB geometries to GeoJSON
                 Map<String, Object> processedResponse = processTematikResponse(tematikResponse);
-                
+
                 return ResponseEntity.ok(processedResponse);
             } else {
                 System.err.println("❌ Failed to get tematik data: " + response.getStatusCode());
                 return ResponseEntity.status(response.getStatusCode())
-                    .body(Map.of("error", "Failed to get tematik data from BPRD API"));
+                        .body(Map.of("error", "Failed to get tematik data from BPRD API"));
             }
 
         } catch (Exception e) {
             System.err.println("❌ Error getting tematik data: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Clear token on error
             cachedToken = null;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Exception: " + e.getMessage()));
+                    .body(Map.of("error", "Exception: " + e.getMessage()));
         }
     }
 
     /**
      * Process tematik response and convert WKB geometries to GeoJSON
+     * Also adds an "Unclassified" layer for bidang without classification data
      */
-    private Map<String, Object> processTematikResponse(Map<String, Object> tematikResponse) {
+    private Map<String, Object> processTematikResponse(Map<String, Object> tematikResponse,
+            Map<String, Object> tematikRequest) {
         try {
             System.out.println("🔄 Processing tematik response with WKB conversion...");
-            
+
             Map<String, Object> processedResponse = new HashMap<>(tematikResponse);
-            
+
             // Get the layer data
             @SuppressWarnings("unchecked")
             Map<String, Object> layerMap = (Map<String, Object>) tematikResponse.get("layer");
-            
+
             if (layerMap != null) {
                 Map<String, Object> processedLayers = new HashMap<>();
-                
+                int totalClassifiedBidang = 0;
+
                 for (Map.Entry<String, Object> layerEntry : layerMap.entrySet()) {
                     String layerKey = layerEntry.getKey();
                     @SuppressWarnings("unchecked")
                     Map<String, Object> layerData = (Map<String, Object>) layerEntry.getValue();
-                    
+
                     // Copy layer metadata
                     Map<String, Object> processedLayer = new HashMap<>();
                     processedLayer.put("label", layerData.get("label"));
                     processedLayer.put("color", layerData.get("color"));
-                    
+
                     // Process the data array
                     @SuppressWarnings("unchecked")
                     List<Map<String, Object>> dataList = (List<Map<String, Object>>) layerData.get("data");
-                    
+
                     if (dataList != null) {
                         List<Map<String, Object>> processedDataList = new ArrayList<>();
-                        
+                        totalClassifiedBidang += dataList.size();
+
                         for (Map<String, Object> bidangData : dataList) {
                             Map<String, Object> processedBidang = new HashMap<>(bidangData);
-                            
+
                             // Convert WKB geometry to GeoJSON
                             String geomWkbHex = (String) bidangData.get("geom");
                             if (geomWkbHex != null && !geomWkbHex.trim().isEmpty()) {
                                 try {
-                                    Map<String, Object> geoJson = WkbToGeoJsonConverter.convertWkbHexToGeoJson(geomWkbHex);
+                                    Map<String, Object> geoJson = WkbToGeoJsonConverter
+                                            .convertWkbHexToGeoJson(geomWkbHex);
                                     processedBidang.put("geojson", geoJson);
                                 } catch (Exception e) {
-                                    System.err.println("⚠️ Failed to convert geometry for bidang " + bidangData.get("nop"));
+                                    System.err.println(
+                                            "⚠️ Failed to convert geometry for bidang " + bidangData.get("nop"));
                                     processedBidang.put("geojson", null);
                                 }
                             }
-                            
+
                             processedDataList.add(processedBidang);
                         }
-                        
+
                         processedLayer.put("data", processedDataList);
                     }
-                    
+
                     processedLayers.put(layerKey, processedLayer);
                 }
-                
+
+                // Calculate unclassified bidang count from local PostgreSQL
+                try {
+                    String kdKec = (String) tematikRequest.get("id_kecamatan");
+                    @SuppressWarnings("unchecked")
+                    List<String> kdKelList = (List<String>) tematikRequest.get("id_kelurahan");
+                    String kdKel = kdKelList != null && !kdKelList.isEmpty() ? kdKelList.get(0) : null;
+
+                    if (kdKec != null && kdKel != null) {
+                        // Get total bidang count from local PostgreSQL
+                        Long totalBidangCount = postgresJdbcTemplate.queryForObject(
+                                "SELECT COUNT(*) FROM sig.bidang WHERE kd_kec = ? AND kd_kel = ? AND is_active = true",
+                                Long.class, kdKec, kdKel);
+
+                        int totalBidang = totalBidangCount != null ? totalBidangCount.intValue() : 0;
+                        int unclassifiedCount = totalBidang - totalClassifiedBidang;
+
+                        System.out.println("📊 Bidang counts - Total: " + totalBidang +
+                                ", Classified: " + totalClassifiedBidang +
+                                ", Unclassified: " + unclassifiedCount);
+
+                        // Add unclassified layer if there are unclassified bidang
+                        if (unclassifiedCount > 0) {
+                            Map<String, Object> unclassifiedLayer = new HashMap<>();
+                            unclassifiedLayer.put("label", "Tidak Terklasifikasi");
+                            unclassifiedLayer.put("color", "RGB(128,128,128)"); // Gray color
+                            unclassifiedLayer.put("data", new ArrayList<>()); // Empty data - just for legend count
+                            unclassifiedLayer.put("count", unclassifiedCount); // Add count for legend display
+
+                            processedLayers.put("unclassified", unclassifiedLayer);
+                            System.out.println("➕ Added unclassified layer with " + unclassifiedCount + " bidang");
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("⚠️ Could not calculate unclassified bidang: " + e.getMessage());
+                    // Continue without unclassified layer
+                }
+
                 processedResponse.put("layer", processedLayers);
             }
-            
+
             System.out.println("✅ Tematik response processed successfully");
             return processedResponse;
-            
+
         } catch (Exception e) {
             System.err.println("❌ Error processing tematik response: " + e.getMessage());
             e.printStackTrace();

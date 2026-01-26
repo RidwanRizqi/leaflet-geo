@@ -1,6 +1,7 @@
 package com.example.leaflet_geo.repository;
 
 import com.example.leaflet_geo.entity.DatObjekPajak;
+import com.example.leaflet_geo.model.DatObjekPajak;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -54,13 +55,13 @@ public class DatObjekPajakRepository {
         objekPajak.setKeteranganSpop(rs.getString("KETERANGAN_SPOP"));
         objekPajak.setLatitude(rs.getString("LATITUDE"));
         objekPajak.setLongitude(rs.getString("LONGITUDE"));
-        
+
         // Reference data (nullable)
         objekPajak.setNmKecamatan(rs.getString("NM_KECAMATAN"));
         objekPajak.setNmKelurahan(rs.getString("NM_KELURAHAN"));
         objekPajak.setNmPropinsi(rs.getString("NM_PROPINSI"));
         objekPajak.setNmDati2(rs.getString("NM_DATI2"));
-        
+
         return objekPajak;
     }
 
@@ -142,27 +143,27 @@ public class DatObjekPajakRepository {
      */
     public Optional<DatObjekPajak> findByIdWithReferences(String kdPropinsi, String kdDati2, String kdKecamatan, String kdKelurahan, String kdBlok, String noUrut, String kdJnsOp) {
         String sql = """
-            SELECT op.*, 
+            SELECT op.*,
                    kec.NM_KECAMATAN,
                    kel.NM_KELURAHAN,
                    prop.NM_PROPINSI,
                    dati2.NM_DATI2
             FROM SYSTEM.DAT_OBJEK_PAJAK op
-            LEFT JOIN SYSTEM.REF_KECAMATAN kec ON op.KD_PROPINSI = kec.KD_PROPINSI 
-                                                AND op.KD_DATI2 = kec.KD_DATI2 
+            LEFT JOIN SYSTEM.REF_KECAMATAN kec ON op.KD_PROPINSI = kec.KD_PROPINSI
+                                                AND op.KD_DATI2 = kec.KD_DATI2
                                                 AND op.KD_KECAMATAN = kec.KD_KECAMATAN
-            LEFT JOIN SYSTEM.REF_KELURAHAN kel ON op.KD_PROPINSI = kel.KD_PROPINSI 
-                                                AND op.KD_DATI2 = kel.KD_DATI2 
-                                                AND op.KD_KECAMATAN = kel.KD_KECAMATAN 
+            LEFT JOIN SYSTEM.REF_KELURAHAN kel ON op.KD_PROPINSI = kel.KD_PROPINSI
+                                                AND op.KD_DATI2 = kel.KD_DATI2
+                                                AND op.KD_KECAMATAN = kel.KD_KECAMATAN
                                                 AND op.KD_KELURAHAN = kel.KD_KELURAHAN
             LEFT JOIN SYSTEM.REF_PROPINSI prop ON op.KD_PROPINSI = prop.KD_PROPINSI
-            LEFT JOIN SYSTEM.REF_DATI2 dati2 ON op.KD_PROPINSI = dati2.KD_PROPINSI 
+            LEFT JOIN SYSTEM.REF_DATI2 dati2 ON op.KD_PROPINSI = dati2.KD_PROPINSI
                                               AND op.KD_DATI2 = dati2.KD_DATI2
-            WHERE op.KD_PROPINSI = ? AND op.KD_DATI2 = ? AND op.KD_KECAMATAN = ? 
+            WHERE op.KD_PROPINSI = ? AND op.KD_DATI2 = ? AND op.KD_KECAMATAN = ?
                   AND op.KD_KELURAHAN = ? AND op.KD_BLOK = ? AND op.NO_URUT = ? AND op.KD_JNS_OP = ?
             """;
-        
-        List<DatObjekPajak> result = oracleJdbcTemplate.query(sql, this::mapRowToDatObjekPajak, 
+
+        List<DatObjekPajak> result = oracleJdbcTemplate.query(sql, this::mapRowToDatObjekPajak,
             kdPropinsi, kdDati2, kdKecamatan, kdKelurahan, kdBlok, noUrut, kdJnsOp);
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }

@@ -1,10 +1,10 @@
 package com.example.leaflet_geo.controller;
 
+import com.example.leaflet_geo.dto.ApiResponse;
 import com.example.leaflet_geo.service.SismiopService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,17 +24,14 @@ public class SismiopController {
      * GET /api/sismiop/test
      */
     @GetMapping("/test")
-    public ResponseEntity<Map<String, Object>> testConnection() {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<String>> testConnection() {
         try {
             String result = sismiopService.testConnection();
-            response.put("status", "success");
-            response.put("message", result);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("SISMIOP connection test berhasil", result));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Connection failed: " + e.getMessage()));
         }
     }
 
@@ -43,18 +40,15 @@ public class SismiopController {
      * GET /api/sismiop/analyze
      */
     @GetMapping("/analyze")
-    public ResponseEntity<Map<String, Object>> analyzeDatabase() {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> analyzeDatabase() {
         try {
             List<Map<String, Object>> tables = sismiopService.getAllTables();
-            response.put("status", "success");
-            response.put("totalTables", tables.size());
-            response.put("tables", tables);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Database analysis completed. Total tables: " + tables.size(), tables,
+                            (long) tables.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to analyze database: " + e.getMessage()));
         }
     }
 
@@ -63,22 +57,19 @@ public class SismiopController {
      * GET /api/sismiop/tables/{tableName}/structure
      */
     @GetMapping("/tables/{tableName}/structure")
-    public ResponseEntity<Map<String, Object>> getTableStructure(@PathVariable String tableName) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getTableStructure(@PathVariable String tableName) {
         try {
             List<Map<String, Object>> columns = sismiopService.getTableStructure(tableName);
             Long rowCount = sismiopService.getTableRowCount(tableName);
-            
-            response.put("status", "success");
-            response.put("tableName", tableName.toUpperCase());
-            response.put("columnCount", columns.size());
-            response.put("rowCount", rowCount);
-            response.put("columns", columns);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "Structure for table " + tableName.toUpperCase() + " retrieved. Columns: " + columns.size()
+                                    + ", Rows: " + rowCount,
+                            columns,
+                            (long) columns.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to get table structure: " + e.getMessage()));
         }
     }
 
@@ -87,22 +78,19 @@ public class SismiopController {
      * GET /api/sismiop/tables/{tableName}/data?limit=10
      */
     @GetMapping("/tables/{tableName}/data")
-    public ResponseEntity<Map<String, Object>> getTableData(
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getTableData(
             @PathVariable String tableName,
             @RequestParam(defaultValue = "10") Integer limit) {
-        Map<String, Object> response = new HashMap<>();
         try {
             List<Map<String, Object>> data = sismiopService.getSampleData(tableName, limit);
-            response.put("status", "success");
-            response.put("tableName", tableName.toUpperCase());
-            response.put("limit", limit);
-            response.put("resultCount", data.size());
-            response.put("data", data);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "Sample data from " + tableName.toUpperCase() + " retrieved (limit: " + limit + ")",
+                            data,
+                            (long) data.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to get sample data: " + e.getMessage()));
         }
     }
 
@@ -111,18 +99,14 @@ public class SismiopController {
      * GET /api/sismiop/objek-pajak/{nop}
      */
     @GetMapping("/objek-pajak/{nop}")
-    public ResponseEntity<Map<String, Object>> getObjekPajak(@PathVariable String nop) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getObjekPajak(@PathVariable String nop) {
         try {
             Map<String, Object> data = sismiopService.getObjekPajakByNop(nop);
-            response.put("status", "success");
-            response.put("nop", nop);
-            response.put("data", data);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Objek pajak dengan NOP " + nop + " ditemukan", data));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(404).body(
+                    ApiResponse.error("Objek pajak tidak ditemukan: " + e.getMessage()));
         }
     }
 
@@ -131,18 +115,14 @@ public class SismiopController {
      * GET /api/sismiop/subjek-pajak/{subjekPajakId}
      */
     @GetMapping("/subjek-pajak/{subjekPajakId}")
-    public ResponseEntity<Map<String, Object>> getSubjekPajak(@PathVariable String subjekPajakId) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getSubjekPajak(@PathVariable String subjekPajakId) {
         try {
             Map<String, Object> data = sismiopService.getSubjekPajakById(subjekPajakId);
-            response.put("status", "success");
-            response.put("subjekPajakId", subjekPajakId);
-            response.put("data", data);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Subjek pajak dengan ID " + subjekPajakId + " ditemukan", data));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(404).body(
+                    ApiResponse.error("Subjek pajak tidak ditemukan: " + e.getMessage()));
         }
     }
 
@@ -151,18 +131,14 @@ public class SismiopController {
      * GET /api/sismiop/kecamatan
      */
     @GetMapping("/kecamatan")
-    public ResponseEntity<Map<String, Object>> getKecamatanList() {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getKecamatanList() {
         try {
             List<Map<String, Object>> data = sismiopService.getKecamatanList();
-            response.put("status", "success");
-            response.put("count", data.size());
-            response.put("data", data);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("List kecamatan berhasil diambil", data, (long) data.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to get kecamatan list: " + e.getMessage()));
         }
     }
 
@@ -171,20 +147,16 @@ public class SismiopController {
      * GET /api/sismiop/kelurahan?kdKecamatan=010
      */
     @GetMapping("/kelurahan")
-    public ResponseEntity<Map<String, Object>> getKelurahanByKecamatan(
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getKelurahanByKecamatan(
             @RequestParam String kdKecamatan) {
-        Map<String, Object> response = new HashMap<>();
         try {
             List<Map<String, Object>> data = sismiopService.getKelurahanByKecamatan(kdKecamatan);
-            response.put("status", "success");
-            response.put("kdKecamatan", kdKecamatan);
-            response.put("count", data.size());
-            response.put("data", data);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("List kelurahan untuk kecamatan " + kdKecamatan + " berhasil diambil", data,
+                            (long) data.size()));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Failed to get kelurahan list: " + e.getMessage()));
         }
     }
 
@@ -193,69 +165,16 @@ public class SismiopController {
      * GET /api/sismiop/sppt/{nop}?tahun=2024
      */
     @GetMapping("/sppt/{nop}")
-    public ResponseEntity<Map<String, Object>> getSppt(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getSppt(
             @PathVariable String nop,
             @RequestParam String tahun) {
-        Map<String, Object> response = new HashMap<>();
         try {
             Map<String, Object> data = sismiopService.getSpptByNopTahun(nop, tahun);
-            response.put("status", "success");
-            response.put("nop", nop);
-            response.put("tahun", tahun);
-            response.put("data", data);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(
+                    ApiResponse.success("SPPT untuk NOP " + nop + " tahun " + tahun + " ditemukan", data));
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(404).body(response);
-        }
-    }
-
-    /**
-     * Debug: Get SPPT by individual kode components
-     * GET /api/sismiop/sppt-by-kode?kd_prop=35&kd_dati2=08&kd_kec=060&kd_kel=014&kd_blok=007&no_urut=0028&kd_jns_op=0&tahun=2025
-     */
-    @GetMapping("/sppt-by-kode")
-    public ResponseEntity<Map<String, Object>> getSpptByKode(
-            @RequestParam String kd_prop,
-            @RequestParam String kd_dati2,
-            @RequestParam String kd_kec,
-            @RequestParam String kd_kel,
-            @RequestParam String kd_blok,
-            @RequestParam String no_urut,
-            @RequestParam String kd_jns_op,
-            @RequestParam String tahun) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            Map<String, Object> data = sismiopService.getSpptByKodes(
-                kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, no_urut, kd_jns_op, tahun);
-            response.put("status", "success");
-            response.put("params", Map.of(
-                "kd_prop", kd_prop,
-                "kd_dati2", kd_dati2,
-                "kd_kec", kd_kec,
-                "kd_kel", kd_kel,
-                "kd_blok", kd_blok,
-                "no_urut", no_urut,
-                "kd_jns_op", kd_jns_op,
-                "tahun", tahun
-            ));
-            response.put("data", data);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            response.put("params", Map.of(
-                "kd_prop", kd_prop,
-                "kd_dati2", kd_dati2,
-                "kd_kec", kd_kec,
-                "kd_kel", kd_kel,
-                "kd_blok", kd_blok,
-                "no_urut", no_urut,
-                "kd_jns_op", kd_jns_op,
-                "tahun", tahun
-            ));
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(404).body(
+                    ApiResponse.error("SPPT tidak ditemukan: " + e.getMessage()));
         }
     }
 }
