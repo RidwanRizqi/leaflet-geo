@@ -38,6 +38,24 @@ public class PbjtAssessmentController {
     @Value("${file.upload.dir:uploads/pbjt-images}")
     private String uploadDir;
     
+    @PostMapping("/calculate")
+    public ResponseEntity<Map<String, Object>> calculateAssessment(@Valid @RequestBody AssessmentRequestDTO request) {
+        try {
+            com.example.leaflet_geo.dto.CalculationResultDTO result = assessmentService.calculateAssessment(request);
+            return ResponseEntity.ok(Map.of(
+                "data", result,
+                "success", true,
+                "message", "Kalkulasi berhasil"
+            ));
+        } catch (Exception e) {
+            log.error("Error calculating assessment", e);
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllAssessments(
             @RequestParam(defaultValue = "0") int page,
@@ -45,8 +63,21 @@ public class PbjtAssessmentController {
         try {
             Page<PbjtAssessment> assessmentPage = assessmentService.getAllAssessments(page, size);
             
+            // Extract Tax Object IDs for batch fetching
+            List<String> taxObjectIds = assessmentPage.getContent().stream()
+                .map(PbjtAssessment::getTaxObjectId)
+                .collect(Collectors.toList());
+            
+            // Fetch realization history in one batch query (FAST)
+            Map<String, List<com.example.leaflet_geo.dto.RealisasiDTO>> realizationMap = 
+                assessmentService.getRealisasiHistoryMap(taxObjectIds);
+            
+            // Convert to DTO with pre-fetched history
             List<AssessmentResponseDTO> data = assessmentPage.getContent().stream()
-                .map(assessmentService::convertToResponseDTO)
+                .map(a -> assessmentService.convertToResponseDTO(
+                    a, 
+                    realizationMap.getOrDefault(a.getTaxObjectId(), java.util.Collections.emptyList())
+                ))
                 .collect(Collectors.toList());
             
             Map<String, Object> response = Map.of(

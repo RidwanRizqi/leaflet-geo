@@ -63,6 +63,14 @@ public class PbjtAssessment {
     @JdbcTypeCode(SqlTypes.JSON)
     private List<Map<String, Object>> observations;
     
+    // New: Menu Items stored as JSON
+    @Column(name = "menu_items", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<Map<String, Object>> menuItems;
+
+    @Column(name = "opening_days_per_month")
+    private Integer openingDaysPerMonth;
+
     // Calculation results
     @Column(name = "daily_revenue_weekday", precision = 15, scale = 2)
     private BigDecimal dailyRevenueWeekday;
@@ -76,6 +84,16 @@ public class PbjtAssessment {
     @Column(name = "monthly_revenue_adjusted", precision = 15, scale = 2)
     private BigDecimal monthlyRevenueAdjusted;
     
+    // New: Menu Based Calculation Results
+    @Column(name = "monthly_revenue_menu_based", precision = 15, scale = 2)
+    private BigDecimal monthlyRevenueMenuBased;
+
+    @Column(name = "monthly_pbjt_menu_based", precision = 15, scale = 2)
+    private BigDecimal monthlyPbjtMenuBased;
+
+    @Column(name = "annual_pbjt_menu_based", precision = 15, scale = 2)
+    private BigDecimal annualPbjtMenuBased;
+
     // Adjustment factors
     @Column(name = "business_type_coefficient", precision = 4, scale = 2)
     private BigDecimal businessTypeCoefficient;
@@ -131,6 +149,19 @@ public class PbjtAssessment {
     @Column(name = "address", columnDefinition = "text")
     private String address;
     
+    // Advanced Location Factors (New)
+    @Column(name = "road_type", length = 50)
+    private String roadType;
+
+    @Column(name = "near_school")
+    private Boolean nearSchool;
+
+    @Column(name = "near_office")
+    private Boolean nearOffice;
+
+    @Column(name = "near_market")
+    private Boolean nearMarket;
+
     @Column(name = "kelurahan")
     private String kelurahan;
     

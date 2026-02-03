@@ -50,6 +50,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/pendapatan/**").permitAll()
                         .requestMatchers("/api/dashboard/**").permitAll()
                         .requestMatchers("/api/pajak/**").permitAll()
+                        // PBJT Assessment (Test Permission)
+                        .requestMatchers("/api/pbjt-assessments/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

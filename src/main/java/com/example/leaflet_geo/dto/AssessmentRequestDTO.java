@@ -62,14 +62,19 @@ public class AssessmentRequestDTO {
     
     @NotBlank(message = "Address is required")
     private String address;
-    
+
+    // Advanced Location Factors (New)
+    private String roadType; // ARTERI, KOLEKTOR, LOKAL, GANG
+    private Boolean nearSchool;
+    private Boolean nearOffice;
+    private Boolean nearMarket;
+
     private String kelurahan;
     private String kecamatan;
     private String kabupaten;
     
-    // Observations (minimum 2 required)
-    @NotNull(message = "Observations are required")
-    @Size(min = 2, max = 5, message = "Please provide 2-5 observations")
+    // Observations (optional if menu items provided)
+    // Removed @Size(min = 2) to allow Menu-only based assessment
     @Valid
     private List<ObservationDTO> observations;
     
@@ -87,6 +92,10 @@ public class AssessmentRequestDTO {
     private List<String> photoUrls;
     private String supportingDocUrl;
     
+    // New: Menu Based Method Inputs
+    private List<MenuItemDTO> menuItems;
+    private Integer openingDaysPerMonth;
+
     // Tax configuration (optional - defaults will be applied)
     private BigDecimal taxRate;
     private BigDecimal inflationRate;

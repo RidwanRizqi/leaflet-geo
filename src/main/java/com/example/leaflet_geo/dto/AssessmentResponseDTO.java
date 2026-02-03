@@ -18,6 +18,7 @@ public class AssessmentResponseDTO {
     
     private Long id;
     private String businessId;
+    private String taxObjectId; // Added for debugging
     private String businessName;
     private LocalDate assessmentDate;
     
@@ -46,6 +47,9 @@ public class AssessmentResponseDTO {
     // Location
     private LocationDetails location;
     
+    // Realisasi History (Direct from SIMATDA)
+    private java.util.List<RealisasiDTO> realisasiHistory;
+
     // Observations
     private java.util.List<ObservationDetails> observations;
     

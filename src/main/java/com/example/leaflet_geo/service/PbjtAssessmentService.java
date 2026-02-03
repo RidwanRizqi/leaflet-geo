@@ -8,6 +8,9 @@ import com.example.leaflet_geo.entity.ObservationHistory;
 import com.example.leaflet_geo.entity.PbjtAssessment;
 import com.example.leaflet_geo.repository.pbjt.ObservationHistoryRepository;
 import com.example.leaflet_geo.repository.pbjt.PbjtAssessmentRepository;
+import com.example.leaflet_geo.dto.RealisasiDTO;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,11 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class PbjtAssessmentService {
@@ -31,7 +36,23 @@ public class PbjtAssessmentService {
     private final PbjtAssessmentRepository assessmentRepository;
     private final ObservationHistoryRepository observationRepository;
     private final PbjtCalculationService calculationService;
+    private final JdbcTemplate mysqlJdbcTemplate;
+
+    public PbjtAssessmentService(
+            PbjtAssessmentRepository assessmentRepository,
+            ObservationHistoryRepository observationRepository,
+            PbjtCalculationService calculationService,
+            @Qualifier("mysqlJdbcTemplate") JdbcTemplate mysqlJdbcTemplate) {
+        this.assessmentRepository = assessmentRepository;
+        this.observationRepository = observationRepository;
+        this.calculationService = calculationService;
+        this.mysqlJdbcTemplate = mysqlJdbcTemplate;
+    }
     
+    public CalculationResultDTO calculateAssessment(AssessmentRequestDTO request) {
+        return calculationService.calculate(request);
+    }
+
     public PbjtAssessment createAssessment(AssessmentRequestDTO request) {
         log.info("Creating new assessment for business: {}", request.getBusinessId());
         
@@ -57,6 +78,23 @@ public class PbjtAssessmentService {
                 request.getPaymentMethods().toArray(new String[0]) : null)
             .dailyRevenueWeekday(calculation.getDailyRevenueWeekday())
             .dailyRevenueWeekend(calculation.getDailyRevenueWeekend())
+            
+            // Map Menu-based results
+            .monthlyRevenueMenuBased(calculation.getMonthlyRevenueMenuBased())
+            .monthlyPbjtMenuBased(calculation.getMonthlyPbjtMenuBased())
+            .annualPbjtMenuBased(calculation.getAnnualPbjtMenuBased())
+            .openingDaysPerMonth(request.getOpeningDaysPerMonth())
+            // Map new Menu Items (Convert List<DTO> to List<Map<String, Object>>)
+            .menuItems(request.getMenuItems() != null ? 
+                request.getMenuItems().stream()
+                .map(item -> {
+                     Map<String, Object> map = new java.util.HashMap<>();
+                     map.put("name", item.getName());
+                     map.put("price", item.getPrice());
+                     map.put("category", item.getCategory());
+                     return map;
+                }) .collect(Collectors.toList()) : null)
+
             .monthlyRevenueRaw(calculation.getMonthlyRevenueRaw())
             .monthlyRevenueAdjusted(calculation.getMonthlyRevenueAdjusted())
             .businessTypeCoefficient(calculation.getBusinessTypeCoefficient())
@@ -74,6 +112,10 @@ public class PbjtAssessmentService {
             .latitude(request.getLatitude())
             .longitude(request.getLongitude())
             .address(request.getAddress())
+            .roadType(request.getRoadType())
+            .nearSchool(request.getNearSchool())
+            .nearOffice(request.getNearOffice())
+            .nearMarket(request.getNearMarket())
             .kelurahan(request.getKelurahan())
             .kecamatan(request.getKecamatan())
             .kabupaten(request.getKabupaten())
@@ -139,11 +181,31 @@ public class PbjtAssessmentService {
         existing.setLocationScore(calculation.getLocationScore());
         existing.setMonthlyPbjt(calculation.getMonthlyPbjt());
         existing.setAnnualPbjt(calculation.getAnnualPbjt());
+        // Menu Based Results
+        existing.setMonthlyRevenueMenuBased(calculation.getMonthlyRevenueMenuBased());
+        existing.setMonthlyPbjtMenuBased(calculation.getMonthlyPbjtMenuBased());
+        existing.setAnnualPbjtMenuBased(calculation.getAnnualPbjtMenuBased());
+        existing.setOpeningDaysPerMonth(request.getOpeningDaysPerMonth());
+        // Update Menu Items
+        if (request.getMenuItems() != null) {
+            existing.setMenuItems(request.getMenuItems().stream()
+                .map(item -> {
+                    Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("name", item.getName());
+                    map.put("price", item.getPrice());
+                    map.put("category", item.getCategory());
+                    return map;
+                }).collect(Collectors.toList()));
+        }
         existing.setConfidenceScore(calculation.getConfidenceScore());
         existing.setConfidenceLevel(determineConfidenceLevel(calculation.getConfidenceScore()));
         existing.setLatitude(request.getLatitude());
         existing.setLongitude(request.getLongitude());
         existing.setAddress(request.getAddress());
+        existing.setRoadType(request.getRoadType());
+        existing.setNearSchool(request.getNearSchool());
+        existing.setNearOffice(request.getNearOffice());
+        existing.setNearMarket(request.getNearMarket());
         existing.setKelurahan(request.getKelurahan());
         existing.setKecamatan(request.getKecamatan());
         existing.setKabupaten(request.getKabupaten());
@@ -179,85 +241,28 @@ public class PbjtAssessmentService {
         assessmentRepository.deleteById(id);
     }
     
-    public AssessmentResponseDTO convertToResponseDTO(PbjtAssessment assessment) {
-        return AssessmentResponseDTO.builder()
-            .id(assessment.getId())
-            .businessId(assessment.getBusinessId())
-            .businessName(assessment.getBusinessName())
-            .assessmentDate(assessment.getAssessmentDate())
-            .buildingArea(assessment.getBuildingArea())
-            .seatingCapacity(assessment.getSeatingCapacity())
-            .businessType(assessment.getBusinessType())
-            .operatingHoursStart(assessment.getOperatingHoursStart() != null ? assessment.getOperatingHoursStart().toString() : null)
-            .operatingHoursEnd(assessment.getOperatingHoursEnd() != null ? assessment.getOperatingHoursEnd().toString() : null)
-            .address(assessment.getAddress())
-            .dailyRevenueWeekday(assessment.getDailyRevenueWeekday())
-            .dailyRevenueWeekend(assessment.getDailyRevenueWeekend())
-            .monthlyRevenueRaw(assessment.getMonthlyRevenueRaw())
-            .monthlyRevenueAdjusted(assessment.getMonthlyRevenueAdjusted())
-            .monthlyPbjt(assessment.getMonthlyPbjt())
-            .annualPbjt(assessment.getAnnualPbjt())
-            .adjustments(AssessmentResponseDTO.AdjustmentDetails.builder()
-                .businessType(assessment.getBusinessType())
-                .businessTypeCoefficient(assessment.getBusinessTypeCoefficient())
-                .locationScore(assessment.getLocationScore())
-                .operationalRate(assessment.getOperationalRate())
-                .taxRate(assessment.getTaxRate())
-                .inflationRate(assessment.getInflationRate())
-                .build())
-            .confidence(AssessmentResponseDTO.ConfidenceDetails.builder()
-                .score(assessment.getConfidenceScore())
-                .level(assessment.getConfidenceLevel())
-                .build())
-            .location(AssessmentResponseDTO.LocationDetails.builder()
-                .latitude(assessment.getLatitude())
-                .longitude(assessment.getLongitude())
-                .address(assessment.getAddress())
-                .kelurahan(assessment.getKelurahan())
-                .kecamatan(assessment.getKecamatan())
-                .kabupaten(assessment.getKabupaten())
-                .build())
-            .observations(observationRepository.findByAssessmentIdOrderByDateDesc(assessment.getId()).stream()
-                .map(obs -> AssessmentResponseDTO.ObservationDetails.builder()
-                    .id(obs.getId())
-                    .observationDate(obs.getObservationDate())
-                    .dayType(obs.getDayType())
-                    .visitors(obs.getVisitors())
-                    .durationHours(obs.getDurationHours())
-                    .avgTransaction(obs.getAvgTransaction())
-                    .visitorsPerHour(obs.getVisitorsPerHour())
-                    .sampleTransactions(obs.getSampleTransactions().stream()
-                        .map(tx -> AssessmentResponseDTO.SampleTransactionDetails.builder()
-                            .amount(tx.getAmount())
-                            .notes(tx.getNotes())
-                            .build())
-                        .collect(java.util.stream.Collectors.toList()))
-                    .notes(obs.getNotes())
-                    .build())
-                .collect(java.util.stream.Collectors.toList()))
-            .photoUrls(assessment.getPhotoUrls())
-            .supportingDocUrl(assessment.getSupportingDocUrl())
-            .surveyorId(assessment.getSurveyorId())
-            .createdAt(assessment.getCreatedAt())
-            .updatedAt(assessment.getUpdatedAt())
-            .build();
-    }
+
     
     private ObservationHistory convertToObservationHistory(ObservationDTO dto, PbjtAssessment assessment) {
         // Calculate average from sample transactions
-        java.math.BigDecimal avgTransaction = dto.getSampleTransactions().stream()
-            .map(ObservationDTO.SampleTransactionDTO::getAmount)
-            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
-            .divide(java.math.BigDecimal.valueOf(dto.getSampleTransactions().size()), 
-                2, java.math.RoundingMode.HALF_UP);
+        java.math.BigDecimal avgTransaction = java.math.BigDecimal.ZERO;
+        List<ObservationHistory.SampleTransaction> sampleTransactions = new ArrayList<>();
         
-        // Convert DTOs to entity SampleTransaction objects
-        List<ObservationHistory.SampleTransaction> sampleTransactions = dto.getSampleTransactions().stream()
-            .map(txDto -> ObservationHistory.SampleTransaction.builder()
-                .amount(txDto.getAmount())
-                .notes(txDto.getNotes())
-                .build())
-            .collect(java.util.stream.Collectors.toList());
+        if (dto.getSampleTransactions() != null && !dto.getSampleTransactions().isEmpty()) {
+             avgTransaction = dto.getSampleTransactions().stream()
+                .map(ObservationDTO.SampleTransactionDTO::getAmount)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+                .divide(java.math.BigDecimal.valueOf(dto.getSampleTransactions().size()), 
+                    2, java.math.RoundingMode.HALF_UP);
+             
+             // Convert DTOs to entity SampleTransaction objects
+             sampleTransactions = dto.getSampleTransactions().stream()
+                .map(txDto -> ObservationHistory.SampleTransaction.builder()
+                    .amount(txDto.getAmount())
+                    .notes(txDto.getNotes())
+                    .build())
+                .collect(java.util.stream.Collectors.toList());
+        }
         
         return ObservationHistory.builder()
             .assessment(assessment)
@@ -348,4 +353,170 @@ public class PbjtAssessmentService {
             .businessTypes(businessTypes)
             .build();
     }
+
+    private List<RealisasiDTO> getRealisasiHistory(String taxObjectId) {
+        if (taxObjectId == null || taxObjectId.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+
+        String sql = """
+            SELECT 
+                YEAR(t_tglpembayaran) as tahun,
+                SUM(COALESCE(t_jmlhpembayaran, 0)) as realisasi_amount,
+                COUNT(t_idtransaksi) as jumlah_transaksi
+            FROM t_transaksi
+            WHERE t_idwpobjek = ?
+              AND t_tglpembayaran IS NOT NULL
+              AND YEAR(t_tglpembayaran) BETWEEN 2021 AND 2025
+            GROUP BY YEAR(t_tglpembayaran)
+            ORDER BY YEAR(t_tglpembayaran)
+        """;
+
+        try {
+            return mysqlJdbcTemplate.query(sql, (rs, rowNum) -> RealisasiDTO.builder()
+                .tahun(rs.getInt("tahun"))
+                .realisasiAmount(rs.getBigDecimal("realisasi_amount"))
+                .jumlahTransaksi(rs.getInt("jumlah_transaksi"))
+                .build(), taxObjectId);
+        } catch (Exception e) {
+            log.error("Error fetching realisasi for tax object: {}", taxObjectId, e);
+            // Return empty list instead of failing
+            return java.util.Collections.emptyList();
+        }
+    }
+    
+    /**
+     * Batch fetch realization history for multiple tax object IDs.
+     * Use this for lists to avoid N+1 Application <-> Database roundtrips.
+     */
+    public Map<String, List<RealisasiDTO>> getRealisasiHistoryMap(List<String> taxObjectIds) {
+        if (taxObjectIds == null || taxObjectIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        
+        // Filter out nulls/empties
+        List<String> validIds = taxObjectIds.stream()
+            .filter(id -> id != null && !id.isEmpty())
+            .distinct()
+            .collect(Collectors.toList());
+            
+        if (validIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        
+        // Build WHERE IN clause dynamically
+        String inSql = String.join(",", Collections.nCopies(validIds.size(), "?"));
+        
+        String sql = String.format("""
+            SELECT 
+                t_idwpobjek,
+                YEAR(t_tglpembayaran) as tahun,
+                SUM(COALESCE(t_jmlhpembayaran, 0)) as realisasi_amount,
+                COUNT(t_idtransaksi) as jumlah_transaksi
+            FROM t_transaksi
+            WHERE t_idwpobjek IN (%s)
+              AND t_tglpembayaran IS NOT NULL
+              AND YEAR(t_tglpembayaran) BETWEEN 2021 AND 2025
+            GROUP BY t_idwpobjek, YEAR(t_tglpembayaran)
+            ORDER BY t_idwpobjek, YEAR(t_tglpembayaran)
+        """, inSql);
+        
+        try {
+            // Flatten the result into a list of objects holding (id, dto)
+            // Since JdbcTemplate doesn't support grouping directly easily
+            List<Map<String, Object>> rows = mysqlJdbcTemplate.query(sql, (rs, rowNum) -> {
+                RealisasiDTO dto = RealisasiDTO.builder()
+                    .tahun(rs.getInt("tahun"))
+                    .realisasiAmount(rs.getBigDecimal("realisasi_amount"))
+                    .jumlahTransaksi(rs.getInt("jumlah_transaksi"))
+                    .build();
+                return Map.of("id", rs.getString("t_idwpobjek"), "dto", dto);
+            }, validIds.toArray());
+            
+            // Group by ID in memory
+            Map<String, List<RealisasiDTO>> result = new java.util.HashMap<>();
+            for (Map<String, Object> row : rows) {
+                String id = (String) row.get("id");
+                RealisasiDTO dto = (RealisasiDTO) row.get("dto");
+                result.computeIfAbsent(id, k -> new ArrayList<>()).add(dto);
+            }
+            
+            return result;
+            
+        } catch (Exception e) {
+            log.error("Error fetching batch realisasi", e);
+            return Collections.emptyMap();
+        }
+    }
+    
+    public AssessmentResponseDTO convertToResponseDTO(PbjtAssessment assessment) {
+        return convertToResponseDTO(assessment, getRealisasiHistory(assessment.getTaxObjectId()));
+    }
+
+    public AssessmentResponseDTO convertToResponseDTO(PbjtAssessment assessment, List<RealisasiDTO> providedHistory) {
+         return AssessmentResponseDTO.builder()
+            .id(assessment.getId())
+            .businessId(assessment.getBusinessId())
+            .taxObjectId(assessment.getTaxObjectId())
+            .businessName(assessment.getBusinessName())
+            .assessmentDate(assessment.getAssessmentDate())
+            .buildingArea(assessment.getBuildingArea())
+            .seatingCapacity(assessment.getSeatingCapacity())
+            .businessType(assessment.getBusinessType())
+            .operatingHoursStart(assessment.getOperatingHoursStart() != null ? assessment.getOperatingHoursStart().toString() : null)
+            .operatingHoursEnd(assessment.getOperatingHoursEnd() != null ? assessment.getOperatingHoursEnd().toString() : null)
+            .address(assessment.getAddress())
+            .dailyRevenueWeekday(assessment.getDailyRevenueWeekday())
+            .dailyRevenueWeekend(assessment.getDailyRevenueWeekend())
+            .monthlyRevenueRaw(assessment.getMonthlyRevenueRaw())
+            .monthlyRevenueAdjusted(assessment.getMonthlyRevenueAdjusted())
+            .monthlyPbjt(assessment.getMonthlyPbjt())
+            .annualPbjt(assessment.getAnnualPbjt())
+            .adjustments(AssessmentResponseDTO.AdjustmentDetails.builder()
+                .businessType(assessment.getBusinessType())
+                .businessTypeCoefficient(assessment.getBusinessTypeCoefficient())
+                .locationScore(assessment.getLocationScore())
+                .operationalRate(assessment.getOperationalRate())
+                .taxRate(assessment.getTaxRate())
+                .inflationRate(assessment.getInflationRate())
+                .build())
+            .confidence(AssessmentResponseDTO.ConfidenceDetails.builder()
+                .score(assessment.getConfidenceScore())
+                .level(assessment.getConfidenceLevel())
+                .build())
+            .location(AssessmentResponseDTO.LocationDetails.builder()
+                .latitude(assessment.getLatitude())
+                .longitude(assessment.getLongitude())
+                .address(assessment.getAddress())
+                .kelurahan(assessment.getKelurahan())
+                .kecamatan(assessment.getKecamatan())
+                .kabupaten(assessment.getKabupaten())
+                .build())
+            .realisasiHistory(providedHistory)
+            .observations(observationRepository.findByAssessmentIdOrderByDateDesc(assessment.getId()).stream()
+                .map(obs -> AssessmentResponseDTO.ObservationDetails.builder()
+                    .id(obs.getId())
+                    .observationDate(obs.getObservationDate())
+                    .dayType(obs.getDayType())
+                    .visitors(obs.getVisitors())
+                    .durationHours(obs.getDurationHours())
+                    .avgTransaction(obs.getAvgTransaction())
+                    .visitorsPerHour(obs.getVisitorsPerHour())
+                    .sampleTransactions(obs.getSampleTransactions().stream()
+                        .map(tx -> AssessmentResponseDTO.SampleTransactionDetails.builder()
+                            .amount(tx.getAmount())
+                            .notes(tx.getNotes())
+                            .build())
+                        .collect(java.util.stream.Collectors.toList()))
+                    .notes(obs.getNotes())
+                    .build())
+                .collect(java.util.stream.Collectors.toList()))
+            .photoUrls(assessment.getPhotoUrls())
+            .supportingDocUrl(assessment.getSupportingDocUrl())
+            .surveyorId(assessment.getSurveyorId())
+            .createdAt(assessment.getCreatedAt())
+            .updatedAt(assessment.getUpdatedAt())
+            .build();
+    }
 }
+

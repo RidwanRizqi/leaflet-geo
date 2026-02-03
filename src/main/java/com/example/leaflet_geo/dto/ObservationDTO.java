@@ -45,8 +45,7 @@ public class ObservationDTO {
     @DecimalMax(value = "24.0", message = "Maximum observation duration is 24 hours")
     private BigDecimal durationHours;
     
-    @NotNull(message = "Sample transactions are required")
-    @Size(min = 5, max = 30, message = "Please provide 5-30 sample transaction values")
+    // Made optional for Menu Method
     private List<SampleTransactionDTO> sampleTransactions;
     
     private String notes;
