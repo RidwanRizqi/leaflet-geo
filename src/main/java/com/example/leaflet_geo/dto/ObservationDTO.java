@@ -48,5 +48,8 @@ public class ObservationDTO {
     // Made optional for Menu Method
     private List<SampleTransactionDTO> sampleTransactions;
     
+    // Assigned user/petugas for this observation
+    private String assignedUserId;
+    
     private String notes;
 }

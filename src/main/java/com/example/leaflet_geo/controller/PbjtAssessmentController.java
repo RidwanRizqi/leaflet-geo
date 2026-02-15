@@ -328,17 +328,17 @@ public class PbjtAssessmentController {
     
     /**
      * Upload business images
-     * Max 4 images, 5MB per file
+     * Max 10 images, 5MB per file
      */
     @PostMapping("/upload-images")
     public ResponseEntity<Map<String, Object>> uploadImages(
             @RequestParam("files") MultipartFile[] files) {
         try {
             // Validate file count
-            if (files.length > 4) {
+            if (files.length > 10) {
                 return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
-                    "message", "Maksimal 4 gambar"
+                    "message", "Maksimal 10 gambar"
                 ));
             }
             

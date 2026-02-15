@@ -56,6 +56,20 @@ public class PbjtAssessmentService {
     public PbjtAssessment createAssessment(AssessmentRequestDTO request) {
         log.info("Creating new assessment for business: {}", request.getBusinessId());
         
+        // Auto-generate Business ID if not provided
+        if (request.getBusinessId() == null || request.getBusinessId().trim().isEmpty()) {
+            long count = assessmentRepository.count();
+            String generatedId = "NOP-AUTO-" + String.format("%05d", count + 1);
+            
+            // Simple collision check (retry a few times if needed, or just increment)
+            while (assessmentRepository.existsByBusinessId(generatedId)) {
+                count++;
+                generatedId = "NOP-AUTO-" + String.format("%05d", count + 1);
+            }
+            log.info("Auto-generated Business ID: {}", generatedId);
+            request.setBusinessId(generatedId);
+        }
+
         // Check if business ID already exists
         if (assessmentRepository.existsByBusinessId(request.getBusinessId())) {
             throw new RuntimeException("Business ID already exists: " + request.getBusinessId());
