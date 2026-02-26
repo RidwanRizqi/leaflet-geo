@@ -41,7 +41,7 @@ public class MultipleDatabaseConfig {
     @Bean(name = "mysqlDataSource")
     public DataSource mysqlDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://192.178.10.112:3306/simpatda_lumajang?useSSL=false&serverTimezone=UTC")
+                .url("jdbc:mysql://192.178.10.112:3306/simpatda_lumajang?useSSL=false&serverTimezone=UTC&connectTimeout=3000&socketTimeout=5000")
                 .username("polinema")
                 .password("P0l1n3m4@bprd")
                 .driverClassName("com.mysql.cj.jdbc.Driver")
@@ -115,6 +115,23 @@ public class MultipleDatabaseConfig {
     // JdbcTemplate untuk PostgreSQL E-PASIR
     @Bean(name = "epasirJdbcTemplate")
     public JdbcTemplate epasirJdbcTemplate(@Qualifier("epasirDataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
+    // PostgreSQL PBJT Assessment sebagai database ketujuh
+    @Bean(name = "pbjtDataSource")
+    public DataSource pbjtDataSource() {
+        return DataSourceBuilder.create()
+                .url("jdbc:postgresql://localhost:5432/pbjt_assessment_db")
+                .username("zpreoz")
+                .password("@mb@TRON11")
+                .driverClassName("org.postgresql.Driver")
+                .build();
+    }
+
+    // JdbcTemplate untuk PostgreSQL PBJT Assessment
+    @Bean(name = "pbjtJdbcTemplate")
+    public JdbcTemplate pbjtJdbcTemplate(@Qualifier("pbjtDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 }
