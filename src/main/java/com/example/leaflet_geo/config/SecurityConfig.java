@@ -50,6 +50,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/pendapatan/**").permitAll()
                         .requestMatchers("/api/dashboard/**").permitAll()
                         .requestMatchers("/api/pajak/**").permitAll()
+                        // PBJT Assessment endpoints
+                        .requestMatchers("/api/pbjt-assessments/**").permitAll()
+                        .requestMatchers("/api/pbjt-realization/**").permitAll()
+                        .requestMatchers("/api/simatda/**").permitAll()
+                        // Hotel accommodation endpoints
+                        .requestMatchers("/api/hotel-accommodations/**").permitAll()
+                        // File serving (uploaded images)
+                        .requestMatchers("/api/file/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
