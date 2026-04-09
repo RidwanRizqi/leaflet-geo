@@ -148,15 +148,15 @@ public class DatObjekPajakRepository {
                    prop.NM_PROPINSI,
                    dati2.NM_DATI2
             FROM SYSTEM.DAT_OBJEK_PAJAK op
-            LEFT JOIN SYSTEM.REF_KECAMATAN kec ON op.KD_PROPINSI = kec.KD_PROPINSI
+            LEFT JOIN PBB.REF_KECAMATAN kec ON op.KD_PROPINSI = kec.KD_PROPINSI
                                                 AND op.KD_DATI2 = kec.KD_DATI2
                                                 AND op.KD_KECAMATAN = kec.KD_KECAMATAN
-            LEFT JOIN SYSTEM.REF_KELURAHAN kel ON op.KD_PROPINSI = kel.KD_PROPINSI
+            LEFT JOIN PBB.REF_KELURAHAN kel ON op.KD_PROPINSI = kel.KD_PROPINSI
                                                 AND op.KD_DATI2 = kel.KD_DATI2
                                                 AND op.KD_KECAMATAN = kel.KD_KECAMATAN
                                                 AND op.KD_KELURAHAN = kel.KD_KELURAHAN
-            LEFT JOIN SYSTEM.REF_PROPINSI prop ON op.KD_PROPINSI = prop.KD_PROPINSI
-            LEFT JOIN SYSTEM.REF_DATI2 dati2 ON op.KD_PROPINSI = dati2.KD_PROPINSI
+            LEFT JOIN PBB.REF_PROPINSI prop ON op.KD_PROPINSI = prop.KD_PROPINSI
+            LEFT JOIN PBB.REF_DATI2 dati2 ON op.KD_PROPINSI = dati2.KD_PROPINSI
                                               AND op.KD_DATI2 = dati2.KD_DATI2
             WHERE op.KD_PROPINSI = ? AND op.KD_DATI2 = ? AND op.KD_KECAMATAN = ?
                   AND op.KD_KELURAHAN = ? AND op.KD_BLOK = ? AND op.NO_URUT = ? AND op.KD_JNS_OP = ?

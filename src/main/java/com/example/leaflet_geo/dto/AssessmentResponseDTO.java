@@ -38,6 +38,11 @@ public class AssessmentResponseDTO {
     private BigDecimal monthlyPbjt;
     private BigDecimal annualPbjt;
     
+    // Menu-based calculation results
+    private BigDecimal monthlyRevenueMenuBased;
+    private BigDecimal monthlyPbjtMenuBased;
+    private BigDecimal annualPbjtMenuBased;
+    
     // Adjustment factors
     private AdjustmentDetails adjustments;
     

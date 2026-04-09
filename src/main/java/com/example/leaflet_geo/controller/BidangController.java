@@ -632,7 +632,7 @@ public class BidangController {
 
             // Step 2: Get names from Oracle
             List<Map<String, Object>> kecamatanData = oracleJdbcTemplate.queryForList(
-                "SELECT KD_PROPINSI, KD_DATI2, KD_KECAMATAN, NM_KECAMATAN FROM SYSTEM.REF_KECAMATAN WHERE KD_PROPINSI = ? AND KD_DATI2 = ? ORDER BY KD_KECAMATAN",
+                "SELECT KD_PROPINSI, KD_DATI2, KD_KECAMATAN, NM_KECAMATAN FROM PBB.REF_KECAMATAN WHERE KD_PROPINSI = ? AND KD_DATI2 = ? ORDER BY KD_KECAMATAN",
                 kdProp, kdDati2
             );
 
@@ -691,7 +691,7 @@ public class BidangController {
 
             // Step 2: Get names from Oracle
             List<Map<String, Object>> kelurahanData = oracleJdbcTemplate.queryForList(
-                "SELECT KD_PROPINSI, KD_DATI2, KD_KECAMATAN, KD_KELURAHAN, NM_KELURAHAN FROM SYSTEM.REF_KELURAHAN WHERE KD_PROPINSI = ? AND KD_DATI2 = ? AND KD_KECAMATAN = ? ORDER BY KD_KELURAHAN",
+                "SELECT KD_PROPINSI, KD_DATI2, KD_KECAMATAN, KD_KELURAHAN, NM_KELURAHAN FROM PBB.REF_KELURAHAN WHERE KD_PROPINSI = ? AND KD_DATI2 = ? AND KD_KECAMATAN = ? ORDER BY KD_KELURAHAN",
                 kdProp, kdDati2, kdKec
             );
 

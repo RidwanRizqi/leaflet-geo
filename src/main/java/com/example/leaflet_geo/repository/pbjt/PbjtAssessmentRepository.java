@@ -45,6 +45,16 @@ public interface PbjtAssessmentRepository extends JpaRepository<PbjtAssessment, 
     
     boolean existsByBusinessId(String businessId);
     
+    // Search query - searches across multiple fields
+    // Search query - searches only businessName and businessId as requested
+    @Query("SELECT a FROM PbjtAssessment a WHERE " +
+           "LOWER(a.businessName) LIKE LOWER(:query) OR " +
+           "LOWER(a.businessId) LIKE LOWER(:query)")
+    org.springframework.data.domain.Page<PbjtAssessment> searchByQuery(
+        @Param("query") String query,
+        org.springframework.data.domain.Pageable pageable
+    );
+    
     // Map statistics queries
     List<PbjtAssessment> findByKecamatanAndKelurahan(String kecamatan, String kelurahan);
     

@@ -30,7 +30,7 @@ public class AssessmentRequestDTO {
     private LocalDate assessmentDate;
     
     // Profile data
-    @DecimalMin(value = "10.0", message = "Building area must be at least 10 m²")
+    @DecimalMin(value = "1.0", message = "Building area must be at least 1 m²")
     @DecimalMax(value = "10000.0", message = "Building area seems unrealistic")
     private BigDecimal buildingArea;
     

@@ -163,6 +163,11 @@ public class PbjtAssessmentService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return assessmentRepository.findAll(pageable);
     }
+
+    public Page<PbjtAssessment> searchAssessments(String searchTerm, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return assessmentRepository.searchByQuery("%" + searchTerm + "%", pageable);
+    }
     
     public List<PbjtAssessment> getAssessmentsByKabupaten(String kabupaten) {
         return assessmentRepository.findByKabupaten(kabupaten);

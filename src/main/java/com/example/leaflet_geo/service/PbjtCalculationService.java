@@ -391,8 +391,9 @@ public class PbjtCalculationService {
         Map<String, Integer> breakdown = new HashMap<>();
         
         int dataCompleteness = 0;
-        if (request.getObservations().size() >= 3) dataCompleteness += 20;
-        else if (request.getObservations().size() >= 2) dataCompleteness += 10;
+        int obsCount = (request.getObservations() != null) ? request.getObservations().size() : 0;
+        if (obsCount >= 3) dataCompleteness += 20;
+        else if (obsCount >= 2) dataCompleteness += 10;
         if (request.getSeatingCapacity() != null) dataCompleteness += 5;
         if (request.getOperatingHoursStart() != null) dataCompleteness += 5;
         if (request.getBuildingArea() != null) dataCompleteness += 5;

@@ -39,7 +39,7 @@ public class PbjtAssessmentController {
     private String uploadDir;
     
     @PostMapping("/calculate")
-    public ResponseEntity<Map<String, Object>> calculateAssessment(@Valid @RequestBody AssessmentRequestDTO request) {
+    public ResponseEntity<Map<String, Object>> calculateAssessment(@RequestBody AssessmentRequestDTO request) {
         try {
             com.example.leaflet_geo.dto.CalculationResultDTO result = assessmentService.calculateAssessment(request);
             return ResponseEntity.ok(Map.of(
@@ -59,9 +59,18 @@ public class PbjtAssessmentController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllAssessments(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "") String search) {
         try {
-            Page<PbjtAssessment> assessmentPage = assessmentService.getAllAssessments(page, size);
+            Page<PbjtAssessment> assessmentPage;
+            
+            if (search != null && !search.trim().isEmpty()) {
+                System.out.println("DEBUG: Searching for assessment with query: " + search);
+                assessmentPage = assessmentService.searchAssessments(search.trim(), page, size);
+            } else {
+                System.out.println("DEBUG: Getting all assessments (no search)");
+                assessmentPage = assessmentService.getAllAssessments(page, size);
+            }
             
             // Extract Tax Object IDs for batch fetching
             List<String> taxObjectIds = assessmentPage.getContent().stream()

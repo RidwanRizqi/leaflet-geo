@@ -105,10 +105,10 @@ public class DatSubjekPajakRepository {
                    prop.NM_PROPINSI,
                    dati2.NM_DATI2
             FROM SYSTEM.DAT_SUBJEK_PAJAK sp
-            LEFT JOIN SYSTEM.REF_KECAMATAN kec ON sp.KELURAHAN_WP = kec.NM_KECAMATAN
-            LEFT JOIN SYSTEM.REF_KELURAHAN kel ON sp.KELURAHAN_WP = kel.NM_KELURAHAN
-            LEFT JOIN SYSTEM.REF_PROPINSI prop ON sp.KOTA_WP = prop.NM_PROPINSI
-            LEFT JOIN SYSTEM.REF_DATI2 dati2 ON sp.KOTA_WP = dati2.NM_DATI2
+            LEFT JOIN PBB.REF_KECAMATAN kec ON sp.KELURAHAN_WP = kec.NM_KECAMATAN
+            LEFT JOIN PBB.REF_KELURAHAN kel ON sp.KELURAHAN_WP = kel.NM_KELURAHAN
+            LEFT JOIN PBB.REF_PROPINSI prop ON sp.KOTA_WP = prop.NM_PROPINSI
+            LEFT JOIN PBB.REF_DATI2 dati2 ON sp.KOTA_WP = dati2.NM_DATI2
             WHERE sp.SUBJEK_PAJAK_ID = ?
             """;
 
