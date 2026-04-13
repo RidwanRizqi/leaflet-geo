@@ -39,19 +39,20 @@ public class PendapatanService {
     }
 
     /**
-     * Target hardcode untuk setiap jenis pajak
+     * Target hardcode untuk setiap jenis pajak tahun 2026 berdasarkan tabel SKPD
      */
     private static final Map<Integer, Long> TARGET_HARDCODE = Map.of(
-            1, 2_000_000_000L, // Pajak Hotel
-            2, 5_150_000_000L, // Pajak Restoran
-            3, 1_000_000_000L, // Pajak Hiburan
-            5, 45_000_000_000L, // Pajak Penerangan Jalan
-            7, 550_000_000L, // Pajak Parkir
-            4, 2_350_000_000L, // Pajak Reklame
-            6, 29_000_000_000L, // Pajak Mineral Bukan Logam dan Batuan
-            8, 1_200_000_000L, // Pajak Air Tanah
-            10, 15_000_000_000L // BPHTB (Bea Perolehan Hak atas Tanah dan Bangunan)
-    // Pajak Sarang Burung Walet (ID 9) tidak ada target
+            4, 2_350_000_000L, // Pajak Reklame (4.1.01.09)
+            8, 1_200_000_000L, // Pajak Air Tanah (4.1.01.12)
+            6, 29_000_000_000L, // Pajak Mineral Bukan Logam dan Batuan (4.1.01.14)
+            // PBB-P2 (4.1.01.15) -> 24_000_000_000 (tidak ada di map ini krn datanya dari SISMIOP oracle)
+            // BPHTB (4.1.01.16) -> 22_100_000_000 (tidak ada di map ini - dihandle PostgreSQL BPHTB/hardcode bawah) 
+            2, 5_150_000_000L, // PBJT-Makanan dan Minuman (4.1.01.19.01) [Pajak Restoran]
+            5, 45_000_000_000L, // PBJT-Tenaga Listrik (4.1.01.19.02) [Pajak Penerangan Jalan]
+            1, 2_000_000_000L, // PBJT-Jasa Perhotelan (4.1.01.19.03) [Pajak Hotel]
+            7, 550_000_000L, // PBJT-Jasa Parkir (4.1.01.19.04) [Pajak Parkir]
+            3, 1_000_000_000L // PBJT-Jasa Kesenian dan Hiburan (4.1.01.19.05) [Pajak Hiburan]
+        // Opsen PKB & Opsen BBNKB tidak ada ID jenis pajaknya di SIMATDA (1-10)
     );
 
     private long getTotalTargetHardcode() {
@@ -107,35 +108,24 @@ public class PendapatanService {
         BigDecimal totalTarget = new BigDecimal(getTotalTargetHardcode());
         BigDecimal totalRealisasi = new BigDecimal(result.get("total_realisasi").toString());
 
-        // Tambahkan realisasi dan target BPHTB dari database
+        // Tambahkan hardcode untuk Opsen
+        totalTarget = totalTarget.add(new BigDecimal("46607465200")); // Opsen PKB
+        totalTarget = totalTarget.add(new BigDecimal("13962242300")); // Opsen BBNKB
+
+        // Tambahkan hardcode untuk PBB P2 dan BPHTB
+        totalTarget = totalTarget.add(new BigDecimal("22100000000")); // BPHTB
+        totalTarget = totalTarget.add(new BigDecimal("24000000000")); // PBB P2
+
+        // Tambahkan realisasi BPHTB dari database
         Long realisasiBphtb = executeSafely(() -> bphtbService.getRealisasiTahunan(tahun), 0L, "BPHTB Realisasi");
-        Long targetBphtb = executeSafely(() -> bphtbService.getTargetTahunan(tahun), 0L, "BPHTB Target");
 
         totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiBphtb));
-        totalTarget = totalTarget.add(new BigDecimal(targetBphtb));
 
-        // Tambahkan realisasi dan target PBB P2 dari SISMIOP
+        // Tambahkan realisasi PBB P2 dari SISMIOP
         Long realisasiPbb = executeSafely(() -> sismiopService.getRealisasiPbbTahunan(tahun.toString()), 0L,
                 "PBB Realisasi");
-        Long targetPbb = executeSafely(() -> sismiopService.getTargetPbbTahunan(tahun.toString()), 0L, "PBB Target");
 
         totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiPbb));
-        totalTarget = totalTarget.add(new BigDecimal(targetPbb));
-
-        // Override realisasi Pajak Mineral dengan data dari E-PASIR
-        Long realisasiMineralSimpatda = executeSafely(() -> mysqlJdbcTemplate.queryForObject(
-                "SELECT COALESCE(SUM(t_jmlhpembayaran), 0) FROM t_transaksi WHERE t_jenispajak = 6 AND YEAR(t_tglpembayaran) = ?",
-                Long.class, tahun), 0L, "Mineral SIMPATDA");
-
-        Long realisasiMineralEpasir = executeSafely(() -> epasirService.getRealisasiMineralTahunan(tahun), 0L,
-                "Mineral E-PASIR");
-
-        if (realisasiMineralEpasir > 0) {
-            // Ganti realisasi mineral SIMPATDA dengan E-PASIR
-            totalRealisasi = totalRealisasi.subtract(new BigDecimal(realisasiMineralSimpatda));
-            totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiMineralEpasir));
-            System.out.println("✅ Dashboard: Mineral SIMPATDA replaced with E-PASIR");
-        }
 
         BigDecimal selisih = totalTarget.subtract(totalRealisasi);
 
@@ -217,7 +207,7 @@ public class PendapatanService {
 
         // Tambahkan data BPHTB dari database PostgreSQL
         Long realisasiBphtb = executeSafely(() -> bphtbService.getRealisasiTahunan(tahun), 0L, "BPHTB Realisasi List");
-        Long targetBphtb = executeSafely(() -> bphtbService.getTargetTahunan(tahun), 0L, "BPHTB Target List");
+        Long targetBphtb = 22100000000L; // Hardcode BPHTB Target
 
         if (true) { // Always add BPHTB row even if 0
             TargetRealisasiDTO bphtbDto = new TargetRealisasiDTO();
@@ -247,8 +237,7 @@ public class PendapatanService {
         // Tambahkan data PBB P2 dari database SISMIOP Oracle
         Long realisasiPbb = executeSafely(() -> sismiopService.getRealisasiPbbTahunan(tahun.toString()), 0L,
                 "PBB Realisasi List");
-        Long targetPbb = executeSafely(() -> sismiopService.getTargetPbbTahunan(tahun.toString()), 0L,
-                "PBB Target List");
+        Long targetPbb = 24000000000L; // Hardcode PBB Target
 
         if (true) {
             TargetRealisasiDTO pbbDto = new TargetRealisasiDTO();
@@ -274,33 +263,38 @@ public class PendapatanService {
 
             results.add(pbbDto);
         }
+        
+        // Tambahkan Opsen PKB
+        TargetRealisasiDTO pkbDto = new TargetRealisasiDTO();
+        pkbDto.setJenisPajak("Opsen PKB");
+        pkbDto.setUrutan(12);
 
-        // Override data Pajak Mineral (urutan 6) dengan data dari E-PASIR
-        Long realisasiMineralEpasir = executeSafely(() -> epasirService.getRealisasiMineralTahunan(tahun), 0L,
-                "Mineral E-PASIR List");
+        BigDecimal targetPkb = new BigDecimal("46607465200");
+        BigDecimal realisasiPkb = BigDecimal.ZERO;
+        BigDecimal selisihPkb = targetPkb.subtract(realisasiPkb);
 
-        if (realisasiMineralEpasir > 0) {
-            results.stream()
-                    .filter(dto -> dto.getUrutan() == 6)
-                    .findFirst()
-                    .ifPresent(mineralDto -> {
-                        BigDecimal realisasiEpasir = new BigDecimal(realisasiMineralEpasir);
-                        BigDecimal target = mineralDto.getTarget();
-                        BigDecimal selisih = target.subtract(realisasiEpasir);
+        pkbDto.setTarget(targetPkb);
+        pkbDto.setRealisasi(realisasiPkb);
+        pkbDto.setSelisih(selisihPkb);
+        pkbDto.setPersentasePencapaian(0.0);
+        pkbDto.setDetails(List.of());
+        results.add(pkbDto);
 
-                        Double persentase = 0.0;
-                        if (target.compareTo(BigDecimal.ZERO) > 0) {
-                            persentase = realisasiEpasir.divide(target, 4, RoundingMode.HALF_UP)
-                                    .multiply(new BigDecimal("100"))
-                                    .doubleValue();
-                        }
+        // Tambahkan Opsen BBNKB
+        TargetRealisasiDTO bbnkbDto = new TargetRealisasiDTO();
+        bbnkbDto.setJenisPajak("Opsen BBNKB");
+        bbnkbDto.setUrutan(13);
 
-                        mineralDto.setRealisasi(realisasiEpasir);
-                        mineralDto.setSelisih(selisih);
-                        mineralDto.setPersentasePencapaian(persentase);
-                        mineralDto.setJenisPajak("Pajak Mineral (E-PASIR)");
-                    });
-        }
+        BigDecimal targetBbnkb = new BigDecimal("13962242300");
+        BigDecimal realisasiBbnkb = BigDecimal.ZERO;
+        BigDecimal selisihBbnkb = targetBbnkb.subtract(realisasiBbnkb);
+
+        bbnkbDto.setTarget(targetBbnkb);
+        bbnkbDto.setRealisasi(realisasiBbnkb);
+        bbnkbDto.setSelisih(selisihBbnkb);
+        bbnkbDto.setPersentasePencapaian(0.0);
+        bbnkbDto.setDetails(List.of());
+        results.add(bbnkbDto);
 
         // Remove Pajak Sarang Burung Walet (urutan 9) - tidak ada target
         results.removeIf(dto -> dto.getUrutan() != null && dto.getUrutan() == 9);

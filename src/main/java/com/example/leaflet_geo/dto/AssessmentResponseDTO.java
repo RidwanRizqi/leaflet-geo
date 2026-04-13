@@ -42,6 +42,8 @@ public class AssessmentResponseDTO {
     private BigDecimal monthlyRevenueMenuBased;
     private BigDecimal monthlyPbjtMenuBased;
     private BigDecimal annualPbjtMenuBased;
+    private Integer openingDaysPerMonth;
+    private java.util.List<Map<String, Object>> menuItems;
     
     // Adjustment factors
     private AdjustmentDetails adjustments;
@@ -101,6 +103,10 @@ public class AssessmentResponseDTO {
         private BigDecimal latitude;
         private BigDecimal longitude;
         private String address;
+        private String roadType;
+        private Boolean nearSchool;
+        private Boolean nearOffice;
+        private Boolean nearMarket;
         private String kelurahan;
         private String kecamatan;
         private String kabupaten;
