@@ -75,6 +75,9 @@ public class SecurityConfig {
                         // PBJT Assessment (Test Permission)
                         .requestMatchers("/api/pbjt-assessments/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        // Hotel Accommodation endpoints
+                        .requestMatchers("/api/hotel-accommodations/**").permitAll()
+                        .requestMatchers("/api/file/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

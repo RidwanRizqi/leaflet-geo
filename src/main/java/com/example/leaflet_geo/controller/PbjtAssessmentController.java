@@ -2,6 +2,8 @@ package com.example.leaflet_geo.controller;
 
 import com.example.leaflet_geo.dto.AssessmentRequestDTO;
 import com.example.leaflet_geo.dto.AssessmentResponseDTO;
+import com.example.leaflet_geo.dto.MenuMethodRequestDTO;
+import com.example.leaflet_geo.entity.MenuObservationHistory;
 import com.example.leaflet_geo.entity.PbjtAssessment;
 import com.example.leaflet_geo.service.PbjtAssessmentService;
 import jakarta.validation.Valid;
@@ -256,6 +258,64 @@ public class PbjtAssessmentController {
             ));
         } catch (Exception e) {
             log.error("Error deleting assessment: {}", id, e);
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
+            ));
+        }
+    }
+    
+    @PutMapping("/{id}/menu-method")
+    public ResponseEntity<Map<String, Object>> updateMenuMethod(
+            @PathVariable Long id,
+            @RequestBody MenuMethodRequestDTO request) {
+        try {
+            PbjtAssessment assessment = assessmentService.updateMenuMethod(id, request);
+            AssessmentResponseDTO data = assessmentService.convertToResponseDTO(assessment);
+            return ResponseEntity.ok(Map.of(
+                "data", data,
+                "success", true,
+                "message", "Menu method berhasil disimpan dan dicatat ke riwayat."
+            ));
+        } catch (Exception e) {
+            log.error("Error updating menu method: {}", id, e);
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
+            ));
+        }
+    }
+    
+    @GetMapping("/{id}/menu-observations")
+    public ResponseEntity<Map<String, Object>> getMenuObservations(@PathVariable Long id) {
+        try {
+            List<MenuObservationHistory> history = assessmentService.getMenuObservationHistory(id);
+            return ResponseEntity.ok(Map.of(
+                "data", history,
+                "success", true,
+                "message", "Riwayat observasi menu berhasil diambil."
+            ));
+        } catch (Exception e) {
+            log.error("Error fetching menu observations for id: {}", id, e);
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
+            ));
+        }
+    }
+    
+    @DeleteMapping("/{id}/menu-observations/{obsId}")
+    public ResponseEntity<Map<String, Object>> deleteMenuObservation(
+            @PathVariable Long id,
+            @PathVariable Long obsId) {
+        try {
+            assessmentService.deleteMenuObservation(obsId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Riwayat observasi menu berhasil dihapus."
+            ));
+        } catch (Exception e) {
+            log.error("Error deleting menu observation: {} for assessment: {}", obsId, id, e);
             return ResponseEntity.status(400).body(Map.of(
                 "success", false,
                 "message", "Error: " + e.getMessage()

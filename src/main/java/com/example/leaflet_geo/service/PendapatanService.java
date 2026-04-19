@@ -127,6 +127,10 @@ public class PendapatanService {
 
         totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiPbb));
 
+        // Tambahkan realisasi Minerba dari E-PASIR
+        Long realisasiEpasir = executeSafely(() -> epasirService.getRealisasiTotalTahunan(tahun), 0L, "E-PASIR Realisasi");
+        totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiEpasir));
+
         BigDecimal selisih = totalTarget.subtract(totalRealisasi);
 
         Double persentase = 0.0;
@@ -182,6 +186,13 @@ public class PendapatanService {
             Long targetHardcode = TARGET_HARDCODE.getOrDefault(idJenis, 0L);
             BigDecimal target = new BigDecimal(targetHardcode);
             BigDecimal realisasi = rs.getBigDecimal("realisasi");
+
+            // Jika Minerba, override realisasi dari E-Pasir
+            if (idJenis == 6) { // 6 adalah ID untuk Minerba di s_jenisobjek
+                Long realisasiEpasir = executeSafely(() -> epasirService.getRealisasiTotalTahunan(tahun), 0L, "E-PASIR Realisasi List");
+                realisasi = new BigDecimal(realisasiEpasir);
+            }
+
             BigDecimal selisih = target.subtract(realisasi);
 
             Double persentase = 0.0;
@@ -439,8 +450,9 @@ public class PendapatanService {
             "Pajak Reklame", "Reklame",
             "Pajak Penerangan Jalan", "Tenaga Listrik",
             "Pajak Parkir", "Parkir",
-            "Pajak Air Tanah", "Air Tanah",
-            "Pajak Mineral Bukan Logam dan Batuan", "Minerba");
+            "Pajak Air Tanah", "Air Tanah"
+            // "Pajak Mineral Bukan Logam dan Batuan", "Minerba" -> Diambil dari E-Pasir
+    );
 
     /**
      * Get Realisasi Bulanan per Kategori Pajak untuk Dashboard Pajak
@@ -455,8 +467,7 @@ public class PendapatanService {
                     COALESCE(SUM(t.t_jmlhpembayaran), 0) AS total_realisasi
                 FROM t_transaksi t
                 JOIN s_jenisobjek j ON t.t_jenispajak = j.s_idjenis
-                WHERE YEAR(t.t_tglpembayaran) = ?
-                GROUP BY j.s_namajenis, j.s_order, MONTH(t.t_tglpembayaran)
+                WHERE YEAR(t.t_tglpembayaran) = ?                  AND j.s_namajenis != 'Pajak Mineral Bukan Logam dan Batuan'                GROUP BY j.s_namajenis, j.s_order, MONTH(t.t_tglpembayaran)
                 ORDER BY j.s_order, bulan
                 """;
 
@@ -492,6 +503,24 @@ public class PendapatanService {
             }
         } catch (Exception e) {
             System.err.println("⚠️ Could not fetch BPHTB monthly data: " + e.getMessage());
+        }
+
+        // Add Minerba (E-PASIR) monthly data from PostgreSQL
+        try {
+            List<Map<String, Object>> epasirData = epasirService.getRealisasiBulanan(tahun);
+            if (epasirData != null) {
+                for (Map<String, Object> row : epasirData) {
+                    PajakDataDTO dto = new PajakDataDTO();
+                    dto.setKategori("Minerba");
+                    dto.setTahun(tahun);
+                    int bulanNum = ((Number) row.get("bulan")).intValue();
+                    dto.setBulan(getNamaBulan(bulanNum));
+                    dto.setValue(new BigDecimal(row.get("realisasi").toString()));
+                    results.add(dto);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not fetch E-PASIR monthly data: " + e.getMessage());
         }
 
         // Add PBB P2 monthly data from Oracle SISMIOP

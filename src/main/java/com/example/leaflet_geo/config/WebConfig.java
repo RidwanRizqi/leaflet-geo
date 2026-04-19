@@ -14,9 +14,12 @@ public class WebConfig implements WebMvcConfigurer {
     
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve uploaded images
+        // Serve uploaded PBJT assessment images
         registry.addResourceHandler("/uploads/pbjt-images/**")
                 .addResourceLocations("file:" + uploadDir + "/");
+        // Serve uploaded hotel images
+        registry.addResourceHandler("/uploads/hotel-images/**")
+                .addResourceLocations("file:uploads/hotel-images/");
     }
     
     @Override
