@@ -37,16 +37,19 @@ public class PbjtAssessmentService {
     private final ObservationHistoryRepository observationRepository;
     private final PbjtCalculationService calculationService;
     private final JdbcTemplate mysqlJdbcTemplate;
+    private final com.example.leaflet_geo.repository.pbjt.MenuObservationHistoryRepository menuObservationRepository;
 
     public PbjtAssessmentService(
             PbjtAssessmentRepository assessmentRepository,
             ObservationHistoryRepository observationRepository,
             PbjtCalculationService calculationService,
-            @Qualifier("mysqlJdbcTemplate") JdbcTemplate mysqlJdbcTemplate) {
+            @Qualifier("mysqlJdbcTemplate") JdbcTemplate mysqlJdbcTemplate,
+            com.example.leaflet_geo.repository.pbjt.MenuObservationHistoryRepository menuObservationRepository) {
         this.assessmentRepository = assessmentRepository;
         this.observationRepository = observationRepository;
         this.calculationService = calculationService;
         this.mysqlJdbcTemplate = mysqlJdbcTemplate;
+        this.menuObservationRepository = menuObservationRepository;
     }
     
     public CalculationResultDTO calculateAssessment(AssessmentRequestDTO request) {
@@ -546,5 +549,106 @@ public class PbjtAssessmentService {
             .updatedAt(assessment.getUpdatedAt())
             .build();
     }
-}
 
+    public com.example.leaflet_geo.entity.PbjtAssessment updateMenuMethod(Long id, com.example.leaflet_geo.dto.MenuMethodRequestDTO request) {
+        com.example.leaflet_geo.entity.PbjtAssessment existing = assessmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Assessment not found with id: " + id));
+
+        existing.setOpeningDaysPerMonth(request.getOpeningDaysPerMonth());
+        existing.setMenuItems(request.getMenuItems());
+
+        com.example.leaflet_geo.dto.AssessmentRequestDTO reqDTO = new com.example.leaflet_geo.dto.AssessmentRequestDTO();
+        reqDTO.setSeatingCapacity(existing.getSeatingCapacity());
+        reqDTO.setOpeningDaysPerMonth(request.getOpeningDaysPerMonth());
+        reqDTO.setOperatingHoursStart(existing.getOperatingHoursStart());
+        reqDTO.setOperatingHoursEnd(existing.getOperatingHoursEnd());
+
+        if (request.getMenuItems() != null) {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            List<com.example.leaflet_geo.dto.MenuItemDTO> menuItemsDTO = request.getMenuItems().stream()
+                .map(m -> mapper.convertValue(m, com.example.leaflet_geo.dto.MenuItemDTO.class))
+                .collect(Collectors.toList());
+            reqDTO.setMenuItems(menuItemsDTO);
+        }
+
+        List<ObservationHistory> obsHistory = observationRepository.findByAssessmentId(existing.getId());
+        if (obsHistory != null && !obsHistory.isEmpty()) {
+            List<com.example.leaflet_geo.dto.ObservationDTO> reqObs = new ArrayList<>();
+            for (ObservationHistory oh : obsHistory) {
+                com.example.leaflet_geo.dto.ObservationDTO od = new com.example.leaflet_geo.dto.ObservationDTO();
+                od.setObservationDate(oh.getObservationDate());
+                od.setDayType(oh.getDayType());
+                od.setVisitors(oh.getVisitors());
+                od.setDurationHours(oh.getDurationHours());
+                reqObs.add(od);
+            }
+            reqDTO.setObservations(reqObs);
+        }
+
+        com.example.leaflet_geo.dto.CalculationResultDTO calculation = calculationService.calculate(reqDTO);
+
+        existing.setMonthlyRevenueMenuBased(calculation.getMonthlyRevenueMenuBased());
+        existing.setMonthlyPbjtMenuBased(calculation.getMonthlyPbjtMenuBased());
+        existing.setAnnualPbjtMenuBased(calculation.getAnnualPbjtMenuBased());
+
+        existing = assessmentRepository.save(existing);
+
+        com.example.leaflet_geo.entity.MenuObservationHistory history = com.example.leaflet_geo.entity.MenuObservationHistory.builder()
+                .assessment(existing)
+                .observationDate(request.getObservationDate() != null ? request.getObservationDate() : java.time.LocalDate.now())
+                .openingDaysPerMonth(request.getOpeningDaysPerMonth() != null ? request.getOpeningDaysPerMonth() : 30)
+                .menuItems(request.getMenuItems())
+                .monthlyRevenueMenuBased(calculation.getMonthlyRevenueMenuBased())
+                .monthlyPbjtMenuBased(calculation.getMonthlyPbjtMenuBased())
+                .annualPbjtMenuBased(calculation.getAnnualPbjtMenuBased())
+                .build();
+
+        menuObservationRepository.save(history);
+
+        return existing;
+    }
+
+    public List<com.example.leaflet_geo.entity.MenuObservationHistory> getMenuObservationHistory(Long id) {
+        return menuObservationRepository.findByAssessmentIdOrderByObservationDateDesc(id);
+    }
+
+    public void deleteMenuObservation(Long obsId) {
+        menuObservationRepository.findById(obsId)
+                .ifPresent(obs -> menuObservationRepository.delete(obs));
+    }
+
+    public AssessmentResponseDTO.ObservationDetails addObservation(Long assessmentId, ObservationDTO obsDto) {
+        PbjtAssessment assessment = assessmentRepository.findById(assessmentId)
+                .orElseThrow(() -> new RuntimeException("Assessment not found with id: " + assessmentId));
+
+        ObservationHistory history = convertToObservationHistory(obsDto, assessment);
+        ObservationHistory saved = observationRepository.save(history);
+
+        List<AssessmentResponseDTO.SampleTransactionDetails> sampleTxs = new ArrayList<>();
+        if (saved.getSampleTransactions() != null) {
+            sampleTxs = saved.getSampleTransactions().stream()
+                .map(tx -> AssessmentResponseDTO.SampleTransactionDetails.builder()
+                    .amount(tx.getAmount())
+                    .notes(tx.getNotes())
+                    .build())
+                .collect(Collectors.toList());
+        }
+
+        return AssessmentResponseDTO.ObservationDetails.builder()
+            .id(saved.getId())
+            .observationDate(saved.getObservationDate())
+            .dayType(saved.getDayType())
+            .visitors(saved.getVisitors())
+            .durationHours(saved.getDurationHours())
+            .avgTransaction(saved.getAvgTransaction())
+            .visitorsPerHour(saved.getVisitorsPerHour())
+            .sampleTransactions(sampleTxs)
+            .notes(saved.getNotes())
+            .build();
+    }
+
+    public void deleteObservation(Long obsId) {
+        observationRepository.findById(obsId)
+                .ifPresent(obs -> observationRepository.delete(obs));
+    }
+}

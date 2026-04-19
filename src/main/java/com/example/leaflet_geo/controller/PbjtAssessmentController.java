@@ -286,6 +286,64 @@ public class PbjtAssessmentController {
         }
     }
     
+
+    @GetMapping("/{id}/observations")
+    public ResponseEntity<Map<String, Object>> getObservations(@PathVariable Long id) {
+        try {
+            PbjtAssessment assessment = assessmentService.getAssessmentById(id)
+                .orElseThrow(() -> new RuntimeException("Assessment not found with id: " + id));
+            AssessmentResponseDTO data = assessmentService.convertToResponseDTO(assessment);
+            return ResponseEntity.ok(Map.of(
+                "data", data.getObservations() != null ? data.getObservations() : new java.util.ArrayList<>(),
+                "success", true,
+                "message", "Riwayat observasi berhasil diambil."
+            ));
+        } catch (Exception e) {
+            log.error("Error fetching observations for id: {}", id, e);
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/{id}/observations")
+    public ResponseEntity<Map<String, Object>> addObservation(
+            @PathVariable Long id,
+            @RequestBody com.example.leaflet_geo.dto.ObservationDTO request) {
+        try {
+            AssessmentResponseDTO.ObservationDetails obs = assessmentService.addObservation(id, request);
+            return ResponseEntity.ok(Map.of(
+                "data", obs,
+                "success", true,
+                "message", "Observasi berhasil ditambahkan."
+            ));
+        } catch (Exception e) {
+            log.error("Error adding observation for id: {}", id, e);
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
+            ));
+        }
+    }
+
+    @DeleteMapping("/observations/{obsId}")
+    public ResponseEntity<Map<String, Object>> deleteObservation(@PathVariable Long obsId) {
+        try {
+            assessmentService.deleteObservation(obsId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Observasi berhasil dihapus."
+            ));
+        } catch (Exception e) {
+            log.error("Error deleting observation: {}", obsId, e);
+            return ResponseEntity.status(400).body(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/{id}/menu-observations")
     public ResponseEntity<Map<String, Object>> getMenuObservations(@PathVariable Long id) {
         try {

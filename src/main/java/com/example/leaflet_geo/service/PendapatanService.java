@@ -81,7 +81,7 @@ public class PendapatanService {
         String sql = """
                 SELECT
                     (SELECT COALESCE(SUM(t_jmlhpembayaran), 0) FROM t_transaksi
-                     WHERE YEAR(t_tglpembayaran) = ?) AS total_realisasi,
+                     WHERE YEAR(t_tglpembayaran) = ? AND t_jenispajak != 6) AS total_realisasi,
 
                     (SELECT COUNT(*) FROM t_wp) AS total_wp,
 
@@ -351,7 +351,7 @@ public class PendapatanService {
                     MONTH(t_tglpembayaran) AS bulan,
                     SUM(t_jmlhpembayaran) AS realisasi_bulan
                 FROM t_transaksi
-                WHERE YEAR(t_tglpembayaran) = ?
+                WHERE YEAR(t_tglpembayaran) = ? AND t_jenispajak != 6
                 GROUP BY MONTH(t_tglpembayaran)
                 ORDER BY bulan
                 """;
@@ -363,6 +363,34 @@ public class PendapatanService {
             dto.setRealisasiBulan(rs.getBigDecimal("realisasi_bulan"));
             return dto;
         }, tahun), new ArrayList<>(), "MySQL Trend Bulanan");
+
+        // Merge E-PASIR Data ke Trend Bulanan
+        try {
+            List<Map<String, Object>> epasirData = epasirService.getRealisasiBulanan(tahun);
+            if (epasirData != null) {
+                for (Map<String, Object> row : epasirData) {
+                    int bulanNum = ((Number) row.get("bulan")).intValue();
+                    BigDecimal realisasiEpasir = new BigDecimal(row.get("realisasi").toString());
+                    
+                    // Find existing month or create new
+                    TrendBulananDTO existing = trends.stream().filter(t -> t.getBulan() == bulanNum).findFirst().orElse(null);
+                    if (existing != null) {
+                        existing.setRealisasiBulan(existing.getRealisasiBulan().add(realisasiEpasir));
+                    } else {
+                        TrendBulananDTO dto = new TrendBulananDTO();
+                        dto.setBulan(bulanNum);
+                        dto.setNamaBulan(getNamaBulan(bulanNum));
+                        dto.setRealisasiBulan(realisasiEpasir);
+                        trends.add(dto);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not merge E-PASIR to Trend Bulanan: " + e.getMessage());
+        }
+
+        // Sort just in case we appended new months
+        trends.sort((t1, t2) -> Integer.compare(t1.getBulan(), t2.getBulan()));
 
         // Calculate kumulatif
         BigDecimal kumulatif = BigDecimal.ZERO;
@@ -389,7 +417,7 @@ public class PendapatanService {
                 JOIN t_wpobjek obj ON t.t_idwpobjek = obj.t_idobjek
                 JOIN t_wp wp ON obj.t_idwp = wp.t_idwp
                 LEFT JOIN s_jenisobjek j ON t.t_jenispajak = j.s_idjenis
-                WHERE YEAR(t.t_tglpembayaran) = ?
+                WHERE YEAR(t.t_tglpembayaran) = ? AND t.t_jenispajak != 6
                 GROUP BY wp.t_idwp, wp.t_npwpd_lama, wp.t_nama, j.s_namajenis
                 ORDER BY total_pembayaran DESC
                 LIMIT ?
@@ -410,6 +438,25 @@ public class PendapatanService {
      * Get Realisasi Detail by Jenis Pajak
      */
     public List<Map<String, Object>> getRealisasiByJenisPajak(Integer tahun, String jenisPajakId) {
+        // Jika jenisPajakId == 6 (Minerba), langung ke E-Pasir (karena tidak ada di MySQL)
+        if ("6".equals(jenisPajakId)) {
+            List<Map<String, Object>> result = new ArrayList<>();
+            try {
+                List<Map<String, Object>> epasirData = epasirService.getRealisasiBulanan(tahun);
+                if (epasirData != null) {
+                    for (Map<String, Object> row : epasirData) {
+                        result.add(Map.of(
+                            "bulan", row.get("bulan"),
+                            "jenis_pajak", "Pajak Mineral Bukan Logam dan Batuan",
+                            "jumlah_transaksi", 0, // Belum ada count transaksi dari Epasir
+                            "total_realisasi", row.get("realisasi")
+                        ));
+                    }
+                }
+            } catch (Exception e) {}
+            return result;
+        }
+
         String sql = """
                 SELECT
                     MONTH(t.t_tglpembayaran) AS bulan,
@@ -418,7 +465,7 @@ public class PendapatanService {
                     SUM(t.t_jmlhpembayaran) AS total_realisasi
                 FROM t_transaksi t
                 LEFT JOIN s_jenisobjek j ON t.t_jenispajak = j.s_idjenis
-                WHERE YEAR(t.t_tglpembayaran) = ?
+                WHERE YEAR(t.t_tglpembayaran) = ? AND t.t_jenispajak != 6
                 AND (? IS NULL OR t.t_jenispajak = ?)
                 GROUP BY MONTH(t.t_tglpembayaran), j.s_namajenis
                 ORDER BY bulan

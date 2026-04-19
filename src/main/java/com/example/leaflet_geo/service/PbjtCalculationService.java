@@ -159,10 +159,9 @@ public class PbjtCalculationService {
             
             BigDecimal averageVph = totalVph.divide(BigDecimal.valueOf(request.getObservations().size()), 2, RoundingMode.HALF_UP);
             
-            Duration operatingDuration = Duration.between(
-                request.getOperatingHoursStart(),
-                request.getOperatingHoursEnd()
-            );
+            java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart() : java.time.LocalTime.of(8, 0);
+            java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd() : java.time.LocalTime.of(22, 0);
+            Duration operatingDuration = Duration.between(startTime, endTime);
             double totalOperatingHours = operatingDuration.toMinutes() / 60.0;
             
             return averageVph.multiply(BigDecimal.valueOf(totalOperatingHours)).setScale(0, RoundingMode.HALF_UP);
@@ -176,10 +175,9 @@ public class PbjtCalculationService {
         int seatingCapacity = request.getSeatingCapacity() != null ? request.getSeatingCapacity() : 30;
         
         // Also consider operating hours - longer hours = more turnover
-        Duration operatingDuration = Duration.between(
-            request.getOperatingHoursStart(),
-            request.getOperatingHoursEnd()
-        );
+        java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart() : java.time.LocalTime.of(8, 0);
+        java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd() : java.time.LocalTime.of(22, 0);
+        Duration operatingDuration = Duration.between(startTime, endTime);
         double totalOperatingHours = operatingDuration.toMinutes() / 60.0;
         
         // Adjust turnover based on operating hours (8 hours = baseline)
@@ -202,10 +200,9 @@ public class PbjtCalculationService {
             return emptyRevenues;
         }
         
-        Duration operatingDuration = Duration.between(
-            request.getOperatingHoursStart(),
-            request.getOperatingHoursEnd()
-        );
+        java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart() : java.time.LocalTime.of(8, 0);
+        java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd() : java.time.LocalTime.of(22, 0);
+        Duration operatingDuration = Duration.between(startTime, endTime);
         double totalOperatingHours = operatingDuration.toMinutes() / 60.0;
         double peakHours = 4.0;
         double offPeakHours = totalOperatingHours - peakHours;
