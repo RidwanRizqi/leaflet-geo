@@ -62,7 +62,8 @@ public class PbjtAssessmentController {
     public ResponseEntity<Map<String, Object>> getAllAssessments(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "") String search) {
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false) String category) {
         try {
             Page<PbjtAssessment> assessmentPage;
             
@@ -71,7 +72,7 @@ public class PbjtAssessmentController {
                 assessmentPage = assessmentService.searchAssessments(search.trim(), page, size);
             } else {
                 System.out.println("DEBUG: Getting all assessments (no search)");
-                assessmentPage = assessmentService.getAllAssessments(page, size);
+                assessmentPage = assessmentService.getAllAssessments(page, size, category);
             }
             
             // Extract Tax Object IDs for batch fetching
@@ -384,7 +385,7 @@ public class PbjtAssessmentController {
     @GetMapping("/count")
     public ResponseEntity<Map<String, Object>> getCount() {
         try {
-            long count = assessmentService.getAllAssessments(0, Integer.MAX_VALUE).getTotalElements();
+            long count = assessmentService.getAllAssessments(0, Integer.MAX_VALUE, null).getTotalElements();
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Count berhasil diambil",
@@ -402,7 +403,7 @@ public class PbjtAssessmentController {
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> healthCheck() {
         try {
-            long count = assessmentService.getAllAssessments(0, 1).getTotalElements();
+            long count = assessmentService.getAllAssessments(0, 1, null).getTotalElements();
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "PBJT Assessment API is running",
@@ -419,9 +420,10 @@ public class PbjtAssessmentController {
     
     // Map statistics endpoints
     @GetMapping("/stats/by-kecamatan")
-    public ResponseEntity<List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO>> getStatsByKecamatan() {
+    public ResponseEntity<List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO>> getStatsByKecamatan(
+            @RequestParam(required = false) String category) {
         try {
-            List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> stats = assessmentService.getStatsByKecamatan();
+            List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> stats = assessmentService.getStatsByKecamatan(category);
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Error getting stats by kecamatan", e);
@@ -430,9 +432,11 @@ public class PbjtAssessmentController {
     }
     
     @GetMapping("/stats/by-kelurahan/{kecamatan}")
-    public ResponseEntity<List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO>> getStatsByKelurahan(@PathVariable String kecamatan) {
+    public ResponseEntity<List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO>> getStatsByKelurahan(
+            @PathVariable String kecamatan,
+            @RequestParam(required = false) String category) {
         try {
-            List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> stats = assessmentService.getStatsByKelurahan(kecamatan);
+            List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> stats = assessmentService.getStatsByKelurahan(kecamatan, category);
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             log.error("Error getting stats by kelurahan for kecamatan: {}", kecamatan, e);
@@ -443,9 +447,10 @@ public class PbjtAssessmentController {
     @GetMapping("/by-location")
     public ResponseEntity<List<PbjtAssessment>> getAssessmentsByLocation(
             @RequestParam String kecamatan,
-            @RequestParam String kelurahan) {
+            @RequestParam String kelurahan,
+            @RequestParam(required = false) String category) {
         try {
-            List<PbjtAssessment> assessments = assessmentService.getAssessmentsByLocation(kecamatan, kelurahan);
+            List<PbjtAssessment> assessments = assessmentService.getAssessmentsByLocation(kecamatan, kelurahan, category);
             return ResponseEntity.ok(assessments);
         } catch (Exception e) {
             log.error("Error getting assessments by location: {}, {}", kecamatan, kelurahan, e);

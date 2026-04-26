@@ -8,6 +8,10 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.*;
 
+import com.example.leaflet_geo.util.WkbToGeoJsonConverter;
+import com.example.leaflet_geo.util.GeoJsonToWkbConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * BlokController - Mengelola data blok dari tabel sig.blok
  * 
@@ -125,6 +129,33 @@ public class BlokController {
         return getBlokById(id);
     }
 
+    /**
+     * GET /api/blok/{id}/geojson
+     * Return blok with geometry converted to GeoJSON for map preview
+     */
+    @GetMapping("/{id}/geojson")
+    public ResponseEntity<Map<String, Object>> getBlokGeoJson(@PathVariable String id) {
+        try {
+            Map<String, Object> data = postgresJdbcTemplate.queryForMap(
+                    "SELECT id, TRIM(kd_kec) as kd_kec, TRIM(kd_kel) as kd_kel, TRIM(kd_blok) as kd_blok, " +
+                            "encode(ST_AsBinary(geom), 'hex') as geom " +
+                            "FROM sig.blok WHERE id = ?::uuid",
+                    id);
+
+            // Convert WKB hex to GeoJSON
+            String geomWkbHex = (String) data.get("geom");
+            if (geomWkbHex != null && !geomWkbHex.isEmpty()) {
+                Map<String, Object> geoJson = WkbToGeoJsonConverter.convertWkbHexToGeoJson(geomWkbHex);
+                data.put("geojson", geoJson);
+                data.remove("geom"); // Remove WKB, frontend only needs GeoJSON
+            }
+
+            return ResponseEntity.ok(data);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(Map.of("error", "Blok tidak ditemukan", "message", e.getMessage()));
+        }
+    }
+
     @PostMapping
     public ResponseEntity<Map<String, Object>> createBlok(@RequestBody Map<String, Object> body) {
         try {
@@ -132,6 +163,19 @@ public class BlokController {
             String kdKel = (String) body.get("kd_kel");
             String kdBlok = (String) body.get("kd_blok");
             String geom = (String) body.get("geom");
+
+            // Also check for geojson field (GeoJSON format from frontend upload)
+            Object geojsonObj = body.get("geojson");
+            if (geojsonObj != null && (geom == null || geom.trim().isEmpty())) {
+                // Convert GeoJSON to WKB
+                @SuppressWarnings("unchecked")
+                Map<String, Object> geojsonMap = (geojsonObj instanceof Map)
+                        ? (Map<String, Object>) geojsonObj
+                        : new ObjectMapper().readValue(geojsonObj.toString(), Map.class);
+                geom = GeoJsonToWkbConverter.convertGeoJsonToWkbHex(geojsonMap);
+                System.out.println("✅ Converted GeoJSON to WKB: "
+                        + (geom != null ? geom.substring(0, Math.min(50, geom.length())) + "..." : "null"));
+            }
 
             if (kdKec == null || kdKel == null || kdBlok == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "kd_kec, kd_kel, dan kd_blok wajib diisi"));
@@ -146,7 +190,7 @@ public class BlokController {
             if (geom != null && !geom.trim().isEmpty()) {
                 sql = "INSERT INTO sig.blok (id, kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, geom, is_active, created_at, updated_at) "
                         +
-                        "VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, ST_GeomFromWKB(decode(?, 'hex'), 4326), true, NOW(), NOW()) RETURNING id";
+                        "VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, ST_GeomFromEWKB(decode(?, 'hex')), true, NOW(), NOW()) RETURNING id";
                 params = new Object[] { pemda.get("kd_prop"), pemda.get("kd_dati2"), kdKec, kdKel, kdBlok, geom };
             } else {
                 sql = "INSERT INTO sig.blok (id, kd_prop, kd_dati2, kd_kec, kd_kel, kd_blok, is_active, created_at, updated_at) "
@@ -158,7 +202,12 @@ public class BlokController {
             Map<String, Object> result = postgresJdbcTemplate.queryForMap(sql, params);
             return ResponseEntity
                     .ok(Map.of("success", true, "message", "Blok berhasil ditambahkan", "id", result.get("id")));
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", "Blok dengan kode tersebut sudah ada",
+                    "message", "Gunakan tombol Edit untuk mengubah data blok yang sudah ada"));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
@@ -172,6 +221,19 @@ public class BlokController {
             String kdBlok = (String) body.get("kd_blok");
             String geom = (String) body.get("geom");
 
+            // Also check for geojson field (GeoJSON format from frontend upload)
+            Object geojsonObj = body.get("geojson");
+            if (geojsonObj != null && (geom == null || geom.trim().isEmpty())) {
+                // Convert GeoJSON to WKB
+                @SuppressWarnings("unchecked")
+                Map<String, Object> geojsonMap = (geojsonObj instanceof Map)
+                        ? (Map<String, Object>) geojsonObj
+                        : new ObjectMapper().readValue(geojsonObj.toString(), Map.class);
+                geom = GeoJsonToWkbConverter.convertGeoJsonToWkbHex(geojsonMap);
+                System.out.println("✅ Converted GeoJSON to WKB for update: "
+                        + (geom != null ? geom.substring(0, Math.min(50, geom.length())) + "..." : "null"));
+            }
+
             if (kdKec == null || kdKel == null || kdBlok == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "kd_kec, kd_kel, dan kd_blok wajib diisi"));
             }
@@ -179,7 +241,7 @@ public class BlokController {
             int updated;
             if (geom != null && !geom.trim().isEmpty()) {
                 updated = postgresJdbcTemplate.update(
-                        "UPDATE sig.blok SET kd_kec = ?, kd_kel = ?, kd_blok = ?, geom = ST_GeomFromWKB(decode(?, 'hex'), 4326), updated_at = NOW() WHERE id = ?::uuid",
+                        "UPDATE sig.blok SET kd_kec = ?, kd_kel = ?, kd_blok = ?, geom = ST_GeomFromEWKB(decode(?, 'hex')), updated_at = NOW() WHERE id = ?::uuid",
                         kdKec, kdKel, kdBlok, geom, id);
             } else {
                 updated = postgresJdbcTemplate.update(
@@ -191,6 +253,7 @@ public class BlokController {
                 return ResponseEntity.status(404).body(Map.of("error", "Blok tidak ditemukan"));
             return ResponseEntity.ok(Map.of("success", true, "message", "Blok berhasil diupdate"));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }

@@ -162,9 +162,25 @@ public class PbjtAssessmentService {
         return assessmentRepository.findByBusinessId(businessId);
     }
     
-    public Page<PbjtAssessment> getAllAssessments(int page, int size) {
+    public Page<PbjtAssessment> getAllAssessments(int page, int size, String category) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        if (category != null && !category.isEmpty()) {
+            List<String> types = getBusinessTypesByCategory(category);
+            return assessmentRepository.findByBusinessTypeIn(types, pageable);
+        }
         return assessmentRepository.findAll(pageable);
+    }
+
+    /**
+     * Get business types by category
+     */
+    public static List<String> getBusinessTypesByCategory(String category) {
+        if ("hotel".equalsIgnoreCase(category)) {
+            return List.of("HOTEL", "PENGINAPAN", "HOMESTAY", "VILLA", "RESORT", "RUMAH_KOS");
+        } else if ("makanan".equalsIgnoreCase(category)) {
+            return List.of("WARUNG_KECIL", "RUMAH_MAKAN", "RESTAURANT", "CAFE_MODERN", "FRANCHISE", "KANTIN");
+        }
+        return Collections.emptyList();
     }
 
     public Page<PbjtAssessment> searchAssessments(String searchTerm, int page, int size) {
@@ -307,28 +323,56 @@ public class PbjtAssessmentService {
     }
     
     // Map statistics methods
-    public List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> getStatsByKecamatan() {
-        log.info("Getting statistics by kecamatan");
-        List<String> kecamatanList = assessmentRepository.findDistinctKecamatan();
+    public List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> getStatsByKecamatan(String category) {
+        log.info("Getting statistics by kecamatan, category: {}", category);
+        List<String> kecamatanList;
+        if (category != null && !category.isEmpty()) {
+            List<String> types = getBusinessTypesByCategory(category);
+            kecamatanList = assessmentRepository.findDistinctKecamatanByBusinessTypeIn(types);
+        } else {
+            kecamatanList = assessmentRepository.findDistinctKecamatan();
+        }
         
         return kecamatanList.stream().map(kecamatan -> {
-            List<PbjtAssessment> assessments = assessmentRepository.findByKecamatan(kecamatan);
+            List<PbjtAssessment> assessments;
+            if (category != null && !category.isEmpty()) {
+                List<String> types = getBusinessTypesByCategory(category);
+                assessments = assessmentRepository.findByKecamatanAndBusinessTypeIn(kecamatan, types);
+            } else {
+                assessments = assessmentRepository.findByKecamatan(kecamatan);
+            }
             return buildLocationStats(kecamatan, null, assessments);
         }).collect(Collectors.toList());
     }
     
-    public List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> getStatsByKelurahan(String kecamatan) {
-        log.info("Getting statistics by kelurahan for kecamatan: {}", kecamatan);
-        List<String> kelurahanList = assessmentRepository.findDistinctKelurahanByKecamatan(kecamatan);
+    public List<com.example.leaflet_geo.dto.PbjtLocationStatsDTO> getStatsByKelurahan(String kecamatan, String category) {
+        log.info("Getting statistics by kelurahan for kecamatan: {}, category: {}", kecamatan, category);
+        List<String> kelurahanList;
+        if (category != null && !category.isEmpty()) {
+            List<String> types = getBusinessTypesByCategory(category);
+            kelurahanList = assessmentRepository.findDistinctKelurahanByKecamatanAndBusinessTypeIn(kecamatan, types);
+        } else {
+            kelurahanList = assessmentRepository.findDistinctKelurahanByKecamatan(kecamatan);
+        }
         
         return kelurahanList.stream().map(kelurahan -> {
-            List<PbjtAssessment> assessments = assessmentRepository.findByKecamatanAndKelurahan(kecamatan, kelurahan);
+            List<PbjtAssessment> assessments;
+            if (category != null && !category.isEmpty()) {
+                List<String> types = getBusinessTypesByCategory(category);
+                assessments = assessmentRepository.findByKecamatanAndKelurahanAndBusinessTypeIn(kecamatan, kelurahan, types);
+            } else {
+                assessments = assessmentRepository.findByKecamatanAndKelurahan(kecamatan, kelurahan);
+            }
             return buildLocationStats(kecamatan, kelurahan, assessments);
         }).collect(Collectors.toList());
     }
     
-    public List<PbjtAssessment> getAssessmentsByLocation(String kecamatan, String kelurahan) {
-        log.info("Getting assessments for location: {}, {}", kecamatan, kelurahan);
+    public List<PbjtAssessment> getAssessmentsByLocation(String kecamatan, String kelurahan, String category) {
+        log.info("Getting assessments for location: {}, {}, category: {}", kecamatan, kelurahan, category);
+        if (category != null && !category.isEmpty()) {
+            List<String> types = getBusinessTypesByCategory(category);
+            return assessmentRepository.findByKecamatanAndKelurahanAndBusinessTypeIn(kecamatan, kelurahan, types);
+        }
         return assessmentRepository.findByKecamatanAndKelurahan(kecamatan, kelurahan);
     }
     

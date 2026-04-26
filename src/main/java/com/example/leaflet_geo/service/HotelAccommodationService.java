@@ -47,7 +47,7 @@ public class HotelAccommodationService {
                 ORDER BY property_name
                 """;
         try {
-            return pbjtJdbcTemplate.queryForList(query);
+            return cleanRowMaps(pbjtJdbcTemplate.queryForList(query));
         } catch (Exception e) {
             log.error("Error fetching hotels from local DB: {}", e.getMessage());
             return Collections.emptyList();
@@ -61,7 +61,7 @@ public class HotelAccommodationService {
         String query = "SELECT * FROM hotel_accommodations WHERE id = ?";
         try {
             List<Map<String, Object>> results = pbjtJdbcTemplate.queryForList(query, id);
-            return results.isEmpty() ? null : results.get(0);
+            return results.isEmpty() ? null : cleanRowMap(results.get(0));
         } catch (Exception e) {
             log.error("Error fetching hotel {}: {}", id, e.getMessage());
             return null;
@@ -84,7 +84,7 @@ public class HotelAccommodationService {
                 RETURNING *
                 """;
         try {
-            return pbjtJdbcTemplate.queryForMap(query,
+            return cleanRowMap(pbjtJdbcTemplate.queryForMap(query,
                     getStr(data, "accommodation_type", "HOTEL"),
                     getStr(data, "property_name", ""),
                     getStr(data, "owner_name", null),
@@ -109,7 +109,7 @@ public class HotelAccommodationService {
                     getStr(data, "npwpd", null),
                     getStr(data, "tax_object_id", null),
                     getPhotoUrls(data),
-                    getStr(data, "supporting_doc_url", null));
+                    getStr(data, "supporting_doc_url", null)));
         } catch (Exception e) {
             log.error("Error creating hotel: {}", e.getMessage());
             throw new RuntimeException("Failed to create hotel: " + e.getMessage());
@@ -145,7 +145,7 @@ public class HotelAccommodationService {
                 RETURNING *
                 """;
         try {
-            return pbjtJdbcTemplate.queryForMap(query,
+            return cleanRowMap(pbjtJdbcTemplate.queryForMap(query,
                     getStr(data, "accommodation_type", null),
                     getStr(data, "property_name", null),
                     getStr(data, "owner_name", null),
@@ -164,7 +164,7 @@ public class HotelAccommodationService {
                     getStr(data, "status", null),
                     getPhotoUrls(data),
                     getStr(data, "supporting_doc_url", null),
-                    id);
+                    id));
         } catch (Exception e) {
             log.error("Error updating hotel {}: {}", id, e.getMessage());
             throw new RuntimeException("Failed to update hotel: " + e.getMessage());
@@ -275,7 +275,7 @@ public class HotelAccommodationService {
                 ORDER BY total_realisasi DESC
                 """;
         try {
-            return pbjtJdbcTemplate.queryForList(query);
+            return cleanRowMaps(pbjtJdbcTemplate.queryForList(query));
         } catch (Exception e) {
             log.error("Error fetching hotels with realization: {}", e.getMessage());
             return Collections.emptyList();
@@ -503,6 +503,27 @@ public class HotelAccommodationService {
     }
 
     // ==================== HELPERS ====================
+
+    private List<Map<String, Object>> cleanRowMaps(List<Map<String, Object>> rows) {
+        if (rows == null) return null;
+        for (Map<String, Object> row : rows) {
+            cleanRowMap(row);
+        }
+        return rows;
+    }
+
+    private Map<String, Object> cleanRowMap(Map<String, Object> row) {
+        if (row == null) return null;
+        Object photoUrls = row.get("photo_urls");
+        if (photoUrls instanceof java.sql.Array) {
+            try {
+                row.put("photo_urls", (String[]) ((java.sql.Array) photoUrls).getArray());
+            } catch (Exception e) {
+                row.put("photo_urls", null);
+            }
+        }
+        return row;
+    }
 
     private String guessAccommodationType(String name) {
         if (name == null) return "HOTEL";

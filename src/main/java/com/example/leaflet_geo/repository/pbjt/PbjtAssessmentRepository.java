@@ -1,6 +1,8 @@
 package com.example.leaflet_geo.repository.pbjt;
 
 import com.example.leaflet_geo.entity.PbjtAssessment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -65,4 +67,19 @@ public interface PbjtAssessmentRepository extends JpaRepository<PbjtAssessment, 
     
     @Query("SELECT DISTINCT a.kelurahan FROM PbjtAssessment a WHERE a.kecamatan = :kecamatan AND a.kelurahan IS NOT NULL ORDER BY a.kelurahan")
     List<String> findDistinctKelurahanByKecamatan(@Param("kecamatan") String kecamatan);
+
+    // Category-filtered queries
+    Page<PbjtAssessment> findByBusinessTypeIn(List<String> businessTypes, Pageable pageable);
+
+    List<PbjtAssessment> findByKecamatanAndBusinessTypeIn(String kecamatan, List<String> businessTypes);
+
+    List<PbjtAssessment> findByKecamatanAndKelurahanAndBusinessTypeIn(String kecamatan, String kelurahan,
+                    List<String> businessTypes);
+
+    @Query("SELECT DISTINCT a.kecamatan FROM PbjtAssessment a WHERE a.kecamatan IS NOT NULL AND a.businessType IN :types ORDER BY a.kecamatan")
+    List<String> findDistinctKecamatanByBusinessTypeIn(@Param("types") List<String> types);
+
+    @Query("SELECT DISTINCT a.kelurahan FROM PbjtAssessment a WHERE a.kecamatan = :kecamatan AND a.kelurahan IS NOT NULL AND a.businessType IN :types ORDER BY a.kelurahan")
+    List<String> findDistinctKelurahanByKecamatanAndBusinessTypeIn(@Param("kecamatan") String kecamatan,
+                    @Param("types") List<String> types);
 }
