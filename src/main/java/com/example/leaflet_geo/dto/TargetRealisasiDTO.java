@@ -17,5 +17,16 @@ public class TargetRealisasiDTO {
     private BigDecimal realisasi;
     private BigDecimal selisih;
     private Double persentasePencapaian;
+    
+    // Metrik Kalkulasi Probabilitas
+    private Double runRateAktual;
+    private Double runRateDibutuhkan;
+    private Double defisitSurplus;
+    private Double rasio;
+    private Double probabilitas;
+    private String kategori;
+    private String warna;
+    private Boolean isWarning;
+
     private List<RekeningDetailDTO> details; // Breakdown per rekening
 }

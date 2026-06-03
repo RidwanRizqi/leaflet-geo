@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -23,19 +24,25 @@ import java.util.function.Supplier;
 public class PendapatanService {
 
     private final JdbcTemplate mysqlJdbcTemplate;
+    private final JdbcTemplate postgresJdbcTemplate;
     private final BphtbService bphtbService;
     private final SismiopService sismiopService;
     private final EpasirService epasirService;
+    private final TaxProbabilityCalculationService taxProbabilityCalculationService;
 
     public PendapatanService(
             @Qualifier("mysqlJdbcTemplate") JdbcTemplate mysqlJdbcTemplate,
+            @Qualifier("postgresJdbcTemplate") JdbcTemplate postgresJdbcTemplate,
             BphtbService bphtbService,
             SismiopService sismiopService,
-            EpasirService epasirService) {
+            EpasirService epasirService,
+            TaxProbabilityCalculationService taxProbabilityCalculationService) {
         this.mysqlJdbcTemplate = mysqlJdbcTemplate;
+        this.postgresJdbcTemplate = postgresJdbcTemplate;
         this.bphtbService = bphtbService;
         this.sismiopService = sismiopService;
         this.epasirService = epasirService;
+        this.taxProbabilityCalculationService = taxProbabilityCalculationService;
     }
 
     /**
@@ -67,7 +74,7 @@ public class PendapatanService {
     private <T> T executeSafely(Supplier<T> supplier, T defaultValue, String taskName) {
         try {
             return CompletableFuture.supplyAsync(supplier)
-                    .get(3, TimeUnit.SECONDS); // 3 seconds timeout per call
+                    .get(15, TimeUnit.SECONDS); // 15 seconds timeout per call
         } catch (Exception e) {
             System.err.println("⚠️ Timeout/Error in " + taskName + ": " + e.getMessage());
             return defaultValue;
@@ -83,9 +90,16 @@ public class PendapatanService {
                     (SELECT COALESCE(SUM(t_jmlhpembayaran), 0) FROM t_transaksi
                      WHERE YEAR(t_tglpembayaran) = ? AND t_jenispajak != 6) AS total_realisasi,
 
-                    (SELECT COUNT(*) FROM t_wp) AS total_wp,
+                    (SELECT COALESCE(SUM(s_targetjumlah), 0) FROM s_targetdetail td
+                     JOIN s_target t ON td.s_idtargetheader = t.s_idtarget
+                     WHERE t.s_tahuntarget = ?) AS total_target_db,
 
-                    (SELECT COUNT(*) FROM t_wpobjek) AS total_objek,
+                    (SELECT COUNT(DISTINCT obj.t_idwp) FROM t_transaksi t
+                     JOIN t_wpobjek obj ON t.t_idwpobjek = obj.t_idobjek
+                     WHERE YEAR(t.t_tglpembayaran) = ?) AS total_wp,
+
+                    (SELECT COUNT(DISTINCT t.t_idwpobjek) FROM t_transaksi t
+                     WHERE YEAR(t.t_tglpembayaran) = ?) AS total_objek,
 
                     (SELECT COUNT(*) FROM t_transaksi
                      WHERE YEAR(t_tglpembayaran) = ?) AS total_transaksi,
@@ -95,26 +109,25 @@ public class PendapatanService {
                 """;
 
         // Wrap MySQL call
-        Map<String, Object> result = executeSafely(() -> mysqlJdbcTemplate.queryForMap(sql, tahun, tahun, tahun),
+        Map<String, Object> result = executeSafely(() -> mysqlJdbcTemplate.queryForMap(sql, tahun, tahun, tahun, tahun, tahun, tahun),
                 Map.of(
                         "total_realisasi", 0,
+                        "total_target_db", 0,
                         "total_wp", 0,
                         "total_objek", 0,
                         "total_transaksi", 0,
                         "jenis_pajak_aktif", 0),
                 "MySQL Dashboard Summary");
 
-        // Gunakan target hardcode
-        BigDecimal totalTarget = new BigDecimal(getTotalTargetHardcode());
+        // Ambil total target dari tabel system.anggaran PostgreSQL
+        BigDecimal totalTarget = executeSafely(() -> 
+            postgresJdbcTemplate.queryForObject(
+                "SELECT COALESCE(SUM(nilai_anggaran), 0) FROM system.anggaran WHERE tahun_anggaran = ?",
+                BigDecimal.class, 
+                tahun
+            ), BigDecimal.ZERO, "PostgreSQL Total Anggaran");
+
         BigDecimal totalRealisasi = new BigDecimal(result.get("total_realisasi").toString());
-
-        // Tambahkan hardcode untuk Opsen
-        totalTarget = totalTarget.add(new BigDecimal("46607465200")); // Opsen PKB
-        totalTarget = totalTarget.add(new BigDecimal("13962242300")); // Opsen BBNKB
-
-        // Tambahkan hardcode untuk PBB P2 dan BPHTB
-        totalTarget = totalTarget.add(new BigDecimal("22100000000")); // BPHTB
-        totalTarget = totalTarget.add(new BigDecimal("24000000000")); // PBB P2
 
         // Tambahkan realisasi BPHTB dari database
         Long realisasiBphtb = executeSafely(() -> bphtbService.getRealisasiTahunan(tahun), 0L, "BPHTB Realisasi");
@@ -158,11 +171,27 @@ public class PendapatanService {
      * Get Target vs Realisasi per Jenis Pajak (Target Hardcode)
      */
     public List<TargetRealisasiDTO> getTargetRealisasiPerJenis(Integer tahun) {
+        // Ambil mapping anggaran (target) dari tabel system.anggaran di PostgreSQL
+        Map<String, BigDecimal> mapAnggaran = new HashMap<>();
+        executeSafely(() -> {
+            postgresJdbcTemplate.query(
+                "SELECT jenis_pajak, nilai_anggaran FROM system.anggaran WHERE tahun_anggaran = ?",
+                rs -> {
+                    String jp = rs.getString("jenis_pajak");
+                    if (jp != null) {
+                        mapAnggaran.put(jp.trim().toLowerCase(), rs.getBigDecimal("nilai_anggaran"));
+                    }
+                },
+                tahun
+            );
+            return null;
+        }, null, "Load PostgreSQL Anggaran");
         String sql = """
                 SELECT
                     j.s_idjenis AS id_jenis,
                     j.s_namajenis AS jenis_pajak,
-                    COALESCE(r.total_realisasi, 0) AS realisasi
+                    COALESCE(r.total_realisasi, 0) AS realisasi,
+                    COALESCE(tg.total_target, 0) AS target_db
                 FROM s_jenisobjek j
                 LEFT JOIN (
                     SELECT
@@ -172,20 +201,34 @@ public class PendapatanService {
                     WHERE YEAR(t_tglpembayaran) = ?
                     GROUP BY t_jenispajak
                 ) r ON r.t_jenispajak = j.s_idjenis
+                LEFT JOIN (
+                    SELECT
+                        rek.s_jenisobjek,
+                        SUM(td.s_targetjumlah) AS total_target
+                    FROM s_targetdetail td
+                    JOIN s_target t ON t.s_idtarget = td.s_idtargetheader
+                    JOIN s_rekening rek ON rek.s_idkorek = td.s_targetrekening
+                    WHERE t.s_tahuntarget = ?
+                    GROUP BY rek.s_jenisobjek
+                ) tg ON tg.s_jenisobjek = j.s_idjenis
                 """;
 
         List<TargetRealisasiDTO> results = executeSafely(() -> mysqlJdbcTemplate.query(sql, (rs, rowNum) -> {
             TargetRealisasiDTO dto = new TargetRealisasiDTO();
             Integer idJenis = rs.getInt("id_jenis");
-            
+
             // Map name according to user definition
             String jenisPajakRaw = rs.getString("jenis_pajak");
+            if (jenisPajakRaw != null) {
+                jenisPajakRaw = jenisPajakRaw.trim();
+            }
             String mappedName = KATEGORI_MAPPING.getOrDefault(jenisPajakRaw, jenisPajakRaw);
             dto.setJenisPajak(mappedName);
 
-            // Gunakan target hardcode
-            Long targetHardcode = TARGET_HARDCODE.getOrDefault(idJenis, 0L);
-            BigDecimal target = new BigDecimal(targetHardcode);
+            // Gunakan table system.anggaran PostgreSQL - direct lookup dengan mapped name lowercase
+            String lookupKey = mappedName != null ? mappedName.toLowerCase() : "";
+            BigDecimal target = mapAnggaran.getOrDefault(lookupKey, BigDecimal.ZERO);
+            
             BigDecimal realisasi = rs.getBigDecimal("realisasi");
 
             // Jika Minerba, override realisasi dari E-Pasir
@@ -210,16 +253,16 @@ public class PendapatanService {
             dto.setDetails(getRekeningDetailByJenis(idJenis, tahun));
 
             return dto;
-        }, tahun), new ArrayList<>(), "MySQL Target Realisasi");
+        }, tahun, tahun), new ArrayList<>(), "MySQL Target Realisasi");
 
         // Tambahkan data BPHTB dari database PostgreSQL
         Long realisasiBphtb = executeSafely(() -> bphtbService.getRealisasiTahunan(tahun), 0L, "BPHTB Realisasi List");
-        Long targetBphtb = 22100000000L; // Hardcode BPHTB Target
+        BigDecimal targetBphtb = mapAnggaran.getOrDefault("Bea Perolehan Hak Atas Tanah dan Bangunan (BPHTB)".toLowerCase(), BigDecimal.ZERO);
 
         if (true) { // Always add BPHTB row even if 0
             TargetRealisasiDTO bphtbDto = new TargetRealisasiDTO();
             bphtbDto.setJenisPajak("Bea Perolehan Hak Atas Tanah dan Bangunan (BPHTB)");
-            BigDecimal target = new BigDecimal(targetBphtb);
+            BigDecimal target = targetBphtb;
             BigDecimal realisasi = new BigDecimal(realisasiBphtb);
             BigDecimal selisih = target.subtract(realisasi);
 
@@ -241,13 +284,13 @@ public class PendapatanService {
         // Tambahkan data PBB P2 dari database SISMIOP Oracle
         Long realisasiPbb = executeSafely(() -> sismiopService.getRealisasiPbbTahunan(tahun.toString()), 0L,
                 "PBB Realisasi List");
-        Long targetPbb = 24000000000L; // Hardcode PBB Target
+        BigDecimal targetPbb = mapAnggaran.getOrDefault("Pajak Bumi dan Bangunan Perdesaan dan Perkotaan (PBBP2)".toLowerCase(), BigDecimal.ZERO);
 
         if (true) {
             TargetRealisasiDTO pbbDto = new TargetRealisasiDTO();
             pbbDto.setJenisPajak("Pajak Bumi dan Bangunan Perdesaan dan Perkotaan (PBBP2)");
 
-            BigDecimal target = new BigDecimal(targetPbb);
+            BigDecimal target = targetPbb;
             BigDecimal realisasi = new BigDecimal(realisasiPbb);
             BigDecimal selisih = target.subtract(realisasi);
 
@@ -270,7 +313,7 @@ public class PendapatanService {
         TargetRealisasiDTO pkbDto = new TargetRealisasiDTO();
         pkbDto.setJenisPajak("Opsen PKB");
 
-        BigDecimal targetPkb = new BigDecimal("46607465200");
+        BigDecimal targetPkb = mapAnggaran.getOrDefault("Opsen PKB".toLowerCase(), BigDecimal.ZERO);
         BigDecimal realisasiPkb = BigDecimal.ZERO;
         BigDecimal selisihPkb = targetPkb.subtract(realisasiPkb);
 
@@ -285,7 +328,7 @@ public class PendapatanService {
         TargetRealisasiDTO bbnkbDto = new TargetRealisasiDTO();
         bbnkbDto.setJenisPajak("Opsen BBNKB");
 
-        BigDecimal targetBbnkb = new BigDecimal("13962242300");
+        BigDecimal targetBbnkb = mapAnggaran.getOrDefault("Opsen BBNKB".toLowerCase(), BigDecimal.ZERO);
         BigDecimal realisasiBbnkb = BigDecimal.ZERO;
         BigDecimal selisihBbnkb = targetBbnkb.subtract(realisasiBbnkb);
 
@@ -302,6 +345,7 @@ public class PendapatanService {
         // Sortir sesuai urutan mapping and format urutannya ke parameter Urutan yang diklik dashboard
         for (TargetRealisasiDTO dto : results) {
             dto.setUrutan(KATEGORI_URUTAN.getOrDefault(dto.getJenisPajak(), 99));
+            taxProbabilityCalculationService.enrichWithProbability(dto, tahun);
         }
         results.sort((a, b) -> Integer.compare(a.getUrutan(), b.getUrutan()));
 

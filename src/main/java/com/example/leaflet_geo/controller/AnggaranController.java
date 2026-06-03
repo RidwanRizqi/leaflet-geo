@@ -99,18 +99,18 @@ public class AnggaranController {
     @GetMapping("/jenis-pajak")
     public ResponseEntity<List<Map<String, String>>> getJenisPajak() {
         List<Map<String, String>> options = List.of(
-                Map.of("value", "REKLAME", "label", "Pajak Reklame"),
-                Map.of("value", "AIR_TANAH", "label", "Pajak Air Tanah"),
-                Map.of("value", "MBLB", "label", "Pajak MBLB"),
-                Map.of("value", "PBB_P2", "label", "PBB-P2"),
-                Map.of("value", "BPHTB", "label", "BPHTB"),
-                Map.of("value", "PBJT_MAKANAN_MINUMAN", "label", "PBJT Makanan dan/atau Minuman"),
-                Map.of("value", "PBJT_LISTRIK", "label", "PBJT Tenaga Listrik"),
-                Map.of("value", "PBJT_HOTEL", "label", "PBJT Jasa Perhotelan"),
-                Map.of("value", "PBJT_PARKIR", "label", "PBJT Jasa Parkir"),
-                Map.of("value", "PBJT_HIBURAN", "label", "PBJT Jasa Kesenian dan Hiburan"),
-                Map.of("value", "OPSEN_PKB", "label", "Opsen PKB"),
-                Map.of("value", "OPSEN_BBNKB", "label", "Opsen BBNKB"));
+                Map.of("value", "Pajak Reklame", "label", "Pajak Reklame"),
+                Map.of("value", "Pajak Air Tanah", "label", "Pajak Air Tanah"),
+                Map.of("value", "Pajak Mineral Bukan Logam dan Batuan", "label", "Pajak MBLB"),
+                Map.of("value", "Pajak Bumi dan Bangunan Perdesaan dan Perkotaan (PBBP2)", "label", "PBB-P2"),
+                Map.of("value", "Bea Perolehan Hak Atas Tanah dan Bangunan (BPHTB)", "label", "BPHTB"),
+                Map.of("value", "PBJT-Makanan dan/atau Minuman", "label", "PBJT Makanan dan/atau Minuman"),
+                Map.of("value", "PBJT-Tenaga Listrik", "label", "PBJT Tenaga Listrik"),
+                Map.of("value", "PBJT-Jasa Perhotelan", "label", "PBJT Jasa Perhotelan"),
+                Map.of("value", "PBJT-Jasa Parkir", "label", "PBJT Jasa Parkir"),
+                Map.of("value", "PBJT-Jasa Kesenian dan Hiburan", "label", "PBJT Jasa Kesenian dan Hiburan"),
+                Map.of("value", "Opsen PKB", "label", "Opsen PKB"),
+                Map.of("value", "Opsen BBNKB", "label", "Opsen BBNKB"));
         return ResponseEntity.ok(options);
     }
 

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -567,14 +568,29 @@ public class HotelAccommodationService {
     }
 
     @SuppressWarnings("unchecked")
-    private String[] getPhotoUrls(Map<String, Object> data) {
+    private Object getPhotoUrls(Map<String, Object> data) {
         Object v = data.get("photo_urls");
         if (v == null) return null;
-        if (v instanceof String[]) return (String[]) v;
-        if (v instanceof List) {
+        
+        String[] urls;
+        if (v instanceof String[]) {
+            urls = (String[]) v;
+        } else if (v instanceof List) {
             List<?> list = (List<?>) v;
-            return list.stream().map(Object::toString).toArray(String[]::new);
+            urls = list.stream().map(Object::toString).toArray(String[]::new);
+        } else {
+            return null;
         }
-        return null;
+        
+        // Return null for empty array to avoid SQL grammar issues
+        if (urls.length == 0) return null;
+        
+        // Convert to PostgreSQL text[] array
+        try (Connection conn = pbjtJdbcTemplate.getDataSource().getConnection()) {
+            return conn.createArrayOf("text", urls);
+        } catch (Exception e) {
+            log.warn("Could not create SQL array for photo_urls, falling back to null: {}", e.getMessage());
+            return null;
+        }
     }
 }
