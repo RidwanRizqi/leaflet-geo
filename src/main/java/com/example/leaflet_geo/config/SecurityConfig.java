@@ -74,6 +74,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/pajak/**").permitAll()
                         // PBJT Assessment (Test Permission)
                         .requestMatchers("/api/pbjt-assessments/**").permitAll()
+                        .requestMatchers("/api/role-menu/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
