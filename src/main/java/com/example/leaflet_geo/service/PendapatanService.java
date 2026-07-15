@@ -6,6 +6,7 @@ import com.example.leaflet_geo.dto.TargetRealisasiDTO;
 import com.example.leaflet_geo.dto.TopKontributorDTO;
 import com.example.leaflet_geo.dto.TrendBulananDTO;
 import com.example.leaflet_geo.dto.PajakDataDTO;
+import com.example.leaflet_geo.dto.ProyeksiSummaryDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -650,5 +651,89 @@ public class PendapatanService {
         });
 
         return results;
+    }
+
+    /**
+     * Get Data Proyeksi IIPA AI untuk Tahun 2026
+     */
+    public List<Map<String, Object>> getProyeksiIipa(Integer tahun) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        String jsonPath = "D:/BPRD/leaflet-geo/python_bridge/proyeksi_iipa_2026.json";
+        try {
+            java.io.File file = new java.io.File(jsonPath);
+            if (file.exists()) {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                results = mapper.readValue(file, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
+            }
+        } catch (Exception e) {
+            System.err.println("Error reading proyeksi JSON: " + e.getMessage());
+        }
+        return results;
+    }
+
+    /**
+     * Get Realtime Status Proyeksi untuk UI Stepper Progress
+     */
+    public Map<String, Object> getProyeksiStatus() {
+        Map<String, Object> status = new HashMap<>();
+        String statusPath = "D:/BPRD/leaflet-geo/python_bridge/proyeksi_status.json";
+        try {
+            java.io.File file = new java.io.File(statusPath);
+            if (file.exists()) {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                status = mapper.readValue(file, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+            } else {
+                status.put("stage", 0);
+                status.put("percent", 0);
+                status.put("message", "Sistem siap untuk analisis");
+                status.put("isRunning", false);
+                status.put("isError", false);
+            }
+        } catch (Exception e) {
+            status.put("stage", 0);
+            status.put("percent", 0);
+            status.put("message", "Ready");
+            status.put("isRunning", false);
+            status.put("isError", false);
+        }
+        return status;
+    }
+
+    /**
+     * Trigger Background Process Execution untuk AI Proyeksi
+     */
+    public Map<String, Object> triggerProyeksiExecution() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String statusPath = "D:/BPRD/leaflet-geo/python_bridge/proyeksi_status.json";
+            Map<String, Object> resetStatus = new HashMap<>();
+            resetStatus.put("stage", 1);
+            resetStatus.put("percent", 15);
+            resetStatus.put("message", "STAGE 1: Structural Break Detection & ITSA segmented regression (Bai-Perron)...");
+            resetStatus.put("isRunning", true);
+            resetStatus.put("isError", false);
+            resetStatus.put("timestamp", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
+            
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                mapper.writeValue(new java.io.File(statusPath), resetStatus);
+            } catch (Exception ex) {
+                System.err.println("Could not reset status file: " + ex.getMessage());
+            }
+
+            String scriptPath = "D:/BPRD/leaflet-geo/python_bridge/extract_and_train_iipa.py";
+            String pythonExec = "C:/Users/Zephyrus/AppData/Local/Programs/Python/Python312/python.exe";
+            
+            ProcessBuilder pb = new ProcessBuilder(pythonExec, scriptPath);
+            pb.directory(new java.io.File("D:/BPRD/leaflet-geo/python_bridge"));
+            pb.start(); // Runs asynchronously in background
+            
+            response.put("success", true);
+            response.put("message", "Analisis Adaptif IIPA Machine Learning berhasil dijalankan di background server!");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Gagal memicu analisis: " + e.getMessage());
+        }
+        return response;
     }
 }
