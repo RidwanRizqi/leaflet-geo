@@ -19,7 +19,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class AssessmentRequestDTO {
     
-    @NotBlank(message = "Business ID is required")
     @Size(max = 50, message = "Business ID must not exceed 50 characters")
     private String businessId;
     

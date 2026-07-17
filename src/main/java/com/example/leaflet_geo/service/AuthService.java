@@ -85,19 +85,19 @@ public class AuthService {
      * Matches legacy: POST /user/createadmin
      */
     public User createAdmin(String username, String password) {
-        if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username sudah digunakan");
+        User admin = userRepository.findByUsername(username).orElse(null);
+        if (admin == null) {
+            admin = new User();
+            admin.setId(UUID.randomUUID().toString());
+            admin.setUsername(username);
+            admin.setCreatedAt(LocalDateTime.now());
         }
-
-        User admin = new User();
-        admin.setId(UUID.randomUUID().toString());
-        admin.setUsername(username);
         admin.setPassword(passwordEncoder.encode(password));
         admin.setNama("Administrator");
         admin.setIsAdmin(true);
         admin.setRole("ADMIN");
         admin.setIsActive(true);
-        admin.setCreatedAt(LocalDateTime.now());
+        admin.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(admin);
     }

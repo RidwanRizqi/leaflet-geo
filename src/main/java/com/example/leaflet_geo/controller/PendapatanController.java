@@ -132,4 +132,51 @@ public class PendapatanController {
                     ApiResponse.error("Gagal mengambil data pajak bulanan: " + e.getMessage()));
         }
     }
+
+    /**
+     * Get Proyeksi IIPA AI 2026
+     * GET /api/pendapatan/proyeksi-iipa?tahun=2026
+     */
+    @GetMapping("/proyeksi-iipa")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getProyeksiIipa(
+            @RequestParam(defaultValue = "2026") Integer tahun) {
+        try {
+            List<Map<String, Object>> data = pendapatanService.getProyeksiIipa(tahun);
+            return ResponseEntity.ok(
+                    ApiResponse.success("Proyeksi IIPA AI tahun " + tahun + " berhasil diambil", data, (long) data.size()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Gagal mengambil proyeksi IIPA AI: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get Realtime Status Proyeksi untuk UI Progress Stepper
+     * GET /api/pendapatan/proyeksi-status
+     */
+    @GetMapping("/proyeksi-status")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getProyeksiStatus() {
+        try {
+            Map<String, Object> status = pendapatanService.getProyeksiStatus();
+            return ResponseEntity.ok(ApiResponse.success("Status proyeksi berhasil diambil", status));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Gagal mengambil status proyeksi: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Trigger Background Process Execution untuk AI Proyeksi
+     * POST /api/pendapatan/trigger-proyeksi
+     */
+    @PostMapping("/trigger-proyeksi")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> triggerProyeksi() {
+        try {
+            Map<String, Object> res = pendapatanService.triggerProyeksiExecution();
+            return ResponseEntity.ok(ApiResponse.success("Trigger analisis proyeksi berhasil", res));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    ApiResponse.error("Gagal memicu analisis proyeksi: " + e.getMessage()));
+        }
+    }
 }
