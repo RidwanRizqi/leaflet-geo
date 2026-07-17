@@ -53,14 +53,16 @@ public class PendapatanService {
             4, 2_350_000_000L, // Pajak Reklame (4.1.01.09)
             8, 1_200_000_000L, // Pajak Air Tanah (4.1.01.12)
             6, 29_000_000_000L, // Pajak Mineral Bukan Logam dan Batuan (4.1.01.14)
-            // PBB-P2 (4.1.01.15) -> 24_000_000_000 (tidak ada di map ini krn datanya dari SISMIOP oracle)
-            // BPHTB (4.1.01.16) -> 22_100_000_000 (tidak ada di map ini - dihandle PostgreSQL BPHTB/hardcode bawah) 
+            // PBB-P2 (4.1.01.15) -> 24_000_000_000 (tidak ada di map ini krn datanya dari
+            // SISMIOP oracle)
+            // BPHTB (4.1.01.16) -> 22_100_000_000 (tidak ada di map ini - dihandle
+            // PostgreSQL BPHTB/hardcode bawah)
             2, 5_150_000_000L, // PBJT-Makanan dan Minuman (4.1.01.19.01) [Pajak Restoran]
             5, 45_000_000_000L, // PBJT-Tenaga Listrik (4.1.01.19.02) [Pajak Penerangan Jalan]
             1, 2_000_000_000L, // PBJT-Jasa Perhotelan (4.1.01.19.03) [Pajak Hotel]
             7, 550_000_000L, // PBJT-Jasa Parkir (4.1.01.19.04) [Pajak Parkir]
             3, 1_000_000_000L // PBJT-Jasa Kesenian dan Hiburan (4.1.01.19.05) [Pajak Hiburan]
-        // Opsen PKB & Opsen BBNKB tidak ada ID jenis pajaknya di SIMATDA (1-10)
+    // Opsen PKB & Opsen BBNKB tidak ada ID jenis pajaknya di SIMATDA (1-10)
     );
 
     private long getTotalTargetHardcode() {
@@ -110,7 +112,8 @@ public class PendapatanService {
                 """;
 
         // Wrap MySQL call
-        Map<String, Object> result = executeSafely(() -> mysqlJdbcTemplate.queryForMap(sql, tahun, tahun, tahun, tahun, tahun, tahun),
+        Map<String, Object> result = executeSafely(
+                () -> mysqlJdbcTemplate.queryForMap(sql, tahun, tahun, tahun, tahun, tahun, tahun),
                 Map.of(
                         "total_realisasi", 0,
                         "total_target_db", 0,
@@ -121,12 +124,10 @@ public class PendapatanService {
                 "MySQL Dashboard Summary");
 
         // Ambil total target dari tabel system.anggaran PostgreSQL
-        BigDecimal totalTarget = executeSafely(() -> 
-            postgresJdbcTemplate.queryForObject(
+        BigDecimal totalTarget = executeSafely(() -> postgresJdbcTemplate.queryForObject(
                 "SELECT COALESCE(SUM(nilai_anggaran), 0) FROM system.anggaran WHERE tahun_anggaran = ?",
-                BigDecimal.class, 
-                tahun
-            ), BigDecimal.ZERO, "PostgreSQL Total Anggaran");
+                BigDecimal.class,
+                tahun), BigDecimal.ZERO, "PostgreSQL Total Anggaran");
 
         BigDecimal totalRealisasi = new BigDecimal(result.get("total_realisasi").toString());
 
@@ -142,7 +143,8 @@ public class PendapatanService {
         totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiPbb));
 
         // Tambahkan realisasi Minerba dari E-PASIR
-        Long realisasiEpasir = executeSafely(() -> epasirService.getRealisasiTotalTahunan(tahun), 0L, "E-PASIR Realisasi");
+        Long realisasiEpasir = executeSafely(() -> epasirService.getRealisasiTotalTahunan(tahun), 0L,
+                "E-PASIR Realisasi");
         totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiEpasir));
 
         BigDecimal selisih = totalTarget.subtract(totalRealisasi);
@@ -176,15 +178,14 @@ public class PendapatanService {
         Map<String, BigDecimal> mapAnggaran = new HashMap<>();
         executeSafely(() -> {
             postgresJdbcTemplate.query(
-                "SELECT jenis_pajak, nilai_anggaran FROM system.anggaran WHERE tahun_anggaran = ?",
-                rs -> {
-                    String jp = rs.getString("jenis_pajak");
-                    if (jp != null) {
-                        mapAnggaran.put(jp.trim().toLowerCase(), rs.getBigDecimal("nilai_anggaran"));
-                    }
-                },
-                tahun
-            );
+                    "SELECT jenis_pajak, nilai_anggaran FROM system.anggaran WHERE tahun_anggaran = ?",
+                    rs -> {
+                        String jp = rs.getString("jenis_pajak");
+                        if (jp != null) {
+                            mapAnggaran.put(jp.trim().toLowerCase(), rs.getBigDecimal("nilai_anggaran"));
+                        }
+                    },
+                    tahun);
             return null;
         }, null, "Load PostgreSQL Anggaran");
         String sql = """
@@ -226,15 +227,17 @@ public class PendapatanService {
             String mappedName = KATEGORI_MAPPING.getOrDefault(jenisPajakRaw, jenisPajakRaw);
             dto.setJenisPajak(mappedName);
 
-            // Gunakan table system.anggaran PostgreSQL - direct lookup dengan mapped name lowercase
+            // Gunakan table system.anggaran PostgreSQL - direct lookup dengan mapped name
+            // lowercase
             String lookupKey = mappedName != null ? mappedName.toLowerCase() : "";
             BigDecimal target = mapAnggaran.getOrDefault(lookupKey, BigDecimal.ZERO);
-            
+
             BigDecimal realisasi = rs.getBigDecimal("realisasi");
 
             // Jika Minerba, override realisasi dari E-Pasir
             if (idJenis == 6) { // 6 adalah ID untuk Minerba di s_jenisobjek
-                Long realisasiEpasir = executeSafely(() -> epasirService.getRealisasiTotalTahunan(tahun), 0L, "E-PASIR Realisasi List");
+                Long realisasiEpasir = executeSafely(() -> epasirService.getRealisasiTotalTahunan(tahun), 0L,
+                        "E-PASIR Realisasi List");
                 realisasi = new BigDecimal(realisasiEpasir);
             }
 
@@ -258,7 +261,8 @@ public class PendapatanService {
 
         // Tambahkan data BPHTB dari database PostgreSQL
         Long realisasiBphtb = executeSafely(() -> bphtbService.getRealisasiTahunan(tahun), 0L, "BPHTB Realisasi List");
-        BigDecimal targetBphtb = mapAnggaran.getOrDefault("Bea Perolehan Hak Atas Tanah dan Bangunan (BPHTB)".toLowerCase(), BigDecimal.ZERO);
+        BigDecimal targetBphtb = mapAnggaran
+                .getOrDefault("Bea Perolehan Hak Atas Tanah dan Bangunan (BPHTB)".toLowerCase(), BigDecimal.ZERO);
 
         if (true) { // Always add BPHTB row even if 0
             TargetRealisasiDTO bphtbDto = new TargetRealisasiDTO();
@@ -285,7 +289,8 @@ public class PendapatanService {
         // Tambahkan data PBB P2 dari database SISMIOP Oracle
         Long realisasiPbb = executeSafely(() -> sismiopService.getRealisasiPbbTahunan(tahun.toString()), 0L,
                 "PBB Realisasi List");
-        BigDecimal targetPbb = mapAnggaran.getOrDefault("Pajak Bumi dan Bangunan Perdesaan dan Perkotaan (PBBP2)".toLowerCase(), BigDecimal.ZERO);
+        BigDecimal targetPbb = mapAnggaran
+                .getOrDefault("Pajak Bumi dan Bangunan Perdesaan dan Perkotaan (PBBP2)".toLowerCase(), BigDecimal.ZERO);
 
         if (true) {
             TargetRealisasiDTO pbbDto = new TargetRealisasiDTO();
@@ -309,7 +314,7 @@ public class PendapatanService {
             pbbDto.setDetails(List.of());
             results.add(pbbDto);
         }
-        
+
         // Tambahkan Opsen PKB
         TargetRealisasiDTO pkbDto = new TargetRealisasiDTO();
         pkbDto.setJenisPajak("Opsen PKB");
@@ -343,7 +348,8 @@ public class PendapatanService {
         // Hapus Pajak Sarang Burung Walet dan assign urutan secara manual
         results.removeIf(dto -> dto.getJenisPajak() != null && dto.getJenisPajak().contains("Walet"));
 
-        // Sortir sesuai urutan mapping and format urutannya ke parameter Urutan yang diklik dashboard
+        // Sortir sesuai urutan mapping and format urutannya ke parameter Urutan yang
+        // diklik dashboard
         for (TargetRealisasiDTO dto : results) {
             dto.setUrutan(KATEGORI_URUTAN.getOrDefault(dto.getJenisPajak(), 99));
             taxProbabilityCalculationService.enrichWithProbability(dto, tahun);
@@ -411,9 +417,10 @@ public class PendapatanService {
                 for (Map<String, Object> row : epasirData) {
                     int bulanNum = ((Number) row.get("bulan")).intValue();
                     BigDecimal realisasiEpasir = new BigDecimal(row.get("realisasi").toString());
-                    
+
                     // Find existing month or create new
-                    TrendBulananDTO existing = trends.stream().filter(t -> t.getBulan() == bulanNum).findFirst().orElse(null);
+                    TrendBulananDTO existing = trends.stream().filter(t -> t.getBulan() == bulanNum).findFirst()
+                            .orElse(null);
                     if (existing != null) {
                         existing.setRealisasiBulan(existing.getRealisasiBulan().add(realisasiEpasir));
                     } else {
@@ -478,7 +485,8 @@ public class PendapatanService {
      * Get Realisasi Detail by Jenis Pajak
      */
     public List<Map<String, Object>> getRealisasiByJenisPajak(Integer tahun, String jenisPajakId) {
-        // Jika jenisPajakId == 6 (Minerba), langung ke E-Pasir (karena tidak ada di MySQL)
+        // Jika jenisPajakId == 6 (Minerba), langung ke E-Pasir (karena tidak ada di
+        // MySQL)
         if ("6".equals(jenisPajakId)) {
             List<Map<String, Object>> result = new ArrayList<>();
             try {
@@ -486,14 +494,14 @@ public class PendapatanService {
                 if (epasirData != null) {
                     for (Map<String, Object> row : epasirData) {
                         result.add(Map.of(
-                            "bulan", row.get("bulan"),
-                            "jenis_pajak", "Pajak Mineral Bukan Logam dan Batuan",
-                            "jumlah_transaksi", 0, // Belum ada count transaksi dari Epasir
-                            "total_realisasi", row.get("realisasi")
-                        ));
+                                "bulan", row.get("bulan"),
+                                "jenis_pajak", "Pajak Mineral Bukan Logam dan Batuan",
+                                "jumlah_transaksi", 0, // Belum ada count transaksi dari Epasir
+                                "total_realisasi", row.get("realisasi")));
                     }
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
             return result;
         }
 
@@ -536,8 +544,7 @@ public class PendapatanService {
             "Pajak Restoran", "PBJT-Makanan dan/atau Minuman",
             "Pajak Hiburan", "PBJT-Jasa Kesenian dan Hiburan",
             "Pajak Penerangan Jalan", "PBJT-Tenaga Listrik",
-            "Pajak Parkir", "PBJT-Jasa Parkir"
-    );
+            "Pajak Parkir", "PBJT-Jasa Parkir");
 
     /**
      * Urutan khusus kategori
@@ -554,8 +561,7 @@ public class PendapatanService {
             Map.entry("PBJT-Jasa Parkir", 9),
             Map.entry("PBJT-Jasa Kesenian dan Hiburan", 10),
             Map.entry("Opsen PKB", 11),
-            Map.entry("Opsen BBNKB", 12)
-    );
+            Map.entry("Opsen BBNKB", 12));
 
     /**
      * Get Realisasi Bulanan per Kategori Pajak untuk Dashboard Pajak
@@ -603,7 +609,8 @@ public class PendapatanService {
                     results.add(dto);
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         // Add Minerba (E-PASIR) monthly data from PostgreSQL
         try {
@@ -619,7 +626,8 @@ public class PendapatanService {
                     results.add(dto);
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         // Add PBB P2 monthly data from Oracle SISMIOP
         try {
@@ -635,7 +643,8 @@ public class PendapatanService {
                     results.add(dto);
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         // Urutkan List berdasarkan nama kategori yang sudah dipetakan
         results.sort((a, b) -> {
@@ -643,8 +652,10 @@ public class PendapatanService {
             Integer urutanB = KATEGORI_URUTAN.getOrDefault(b.getKategori(), 99);
             if (urutanA.equals(urutanB)) {
                 // Return mapping based on month if category is same
-                int bulanA = java.util.Arrays.asList("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember").indexOf(a.getBulan());
-                int bulanB = java.util.Arrays.asList("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember").indexOf(b.getBulan());
+                int bulanA = java.util.Arrays.asList("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
+                        "Agustus", "September", "Oktober", "November", "Desember").indexOf(a.getBulan());
+                int bulanB = java.util.Arrays.asList("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
+                        "Agustus", "September", "Oktober", "November", "Desember").indexOf(b.getBulan());
                 return Integer.compare(bulanA, bulanB);
             }
             return urutanA.compareTo(urutanB);

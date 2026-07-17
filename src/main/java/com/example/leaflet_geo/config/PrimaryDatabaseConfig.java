@@ -40,7 +40,7 @@ public class PrimaryDatabaseConfig {
             @Qualifier("postgresDataSource") DataSource dataSource) {
         
         Map<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "none");
+        properties.put("hibernate.hbm2ddl.auto", "update");
         properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.put("hibernate.show_sql", false);
         properties.put("hibernate.format_sql", true);
