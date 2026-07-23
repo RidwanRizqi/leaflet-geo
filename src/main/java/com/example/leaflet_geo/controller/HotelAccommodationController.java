@@ -234,4 +234,5 @@ public class HotelAccommodationController {
                     Map.of("success", false, "message", "Upload failed: " + e.getMessage()));
         }
     }
+
 }
