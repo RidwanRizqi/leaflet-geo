@@ -23,7 +23,8 @@ public class RoleMenuService {
         List<String> roleNames = repository.findDistinctRoleNameBy();
 
         return roleNames.stream().map(roleName -> {
-            List<Integer> menuIds = repository.findMenuIdByRoleName(roleName);
+            List<Integer> menuIds = repository.findMenuIdByRoleName(roleName)
+                    .stream().filter(id -> id != 0).collect(Collectors.toList());
             return RoleMenuDTO.builder()
                     .roleName(roleName)
                     .menuIds(menuIds)
@@ -32,7 +33,8 @@ public class RoleMenuService {
     }
 
     public List<Integer> getMenuIdsByRole(String roleName) {
-        return repository.findMenuIdByRoleName(roleName);
+        return repository.findMenuIdByRoleName(roleName)
+                .stream().filter(id -> id != 0).collect(Collectors.toList());
     }
 
     public List<Integer> getMenuIdsForCurrentUser(String role) {
@@ -54,7 +56,14 @@ public class RoleMenuService {
 
         // Insert new mappings
         LocalDateTime now = LocalDateTime.now();
-        List<RoleMenuMapping> newMappings = request.getMenuIds().stream()
+        List<Integer> menuIdsToSave = request.getMenuIds();
+        
+        // If empty, insert a dummy menuId = 0 so the role name is persisted
+        if (menuIdsToSave == null || menuIdsToSave.isEmpty()) {
+            menuIdsToSave = List.of(0);
+        }
+
+        List<RoleMenuMapping> newMappings = menuIdsToSave.stream()
                 .map(menuId -> {
                     RoleMenuMapping mapping = new RoleMenuMapping();
                     mapping.setId(UUID.randomUUID().toString());

@@ -16,13 +16,13 @@ public class MultipleDatabaseConfig {
 
     @Value("${spring.datasource.url}")
     private String postgresUrl;
-    
+
     @Value("${spring.datasource.username}")
     private String postgresUsername;
-    
+
     @Value("${spring.datasource.password}")
     private String postgresPassword;
-    
+
     @Value("${spring.datasource.driver-class-name}")
     private String postgresDriver;
 
@@ -99,10 +99,11 @@ public class MultipleDatabaseConfig {
         return DataSourceBuilder.create()
                 .url("jdbc:postgresql://localhost:5432/pbjt_assessment_db")
                 .username("postgres")
-                .password("root")
+                .password("1234")
                 .driverClassName("org.postgresql.Driver")
                 .build();
     }
+
     // JdbcTemplate untuk PostgreSQL (primary)
     @Primary
     @Bean(name = "postgresJdbcTemplate")

@@ -25,8 +25,8 @@ import java.util.*;
 @Slf4j
 public class HotelAccommodationService {
 
-    private final JdbcTemplate mysqlJdbcTemplate;   // SIMATDA (read-only)
-    private final JdbcTemplate pbjtJdbcTemplate;     // Local PostgreSQL (CRUD)
+    private final JdbcTemplate mysqlJdbcTemplate; // SIMATDA (read-only)
+    private final JdbcTemplate pbjtJdbcTemplate; // Local PostgreSQL (CRUD)
 
     private static final int JENIS_HOTEL = 1;
 
@@ -81,7 +81,7 @@ public class HotelAccommodationService {
                  formalization_status, estimated_annual_revenue, projected_annual_tax,
                  tax_rate, willing_to_formalize, status, npwpd, tax_object_id,
                  photo_urls, supporting_doc_url)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS text[]), ?)
                 RETURNING *
                 """;
         try {
@@ -104,7 +104,7 @@ public class HotelAccommodationService {
                     getStr(data, "formalization_status", "INFORMAL"),
                     getNum(data, "estimated_annual_revenue"),
                     getNum(data, "projected_annual_tax"),
-                    getNum(data, "tax_rate"),
+                    getNum(data, "tax_rate") != null ? getNum(data, "tax_rate") : new BigDecimal("0.10"),
                     getBool(data, "willing_to_formalize", null),
                     getStr(data, "status", "ACTIVE"),
                     getStr(data, "npwpd", null),
@@ -139,7 +139,7 @@ public class HotelAccommodationService {
                     estimated_annual_revenue = COALESCE(?, estimated_annual_revenue),
                     projected_annual_tax = COALESCE(?, projected_annual_tax),
                     status = COALESCE(?, status),
-                    photo_urls = ?,
+                    photo_urls = CAST(? AS text[]),
                     supporting_doc_url = ?,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
@@ -207,7 +207,8 @@ public class HotelAccommodationService {
             Integer active = pbjtJdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM hotel_accommodations WHERE status = 'ACTIVE'", Integer.class);
             Integer closed = pbjtJdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM hotel_accommodations WHERE status != 'ACTIVE' OR is_closed = true", Integer.class);
+                    "SELECT COUNT(*) FROM hotel_accommodations WHERE status != 'ACTIVE' OR is_closed = true",
+                    Integer.class);
             metrics.put("activeProperties", active != null ? active : 0);
             metrics.put("closedProperties", closed != null ? closed : 0);
 
@@ -316,38 +317,42 @@ public class HotelAccommodationService {
 
         try {
             // 1. Fetch all hotel objects from SIMATDA (READ ONLY)
-            List<Map<String, Object>> simatdaHotels = mysqlJdbcTemplate.queryForList("""
-                    SELECT o.t_idobjek as simatda_id,
-                           o.t_namaobjek as property_name,
-                           o.t_alamatobjek as address,
-                           o.t_latitudeobjek as latitude,
-                           o.t_longitudeobjek as longitude,
-                           o.t_objektutup as is_closed,
-                           o.t_notelpobjek as phone,
-                           o.t_tgldaftarobjek as registration_date,
-                           w.t_idwp as wp_id,
-                           w.t_nama as wp_name,
-                           w.t_namapemilik as owner_name,
-                           w.t_nohp as owner_phone,
-                           COALESCE(c.t_npwpdwp, '') as npwpd,
-                           COALESCE(c.t_nop, '') as object_number,
-                           kec.s_namakec as kecamatan,
-                           kel.s_namakel as kelurahan
-                    FROM t_wpobjek o
-                    LEFT JOIN t_wp w ON o.t_idwp = w.t_idwp
-                    LEFT JOIN cetak_daftar_wp_per_jenis_pajak c ON o.t_namaobjek = c.t_namaobjek AND o.t_jenisobjek = c.t_jenisobjek
-                    LEFT JOIN s_kecamatan kec ON o.t_kecamatanobjek = kec.s_idkec
-                    LEFT JOIN s_kelurahan kel ON o.t_kelurahanobjek = kel.s_idkel
-                    WHERE o.t_jenisobjek = ?
-                    """, JENIS_HOTEL);
+            List<Map<String, Object>> simatdaHotels = mysqlJdbcTemplate.queryForList(
+                    """
+                            SELECT o.t_idobjek as simatda_id,
+                                   o.t_namaobjek as property_name,
+                                   o.t_alamatobjek as address,
+                                   o.t_latitudeobjek as latitude,
+                                   o.t_longitudeobjek as longitude,
+                                   o.t_objektutup as is_closed,
+                                   o.t_notelpobjek as phone,
+                                   o.t_tgldaftarobjek as registration_date,
+                                   w.t_idwp as wp_id,
+                                   w.t_nama as wp_name,
+                                   w.t_namapemilik as owner_name,
+                                   w.t_nohp as owner_phone,
+                                   COALESCE(c.t_npwpdwp, '') as npwpd,
+                                   COALESCE(c.t_nop, '') as object_number,
+                                   kec.s_namakec as kecamatan,
+                                   kel.s_namakel as kelurahan
+                            FROM t_wpobjek o
+                            LEFT JOIN t_wp w ON o.t_idwp = w.t_idwp
+                            LEFT JOIN cetak_daftar_wp_per_jenis_pajak c ON o.t_namaobjek = c.t_namaobjek AND o.t_jenisobjek = c.t_jenisobjek
+                            LEFT JOIN s_kecamatan kec ON o.t_kecamatanobjek = kec.s_idkec
+                            LEFT JOIN s_kelurahan kel ON o.t_kelurahanobjek = kel.s_idkel
+                            WHERE o.t_jenisobjek = ?
+                            """,
+                    JENIS_HOTEL);
 
             log.info("Fetched {} hotel objects from SIMATDA", simatdaHotels.size());
 
             // 2. Upsert each hotel into LOCAL database
             for (Map<String, Object> hotel : simatdaHotels) {
                 try {
-                    Integer simatdaId = hotel.get("simatda_id") != null ? ((Number) hotel.get("simatda_id")).intValue() : null;
-                    if (simatdaId == null) continue;
+                    Integer simatdaId = hotel.get("simatda_id") != null ? ((Number) hotel.get("simatda_id")).intValue()
+                            : null;
+                    if (simatdaId == null)
+                        continue;
 
                     String propertyName = strVal(hotel.get("property_name"));
                     String address = strVal(hotel.get("address"));
@@ -359,7 +364,8 @@ public class HotelAccommodationService {
                         ownerName = propertyName; // fallback to property name
                     }
                     String ownerPhone = strVal(hotel.get("owner_phone"));
-                    if (ownerPhone == null || ownerPhone.isEmpty() || "0".equals(ownerPhone) || "00".equals(ownerPhone) || "-".equals(ownerPhone)) {
+                    if (ownerPhone == null || ownerPhone.isEmpty() || "0".equals(ownerPhone) || "00".equals(ownerPhone)
+                            || "-".equals(ownerPhone)) {
                         ownerPhone = strVal(hotel.get("phone"));
                     }
                     String kecamatan = strVal(hotel.get("kecamatan"));
@@ -368,13 +374,14 @@ public class HotelAccommodationService {
                     String lonStr = strVal(hotel.get("longitude"));
                     BigDecimal lat = (latStr != null && !latStr.isEmpty()) ? new BigDecimal(latStr) : null;
                     BigDecimal lon = (lonStr != null && !lonStr.isEmpty()) ? new BigDecimal(lonStr) : null;
-                    boolean isClosed = hotel.get("is_closed") != null && (
-                        hotel.get("is_closed") instanceof Boolean ? (Boolean) hotel.get("is_closed")
-                        : ((Number) hotel.get("is_closed")).intValue() == 1
-                    );
+                    boolean isClosed = hotel.get("is_closed") != null
+                            && (hotel.get("is_closed") instanceof Boolean ? (Boolean) hotel.get("is_closed")
+                                    : ((Number) hotel.get("is_closed")).intValue() == 1);
                     Integer wpId = hotel.get("wp_id") != null ? ((Number) hotel.get("wp_id")).intValue() : null;
                     String npwpd = strVal(hotel.get("npwpd"));
-                    String objectNumber = hotel.get("object_number") != null ? String.valueOf(hotel.get("object_number")) : null;
+                    String objectNumber = hotel.get("object_number") != null
+                            ? String.valueOf(hotel.get("object_number"))
+                            : null;
 
                     // Determine accommodation type from name heuristic
                     String accType = guessAccommodationType(propertyName);
@@ -402,15 +409,16 @@ public class HotelAccommodationService {
                         updated++;
                     } else {
                         // Insert new
-                        pbjtJdbcTemplate.update("""
-                                INSERT INTO hotel_accommodations
-                                (simatda_id, simatda_wp_id, accommodation_type, property_name,
-                                 owner_name, owner_phone, address, kelurahan, kecamatan,
-                                 kabupaten, latitude, longitude, is_closed, status,
-                                 formalization_status, has_business_permit, has_tax_registration,
-                                 npwpd, object_number, synced_at)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'KABUPATEN LUMAJANG', ?, ?, ?, ?, 'INFORMAL', false, false, ?, ?, CURRENT_TIMESTAMP)
-                                """,
+                        pbjtJdbcTemplate.update(
+                                """
+                                        INSERT INTO hotel_accommodations
+                                        (simatda_id, simatda_wp_id, accommodation_type, property_name,
+                                         owner_name, owner_phone, address, kelurahan, kecamatan,
+                                         kabupaten, latitude, longitude, is_closed, status,
+                                         formalization_status, has_business_permit, has_tax_registration,
+                                         npwpd, object_number, synced_at)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'KABUPATEN LUMAJANG', ?, ?, ?, ?, 'INFORMAL', false, false, ?, ?, CURRENT_TIMESTAMP)
+                                        """,
                                 simatdaId, wpId, accType, propertyName,
                                 ownerName, ownerPhone, address, kelurahan, kecamatan,
                                 lat, lon, isClosed, isClosed ? "CLOSED" : "ACTIVE",
@@ -478,19 +486,21 @@ public class HotelAccommodationService {
                     List<Map<String, Object>> localHotel = pbjtJdbcTemplate.queryForList(
                             "SELECT id FROM hotel_accommodations WHERE simatda_id = ?", simatdaObjekId);
 
-                    if (localHotel.isEmpty()) continue;
+                    if (localHotel.isEmpty())
+                        continue;
                     long hotelId = ((Number) localHotel.get(0).get("id")).longValue();
 
-                    pbjtJdbcTemplate.update("""
-                            INSERT INTO hotel_realisasi (hotel_id, simatda_objek_id, tahun, total_revenue, total_tax, total_payment, transaction_count, synced_at)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                            ON CONFLICT (hotel_id, tahun) DO UPDATE SET
-                                total_revenue = EXCLUDED.total_revenue,
-                                total_tax = EXCLUDED.total_tax,
-                                total_payment = EXCLUDED.total_payment,
-                                transaction_count = EXCLUDED.transaction_count,
-                                synced_at = CURRENT_TIMESTAMP
-                            """,
+                    pbjtJdbcTemplate.update(
+                            """
+                                    INSERT INTO hotel_realisasi (hotel_id, simatda_objek_id, tahun, total_revenue, total_tax, total_payment, transaction_count, synced_at)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                                    ON CONFLICT (hotel_id, tahun) DO UPDATE SET
+                                        total_revenue = EXCLUDED.total_revenue,
+                                        total_tax = EXCLUDED.total_tax,
+                                        total_payment = EXCLUDED.total_payment,
+                                        transaction_count = EXCLUDED.transaction_count,
+                                        synced_at = CURRENT_TIMESTAMP
+                                    """,
                             hotelId, simatdaObjekId, tahun, totalRevenue, totalTax, totalPayment, txCount);
                     count++;
                 } catch (Exception e) {
@@ -506,7 +516,8 @@ public class HotelAccommodationService {
     // ==================== HELPERS ====================
 
     private List<Map<String, Object>> cleanRowMaps(List<Map<String, Object>> rows) {
-        if (rows == null) return null;
+        if (rows == null)
+            return null;
         for (Map<String, Object> row : rows) {
             cleanRowMap(row);
         }
@@ -514,7 +525,8 @@ public class HotelAccommodationService {
     }
 
     private Map<String, Object> cleanRowMap(Map<String, Object> row) {
-        if (row == null) return null;
+        if (row == null)
+            return null;
         Object photoUrls = row.get("photo_urls");
         if (photoUrls instanceof java.sql.Array) {
             try {
@@ -527,12 +539,17 @@ public class HotelAccommodationService {
     }
 
     private String guessAccommodationType(String name) {
-        if (name == null) return "HOTEL";
+        if (name == null)
+            return "HOTEL";
         String lower = name.toLowerCase();
-        if (lower.contains("kos") || lower.contains("kost")) return "RUMAH_KOS";
-        if (lower.contains("wisma") || lower.contains("guest")) return "WISMA";
-        if (lower.contains("homestay") || lower.contains("home stay")) return "HOMESTAY";
-        if (lower.contains("penginapan") || lower.contains("losmen")) return "PENGINAPAN";
+        if (lower.contains("kos") || lower.contains("kost"))
+            return "RUMAH_KOS";
+        if (lower.contains("wisma") || lower.contains("guest"))
+            return "WISMA";
+        if (lower.contains("homestay") || lower.contains("home stay"))
+            return "HOMESTAY";
+        if (lower.contains("penginapan") || lower.contains("losmen"))
+            return "PENGINAPAN";
         return "HOTEL";
     }
 
@@ -547,31 +564,47 @@ public class HotelAccommodationService {
 
     private BigDecimal getNum(Map<String, Object> data, String key) {
         Object v = data.get(key);
-        if (v == null) return null;
-        if (v instanceof BigDecimal) return (BigDecimal) v;
-        if (v instanceof Number) return BigDecimal.valueOf(((Number) v).doubleValue());
-        try { return new BigDecimal(v.toString()); } catch (Exception e) { return null; }
+        if (v == null)
+            return null;
+        if (v instanceof BigDecimal)
+            return (BigDecimal) v;
+        if (v instanceof Number)
+            return BigDecimal.valueOf(((Number) v).doubleValue());
+        try {
+            return new BigDecimal(v.toString());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private Integer getInt(Map<String, Object> data, String key) {
         Object v = data.get(key);
-        if (v == null) return null;
-        if (v instanceof Number) return ((Number) v).intValue();
-        try { return Integer.parseInt(v.toString()); } catch (Exception e) { return null; }
+        if (v == null)
+            return null;
+        if (v instanceof Number)
+            return ((Number) v).intValue();
+        try {
+            return Integer.parseInt(v.toString());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private Boolean getBool(Map<String, Object> data, String key, Boolean defaultVal) {
         Object v = data.get(key);
-        if (v == null) return defaultVal;
-        if (v instanceof Boolean) return (Boolean) v;
+        if (v == null)
+            return defaultVal;
+        if (v instanceof Boolean)
+            return (Boolean) v;
         return Boolean.parseBoolean(v.toString());
     }
 
     @SuppressWarnings("unchecked")
     private Object getPhotoUrls(Map<String, Object> data) {
         Object v = data.get("photo_urls");
-        if (v == null) return null;
-        
+        if (v == null)
+            return null;
+
         String[] urls;
         if (v instanceof String[]) {
             urls = (String[]) v;
@@ -581,16 +614,14 @@ public class HotelAccommodationService {
         } else {
             return null;
         }
-        
+
         // Return null for empty array to avoid SQL grammar issues
-        if (urls.length == 0) return null;
-        
-        // Convert to PostgreSQL text[] array
-        try (Connection conn = pbjtJdbcTemplate.getDataSource().getConnection()) {
-            return conn.createArrayOf("text", urls);
-        } catch (Exception e) {
-            log.warn("Could not create SQL array for photo_urls, falling back to null: {}", e.getMessage());
+        if (urls.length == 0)
             return null;
-        }
+
+        // Convert to PostgreSQL array literal string: {"url1","url2"}
+        return "{" + String.join(",", Arrays.stream(urls)
+                .map(s -> "\"" + s.replace("\"", "\\\"") + "\"")
+                .toArray(String[]::new)) + "}";
     }
 }
