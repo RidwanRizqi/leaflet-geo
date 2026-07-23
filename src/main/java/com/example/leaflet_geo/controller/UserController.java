@@ -46,7 +46,8 @@ public class UserController {
             user.setUsername(request.getUsername().trim().toLowerCase());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setRole(request.getRole());
-            user.setNama(request.getUsername());
+            user.setNama(request.getNama() != null && !request.getNama().trim().isEmpty() 
+                    ? request.getNama().trim() : request.getUsername());
             user.setIsAdmin("ADMIN".equalsIgnoreCase(request.getRole()));
             user.setIsActive(true);
             user.setCreatedAt(LocalDateTime.now());
