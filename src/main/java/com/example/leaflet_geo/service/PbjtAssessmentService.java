@@ -55,6 +55,23 @@ public class PbjtAssessmentService {
     public CalculationResultDTO calculateAssessment(AssessmentRequestDTO request) {
         return calculationService.calculate(request);
     }
+    
+    @jakarta.annotation.PostConstruct
+    public void fixMissingTaxObjectIds() {
+        List<PbjtAssessment> assessments = assessmentRepository.findAll();
+        boolean modified = false;
+        for (PbjtAssessment a : assessments) {
+            if (a.getTaxObjectId() == null && a.getBusinessId() != null) {
+                a.setTaxObjectId(a.getBusinessId());
+                a.setTaxObjectNumber(a.getBusinessId());
+                modified = true;
+            }
+        }
+        if (modified) {
+            assessmentRepository.saveAll(assessments);
+            log.info("Successfully fixed missing tax object IDs for {} assessments.", assessments.size());
+        }
+    }
 
     public PbjtAssessment createAssessment(AssessmentRequestDTO request) {
         log.info("Creating new assessment for business: {}", request.getBusinessId());
@@ -139,6 +156,8 @@ public class PbjtAssessmentService {
             .photoUrls(request.getPhotoUrls() != null ? 
                 request.getPhotoUrls().toArray(new String[0]) : null)
             .supportingDocUrl(request.getSupportingDocUrl())
+            .taxObjectId(request.getBusinessId())
+            .taxObjectNumber(request.getBusinessId())
             .build();
         
         // Save assessment
@@ -257,6 +276,10 @@ public class PbjtAssessmentService {
         if (request.getSurveyorId() != null) {
             existing.setSurveyorId(request.getSurveyorId());
         }
+        
+        // Ensure tax object IDs are set
+        existing.setTaxObjectId(request.getBusinessId());
+        existing.setTaxObjectNumber(request.getBusinessId());
         
         // Save assessment first
         PbjtAssessment savedAssessment = assessmentRepository.save(existing);
