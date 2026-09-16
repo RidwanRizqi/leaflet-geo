@@ -15,181 +15,222 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class PbjtCalculationService {
-    
+
     private static final BigDecimal DEFAULT_TAX_RATE = new BigDecimal("0.10");
     private static final BigDecimal DEFAULT_INFLATION_RATE = new BigDecimal("0.03");
     private static final BigDecimal DEFAULT_OPERATIONAL_RATE = new BigDecimal("0.90");
     private static final int TYPICAL_WEEKDAYS_PER_MONTH = 22;
     private static final int TYPICAL_WEEKENDS_PER_MONTH = 8;
     private static final int TYPICAL_HOLIDAYS_PER_MONTH = 1;
-    
+
     public CalculationResultDTO calculate(AssessmentRequestDTO request) {
         log.info("Starting PBJT calculation for business: {}", request.getBusinessId());
-        
+
         Map<String, BigDecimal> dailyRevenues = calculateDailyRevenues(request);
-        
-        BigDecimal operationalRate = request.getOperationalRate() != null ? 
-            request.getOperationalRate() : DEFAULT_OPERATIONAL_RATE;
+
+        BigDecimal operationalRate = request.getOperationalRate() != null ? request.getOperationalRate() : DEFAULT_OPERATIONAL_RATE;
         BigDecimal monthlyRevenueRaw = calculateMonthlyRevenue(dailyRevenues, operationalRate);
-        
-        BigDecimal typeCoefficient = getBusinessTypeCoefficient(request.getBusinessType(), request.getSeatingCapacity());
+
+        BigDecimal typeCoefficient = getBusinessTypeCoefficient(request.getBusinessType(),request.getSeatingCapacity());
         BigDecimal monthlyRevenueAfterType = monthlyRevenueRaw.multiply(typeCoefficient);
-        
+
         BigDecimal locationScore = calculateLocationScore(request);
         BigDecimal monthlyRevenueAdjusted = monthlyRevenueAfterType.multiply(locationScore);
-        
+
         BigDecimal taxRate = request.getTaxRate() != null ? request.getTaxRate() : DEFAULT_TAX_RATE;
-        BigDecimal inflationRate = request.getInflationRate() != null ? 
-            request.getInflationRate() : DEFAULT_INFLATION_RATE;
-        
+        BigDecimal inflationRate = request.getInflationRate() != null ? request.getInflationRate() : DEFAULT_INFLATION_RATE;
+
+        // --- STEP 7: Perhitungan PBJT/Bulan (Sample) ---
+        // PBJT Bulanan = Omzet_Adjusted × Tax_Rate (10%)
         BigDecimal monthlyPbjt = monthlyRevenueAdjusted.multiply(taxRate)
-            .setScale(2, RoundingMode.HALF_UP);
-        BigDecimal annualPbjt = monthlyPbjt.multiply(BigDecimal.valueOf(12))
-            .multiply(BigDecimal.ONE.add(inflationRate))
-            .setScale(2, RoundingMode.HALF_UP);
-        
+                .setScale(2, RoundingMode.HALF_UP);
+
+        // --- STEP 8: Proyeksi PBJT/Tahun (Sample) ---
+        // PBJT Tahunan = PBJT_Bulanan × 12 × (1 + Inflation_Rate)
+        BigDecimal annualPbjt = monthlyPbjt.multiply(BigDecimal.valueOf(12)).multiply(BigDecimal.ONE.add(inflationRate)).setScale(2, RoundingMode.HALF_UP);
+
         // ----------------------------------------------------
         // Menu Based Calculation (Metode Nilai Tengah)
         // ----------------------------------------------------
-        
+
         // Default values for Menu Method
         BigDecimal monthlyRevenueMenuBased = null;
         BigDecimal monthlyPbjtMenuBased = null;
         BigDecimal annualPbjtMenuBased = null;
         BigDecimal avgFoodPrice = BigDecimal.ZERO;
         BigDecimal avgBevPrice = BigDecimal.ZERO;
-        
+
         if (request.getMenuItems() != null && !request.getMenuItems().isEmpty()) {
             // 1. Calculate Average Prices
+            // --- STEP 1 (Menu): Hitung Rata-rata Harga Menu ---
+            // Avg Food Price = SUM(harga_makanan) / COUNT(item_makanan)
+            // Avg Bev Price = SUM(harga_minuman) / COUNT(item_minuman)
+            // Spend Per Person = Avg_Food + Avg_Bev
             List<BigDecimal> foodPrices = request.getMenuItems().stream()
-                .filter(i -> "FOOD".equalsIgnoreCase(i.getCategory()))
-                .map(com.example.leaflet_geo.dto.MenuItemDTO::getPrice)
-                .collect(Collectors.toList());
-                
-            List<BigDecimal> bevPrices = request.getMenuItems().stream()
-                .filter(i -> "BEVERAGE".equalsIgnoreCase(i.getCategory()))
-                .map(com.example.leaflet_geo.dto.MenuItemDTO::getPrice)
-                .collect(Collectors.toList());
+                    .filter(i -> "FOOD".equalsIgnoreCase(i.getCategory()))
+                    .map(com.example.leaflet_geo.dto.MenuItemDTO::getPrice)
+                    .collect(Collectors.toList());
 
-            // Use median or average? User said "Nilai Tengah", usually average in simplifictions, or median.
-            // Let's use Average for now as per "14 ribu x 70 x 25" example (it implies a single representative value)
+            List<BigDecimal> bevPrices = request.getMenuItems().stream()
+                    .filter(i -> "BEVERAGE".equalsIgnoreCase(i.getCategory()))
+                    .map(com.example.leaflet_geo.dto.MenuItemDTO::getPrice)
+                    .collect(Collectors.toList());
+
+            // Use median or average? User said "Nilai Tengah", usually average in
+            // simplifictions, or median.
+            // Let's use Average for now as per "14 ribu x 70 x 25" example (it implies a
+            // single representative value)
             avgFoodPrice = calculateAverage(foodPrices);
             avgBevPrice = calculateAverage(bevPrices);
-            
+
             BigDecimal spendPerPerson = avgFoodPrice.add(avgBevPrice);
-            
+
             // 2. Determine Traffic (Visitors per Day)
             // We need a daily visitor count.
             // From Observation Data (Sample Method), we have dailyRevenue broken down.
             // We need 'Average Daily Visitors'.
-            // Let's extract VPH (Visitors Per Hour) from existing logic or re-calculate average visitors per day.
-            
+            // Let's extract VPH (Visitors Per Hour) from existing logic or re-calculate
+            // average visitors per day.
+
             // Helper to get average daily visitors from observations
             BigDecimal averageDailyVisitors = calculateAverageDailyVisitors(request);
-            
+
             // 3. Opening Days
             int openingDays = request.getOpeningDaysPerMonth() != null ? request.getOpeningDaysPerMonth() : 30;
-            
+
             // 4. Calculate Revenue
-            // Omzet = (Avg Food + Avg Bev) * Avg Daily Visitors * Opening Days
+            // --- STEP 3 (Menu): Hitung Omzet Bulanan (Menu) ---
+            // Omzet Bulanan Menu = Spend_Per_Person × Pengunjung_Harian ×
+            // Opening_Days_Per_Month
             monthlyRevenueMenuBased = spendPerPerson
-                .multiply(averageDailyVisitors)
-                .multiply(BigDecimal.valueOf(openingDays))
-                .setScale(2, RoundingMode.HALF_UP);
-                
+                    .multiply(averageDailyVisitors)
+                    .multiply(BigDecimal.valueOf(openingDays))
+                    .setScale(2, RoundingMode.HALF_UP);
+
             // 5. Calculate Tax
-             monthlyPbjtMenuBased = monthlyRevenueMenuBased.multiply(taxRate)
-                .setScale(2, RoundingMode.HALF_UP);
-                
-             annualPbjtMenuBased = monthlyPbjtMenuBased.multiply(BigDecimal.valueOf(12))
-                .multiply(BigDecimal.ONE.add(inflationRate))
-                .setScale(2, RoundingMode.HALF_UP);
+            // --- STEP 4 (Menu): Perhitungan PBJT/Bulan (Menu) ---
+            // PBJT Bulanan Menu = Omzet_Bulanan_Menu × Tax_Rate (10%)
+            monthlyPbjtMenuBased = monthlyRevenueMenuBased.multiply(taxRate)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            // --- STEP 5 (Menu): Proyeksi PBJT/Tahun (Menu) ---
+            // PBJT Tahunan Menu = PBJT_Bulanan_Menu × 12 × (1 + Inflation_Rate)
+            annualPbjtMenuBased = monthlyPbjtMenuBased.multiply(BigDecimal.valueOf(12))
+                    .multiply(BigDecimal.ONE.add(inflationRate))
+                    .setScale(2, RoundingMode.HALF_UP);
         }
 
         Map<String, Integer> confidenceBreakdown = calculateConfidenceScore(request);
         Integer totalConfidence = confidenceBreakdown.values().stream()
-            .mapToInt(Integer::intValue).sum();
-        
+                .mapToInt(Integer::intValue).sum();
+
         String recommendation = generateRecommendation(totalConfidence, confidenceBreakdown);
-        
-        log.info("Calculation completed. Monthly PBJT: {}, Annual PBJT: {}, Confidence: {}", 
-            monthlyPbjt, annualPbjt, totalConfidence);
-        
+
+        log.info("Calculation completed. Monthly PBJT: {}, Annual PBJT: {}, Confidence: {}",
+                monthlyPbjt, annualPbjt, totalConfidence);
+
         return CalculationResultDTO.builder()
-            .dailyRevenueWeekday(dailyRevenues.get("weekday"))
-            .dailyRevenueWeekend(dailyRevenues.get("weekend"))
-            .monthlyRevenueRaw(monthlyRevenueRaw)
-            .monthlyRevenueAdjusted(monthlyRevenueAdjusted)
-            .monthlyPbjt(monthlyPbjt)
-            .annualPbjt(annualPbjt)
-            // Menu Based Results
-            .monthlyRevenueMenuBased(monthlyRevenueMenuBased)
-            .monthlyPbjtMenuBased(monthlyPbjtMenuBased)
-            .annualPbjtMenuBased(annualPbjtMenuBased)
-            .averageFoodPrice(avgFoodPrice)
-            .averageBeveragePrice(avgBevPrice)
-            
-            .businessTypeCoefficient(typeCoefficient)
-            .locationScore(locationScore)
-            .operationalRate(operationalRate)
-            .taxRate(taxRate)
-            .inflationRate(inflationRate)
-            .confidenceScore(totalConfidence)
-            .confidenceBreakdown(confidenceBreakdown)
-            .recommendation(recommendation)
-            .build();
+                .dailyRevenueWeekday(dailyRevenues.get("weekday"))
+                .dailyRevenueWeekend(dailyRevenues.get("weekend"))
+                .monthlyRevenueRaw(monthlyRevenueRaw)
+                .monthlyRevenueAdjusted(monthlyRevenueAdjusted)
+                .monthlyPbjt(monthlyPbjt)
+                .annualPbjt(annualPbjt)
+                // Menu Based Results
+                .monthlyRevenueMenuBased(monthlyRevenueMenuBased)
+                .monthlyPbjtMenuBased(monthlyPbjtMenuBased)
+                .annualPbjtMenuBased(annualPbjtMenuBased)
+                .averageFoodPrice(avgFoodPrice)
+                .averageBeveragePrice(avgBevPrice)
+
+                .businessTypeCoefficient(typeCoefficient)
+                .locationScore(locationScore)
+                .operationalRate(operationalRate)
+                .taxRate(taxRate)
+                .inflationRate(inflationRate)
+                .confidenceScore(totalConfidence)
+                .confidenceBreakdown(confidenceBreakdown)
+                .recommendation(recommendation)
+                .build();
     }
-    
+
     private BigDecimal calculateAverage(List<BigDecimal> values) {
-        if (values == null || values.isEmpty()) return BigDecimal.ZERO;
+        if (values == null || values.isEmpty())
+            return BigDecimal.ZERO;
         BigDecimal sum = values.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         return sum.divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP);
     }
 
     private BigDecimal calculateAverageDailyVisitors(AssessmentRequestDTO request) {
+        // --- STEP 2 (Menu): Hitung Rata-rata Pengunjung Harian ---
+        // Jika ada observasi: Pengunjung Harian = VPH_Rata-rata × Total_Jam_Operasi
+        // Jika tidak ada observasi: Pengunjung Harian = Seating_Capacity ×
+        // Turnover_Rate × Hours_Factor
+
         // Calculate average VPH across all observations
         if (request.getObservations() != null && !request.getObservations().isEmpty()) {
             // Use actual observation data
             BigDecimal totalVph = BigDecimal.ZERO;
             for (com.example.leaflet_geo.dto.ObservationDTO obs : request.getObservations()) {
-                 BigDecimal vph = BigDecimal.valueOf(obs.getVisitors())
-                    .divide(obs.getDurationHours(), 2, RoundingMode.HALF_UP);
-                 totalVph = totalVph.add(vph);
+                BigDecimal vph = BigDecimal.valueOf(obs.getVisitors())
+                        .divide(obs.getDurationHours(), 2, RoundingMode.HALF_UP);
+                totalVph = totalVph.add(vph);
             }
-            
-            BigDecimal averageVph = totalVph.divide(BigDecimal.valueOf(request.getObservations().size()), 2, RoundingMode.HALF_UP);
-            
-            java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart() : java.time.LocalTime.of(8, 0);
-            java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd() : java.time.LocalTime.of(22, 0);
+
+            BigDecimal averageVph = totalVph.divide(BigDecimal.valueOf(request.getObservations().size()), 2,
+                    RoundingMode.HALF_UP);
+
+            java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart()
+                    : java.time.LocalTime.of(8, 0);
+            java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd()
+                    : java.time.LocalTime.of(22, 0);
             Duration operatingDuration = Duration.between(startTime, endTime);
             double totalOperatingHours = operatingDuration.toMinutes() / 60.0;
-            
+
             return averageVph.multiply(BigDecimal.valueOf(totalOperatingHours)).setScale(0, RoundingMode.HALF_UP);
         }
-        
+
         // FALLBACK: No observations, estimate from Seating Capacity
         // Assumption: Average turn-over rate is 2-3x per day for restaurants
         // Daily Visitors ≈ Seating Capacity * Turnover Rate
         // For conservative estimate: Turnover Rate = 2.0
         double turnoverRate = 2.0;
         int seatingCapacity = request.getSeatingCapacity() != null ? request.getSeatingCapacity() : 30;
-        
+
         // Also consider operating hours - longer hours = more turnover
-        java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart() : java.time.LocalTime.of(8, 0);
-        java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd() : java.time.LocalTime.of(22, 0);
+        java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart()
+                : java.time.LocalTime.of(8, 0);
+        java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd()
+                : java.time.LocalTime.of(22, 0);
         Duration operatingDuration = Duration.between(startTime, endTime);
         double totalOperatingHours = operatingDuration.toMinutes() / 60.0;
-        
+
         // Adjust turnover based on operating hours (8 hours = baseline)
         double hoursFactor = Math.max(0.5, totalOperatingHours / 8.0);
         double estimatedDailyVisitors = seatingCapacity * turnoverRate * hoursFactor;
-        
-        log.info("Menu Method - No observations. Estimating daily visitors from capacity: {} * {} * {} = {}",
-            seatingCapacity, turnoverRate, hoursFactor, estimatedDailyVisitors);
-        
+
+        // Apply Location Score and Business Type Coefficient for more accurate
+        // estimation
+        BigDecimal locationScore = calculateLocationScore(request);
+        BigDecimal typeCoefficient = getBusinessTypeCoefficient(request.getBusinessType(),
+                request.getSeatingCapacity());
+
+        // Apply Crowd Level Multiplier
+        double crowdMultiplier = 1.0; // DEFAULT = NORMAL
+        if ("SEPI".equalsIgnoreCase(request.getCrowdLevel())) {
+            crowdMultiplier = 0.5;
+        } else if ("RAMAI".equalsIgnoreCase(request.getCrowdLevel())) {
+            crowdMultiplier = 1.5;
+        }
+
+        estimatedDailyVisitors = estimatedDailyVisitors * locationScore.doubleValue() * typeCoefficient.doubleValue() * crowdMultiplier;
+        log.info(
+                "Menu Method - No observations. Estimating daily visitors from capacity: {} * {} * {} * {} (loc) * {} (type) * {} (crowd) = {}",
+                seatingCapacity, turnoverRate, hoursFactor, locationScore, typeCoefficient, crowdMultiplier, estimatedDailyVisitors);
+
         return BigDecimal.valueOf(estimatedDailyVisitors).setScale(0, RoundingMode.HALF_UP);
     }
-    
+
     private Map<String, BigDecimal> calculateDailyRevenues(AssessmentRequestDTO request) {
         // Handle case where observations is null or empty (Menu-only method)
         if (request.getObservations() == null || request.getObservations().isEmpty()) {
@@ -199,151 +240,178 @@ public class PbjtCalculationService {
             emptyRevenues.put("weekend", BigDecimal.ZERO);
             return emptyRevenues;
         }
-        
-        java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart() : java.time.LocalTime.of(8, 0);
-        java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd() : java.time.LocalTime.of(22, 0);
+
+        java.time.LocalTime startTime = request.getOperatingHoursStart() != null ? request.getOperatingHoursStart()
+                : java.time.LocalTime.of(8, 0);
+        java.time.LocalTime endTime = request.getOperatingHoursEnd() != null ? request.getOperatingHoursEnd()
+                : java.time.LocalTime.of(22, 0);
         Duration operatingDuration = Duration.between(startTime, endTime);
         double totalOperatingHours = operatingDuration.toMinutes() / 60.0;
         double peakHours = 4.0;
         double offPeakHours = totalOperatingHours - peakHours;
-        
+
         Map<String, List<ObservationDTO>> observationsByType = request.getObservations()
-            .stream()
-            .collect(Collectors.groupingBy(ObservationDTO::getDayType));
-        
+                .stream()
+                .collect(Collectors.groupingBy(ObservationDTO::getDayType));
+
         BigDecimal vphWeekdayPeak = calculateVisitorsPerHour(
-            observationsByType.getOrDefault("WEEKDAY_PEAK", Collections.emptyList())
-        );
+                observationsByType.getOrDefault("WEEKDAY_PEAK", Collections.emptyList()));
         BigDecimal vphWeekdayOffPeak = calculateVisitorsPerHour(
-            observationsByType.getOrDefault("WEEKDAY_OFFPEAK", Collections.emptyList())
-        );
+                observationsByType.getOrDefault("WEEKDAY_OFFPEAK", Collections.emptyList()));
         BigDecimal vphWeekendPeak = calculateVisitorsPerHour(
-            observationsByType.getOrDefault("WEEKEND_PEAK", Collections.emptyList())
-        );
-        
+                observationsByType.getOrDefault("WEEKEND_PEAK", Collections.emptyList()));
+
         BigDecimal avgTxWeekdayPeak = calculateAverageTransaction(
-            observationsByType.getOrDefault("WEEKDAY_PEAK", Collections.emptyList())
-        );
+                observationsByType.getOrDefault("WEEKDAY_PEAK", Collections.emptyList()));
         BigDecimal avgTxWeekdayOffPeak = calculateAverageTransaction(
-            observationsByType.getOrDefault("WEEKDAY_OFFPEAK", Collections.emptyList())
-        );
+                observationsByType.getOrDefault("WEEKDAY_OFFPEAK", Collections.emptyList()));
         BigDecimal avgTxWeekendPeak = calculateAverageTransaction(
-            observationsByType.getOrDefault("WEEKEND_PEAK", Collections.emptyList())
-        );
-        
+                observationsByType.getOrDefault("WEEKEND_PEAK", Collections.emptyList()));
+
         // Add Weekend OffPeak Support
         BigDecimal vphWeekendOffPeak = calculateVisitorsPerHour(
-            observationsByType.getOrDefault("WEEKEND_OFFPEAK", Collections.emptyList())
-        );
+                observationsByType.getOrDefault("WEEKEND_OFFPEAK", Collections.emptyList()));
         BigDecimal avgTxWeekendOffPeak = calculateAverageTransaction(
-            observationsByType.getOrDefault("WEEKEND_OFFPEAK", Collections.emptyList())
-        );
+                observationsByType.getOrDefault("WEEKEND_OFFPEAK", Collections.emptyList()));
 
         if (vphWeekdayOffPeak.compareTo(BigDecimal.ZERO) == 0) {
             vphWeekdayOffPeak = vphWeekdayPeak.multiply(new BigDecimal("0.60"));
             avgTxWeekdayOffPeak = avgTxWeekdayPeak.multiply(new BigDecimal("0.80"));
         }
-        
+
         // Handle Missing Weekend OffPeak (Default logic)
         if (vphWeekendOffPeak.compareTo(BigDecimal.ZERO) == 0) {
-             // Jika tidak ada data weekend off-peak, gunakan data weekday off-peak (asumsi sama sepinya secara default jika tidak diobservasi)
-             // Atau fallback ke 60% dari weekend peak
-             if (vphWeekdayOffPeak.compareTo(BigDecimal.ZERO) > 0) {
-                 vphWeekendOffPeak = vphWeekdayOffPeak;
-                 avgTxWeekendOffPeak = avgTxWeekdayOffPeak;
-             } else {
-                 vphWeekendOffPeak = vphWeekendPeak.multiply(new BigDecimal("0.60"));
-                 avgTxWeekendOffPeak = avgTxWeekendPeak.multiply(new BigDecimal("0.80"));
-             }
+            // Jika tidak ada data weekend off-peak, gunakan data weekday off-peak (asumsi
+            // sama sepinya secara default jika tidak diobservasi)
+            // Atau fallback ke 60% dari weekend peak
+            if (vphWeekdayOffPeak.compareTo(BigDecimal.ZERO) > 0) {
+                vphWeekendOffPeak = vphWeekdayOffPeak;
+                avgTxWeekendOffPeak = avgTxWeekdayOffPeak;
+            } else {
+                vphWeekendOffPeak = vphWeekendPeak.multiply(new BigDecimal("0.60"));
+                avgTxWeekendOffPeak = avgTxWeekendPeak.multiply(new BigDecimal("0.80"));
+            }
         }
-        
+
+        // --- STEP 3: Hitung Omzet Harian ---
+        // Omzet Weekday = (VPH_Peak × Jam_Peak × AvgTx_Peak) + (VPH_OffPeak ×
+        // Jam_OffPeak × AvgTx_OffPeak)
+        // Omzet Weekend = (VPH_Peak × Jam_Peak × AvgTx_Peak) + (VPH_OffPeak ×
+        // Jam_OffPeak × AvgTx_OffPeak)
         BigDecimal dailyRevenueWeekday = vphWeekdayPeak
-            .multiply(BigDecimal.valueOf(peakHours))
-            .multiply(avgTxWeekdayPeak)
-            .add(vphWeekdayOffPeak.multiply(BigDecimal.valueOf(offPeakHours))
-            .multiply(avgTxWeekdayOffPeak))
-            .setScale(2, RoundingMode.HALF_UP);
-        
+                .multiply(BigDecimal.valueOf(peakHours))
+                .multiply(avgTxWeekdayPeak)
+                .add(vphWeekdayOffPeak.multiply(BigDecimal.valueOf(offPeakHours))
+                        .multiply(avgTxWeekdayOffPeak))
+                .setScale(2, RoundingMode.HALF_UP);
+
         BigDecimal dailyRevenueWeekend = vphWeekendPeak
-            .multiply(BigDecimal.valueOf(peakHours))
-            .multiply(avgTxWeekendPeak)
-            .add(vphWeekendOffPeak.multiply(BigDecimal.valueOf(offPeakHours))
-            .multiply(avgTxWeekendOffPeak))
-            .setScale(2, RoundingMode.HALF_UP);
-        
+                .multiply(BigDecimal.valueOf(peakHours))
+                .multiply(avgTxWeekendPeak)
+                .add(vphWeekendOffPeak.multiply(BigDecimal.valueOf(offPeakHours))
+                        .multiply(avgTxWeekendOffPeak))
+                .setScale(2, RoundingMode.HALF_UP);
+
         Map<String, BigDecimal> result = new HashMap<>();
         result.put("weekday", dailyRevenueWeekday);
         result.put("weekend", dailyRevenueWeekend);
         return result;
     }
-    
+
     private BigDecimal calculateVisitorsPerHour(List<ObservationDTO> observations) {
-        if (observations.isEmpty()) return BigDecimal.ZERO;
-        
+        // --- STEP 1: Hitung VPH (Visitors Per Hour) ---
+        // VPH = Jumlah Pengunjung / Durasi Observasi (jam)
+        if (observations.isEmpty())
+            return BigDecimal.ZERO;
+
         BigDecimal totalVph = observations.stream()
-            .map(obs -> BigDecimal.valueOf(obs.getVisitors())
-                .divide(obs.getDurationHours(), 2, RoundingMode.HALF_UP))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+                .map(obs -> BigDecimal.valueOf(obs.getVisitors())
+                        .divide(obs.getDurationHours(), 2, RoundingMode.HALF_UP))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return totalVph.divide(BigDecimal.valueOf(observations.size()), 2, RoundingMode.HALF_UP);
     }
-    
+
     private BigDecimal calculateAverageTransaction(List<ObservationDTO> observations) {
-        if (observations.isEmpty()) return BigDecimal.ZERO;
-        
+        // --- STEP 2: Hitung Rata-rata Transaksi ---
+        // Avg Transaction = SUM(sample_transactions) / COUNT(sample_transactions)
+        if (observations.isEmpty())
+            return BigDecimal.ZERO;
+
         BigDecimal totalAvg = observations.stream()
-            .map(obs -> {
-                if (obs.getSampleTransactions() == null || obs.getSampleTransactions().isEmpty()) {
-                    return BigDecimal.ZERO;
-                }
-                // Extract amounts from SampleTransactionDTO list
-                List<BigDecimal> amounts = obs.getSampleTransactions().stream()
-                    .map(ObservationDTO.SampleTransactionDTO::getAmount)
-                    .toList();
-                BigDecimal sum = amounts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-                return sum.divide(BigDecimal.valueOf(amounts.size()), 2, RoundingMode.HALF_UP);
-            })
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+                .map(obs -> {
+                    if (obs.getSampleTransactions() == null || obs.getSampleTransactions().isEmpty()) {
+                        return BigDecimal.ZERO;
+                    }
+                    // Extract amounts from SampleTransactionDTO list
+                    List<BigDecimal> amounts = obs.getSampleTransactions().stream()
+                            .map(ObservationDTO.SampleTransactionDTO::getAmount)
+                            .toList();
+                    BigDecimal sum = amounts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+                    return sum.divide(BigDecimal.valueOf(amounts.size()), 2, RoundingMode.HALF_UP);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return totalAvg.divide(BigDecimal.valueOf(observations.size()), 2, RoundingMode.HALF_UP);
     }
-    
+
     private BigDecimal calculateMonthlyRevenue(Map<String, BigDecimal> dailyRevenues, BigDecimal operationalRate) {
+        // --- STEP 4: Hitung Omzet Bulanan (Raw) ---
+        // Effective_Weekdays = 22 - 1 = 21
+        // Effective_Weekends = 8
+        // Omzet Bulanan Raw = (Omzet_Weekday × 21 × Operational_Rate) + (Omzet_Weekend
+        // × 8 × Operational_Rate)
         int effectiveWeekdays = TYPICAL_WEEKDAYS_PER_MONTH - TYPICAL_HOLIDAYS_PER_MONTH;
         int effectiveWeekends = TYPICAL_WEEKENDS_PER_MONTH;
-        
+
         BigDecimal weekdayRevenue = dailyRevenues.get("weekday")
-            .multiply(BigDecimal.valueOf(effectiveWeekdays))
-            .multiply(operationalRate);
-        
+                .multiply(BigDecimal.valueOf(effectiveWeekdays))
+                .multiply(operationalRate);
+
         BigDecimal weekendRevenue = dailyRevenues.get("weekend")
-            .multiply(BigDecimal.valueOf(effectiveWeekends))
-            .multiply(operationalRate);
-        
+                .multiply(BigDecimal.valueOf(effectiveWeekends))
+                .multiply(operationalRate);
+
         return weekdayRevenue.add(weekendRevenue).setScale(2, RoundingMode.HALF_UP);
     }
-    
+
     private BigDecimal getBusinessTypeCoefficient(String businessType, Integer seatingCapacity) {
+        // --- STEP 5: Koefisien Tipe Usaha ---
+        // Default: WARUNG_KECIL(0.85), RUMAH_MAKAN(1.00), RESTAURANT(1.10),
+        // CAFE_MODERN(1.20), FRANCHISE(1.15)
         if (businessType != null) {
             switch (businessType.toUpperCase()) {
-                case "WARUNG_KECIL": return new BigDecimal("0.85");
-                case "RUMAH_MAKAN": return new BigDecimal("1.00");
-                case "RESTAURANT": return new BigDecimal("1.10");
-                case "CAFE_MODERN": return new BigDecimal("1.20");
-                case "FRANCHISE": return new BigDecimal("1.15");
+                case "WARUNG_KECIL":
+                    return new BigDecimal("0.85");
+                case "RUMAH_MAKAN":
+                    return new BigDecimal("1.00");
+                case "RESTAURANT":
+                    return new BigDecimal("1.10");
+                case "CAFE_MODERN":
+                    return new BigDecimal("1.20");
+                case "FRANCHISE":
+                    return new BigDecimal("1.15");
             }
         }
-        
+
         // Classify by capacity
-        if (seatingCapacity < 20) return new BigDecimal("0.85");
-        if (seatingCapacity < 50) return new BigDecimal("1.00");
-        if (seatingCapacity < 150) return new BigDecimal("1.10");
+        if (seatingCapacity < 20)
+            return new BigDecimal("0.85");
+        if (seatingCapacity < 50)
+            return new BigDecimal("1.00");
+        if (seatingCapacity < 150)
+            return new BigDecimal("1.10");
         return new BigDecimal("1.20");
     }
-    
+
     private BigDecimal calculateLocationScore(AssessmentRequestDTO request) {
+        // --- STEP 6: Location Score ---
+        // Base score: 1.00, ditambahkan faktor dekat sekolah (+0.10), kantor (+0.15),
+        // pasar (+0.12)
+        // Ditambahkan faktor jalan: ARTERI (+0.20), KOLEKTOR (+0.15), LOKAL (+0.05),
+        // max score 1.50
         BigDecimal score = BigDecimal.ONE;
-        
+
         // Factor 1: Proximity to traffic generators
         if (Boolean.TRUE.equals(request.getNearSchool())) {
             score = score.add(new BigDecimal("0.10"));
@@ -354,7 +422,7 @@ public class PbjtCalculationService {
         if (Boolean.TRUE.equals(request.getNearMarket())) {
             score = score.add(new BigDecimal("0.12"));
         }
-        
+
         // Factor 2: Road accessibility
         if (request.getRoadType() != null) {
             switch (request.getRoadType().toUpperCase()) {
@@ -375,47 +443,58 @@ public class PbjtCalculationService {
                     break;
             }
         }
-        
+
         // Cap maximum adjustment
         if (score.compareTo(new BigDecimal("1.50")) > 0) {
             score = new BigDecimal("1.50");
         }
-        
+
         return score.setScale(2, RoundingMode.HALF_UP);
     }
-    
+
     private Map<String, Integer> calculateConfidenceScore(AssessmentRequestDTO request) {
         Map<String, Integer> breakdown = new HashMap<>();
-        
+
         int dataCompleteness = 0;
         int obsCount = (request.getObservations() != null) ? request.getObservations().size() : 0;
-        if (obsCount >= 3) dataCompleteness += 20;
-        else if (obsCount >= 2) dataCompleteness += 10;
-        if (request.getSeatingCapacity() != null) dataCompleteness += 5;
-        if (request.getOperatingHoursStart() != null) dataCompleteness += 5;
-        if (request.getBuildingArea() != null) dataCompleteness += 5;
-        if (request.getPhotoUrls() != null && request.getPhotoUrls().size() >= 3) dataCompleteness += 5;
+        if (obsCount >= 3)
+            dataCompleteness += 20;
+        else if (obsCount >= 2)
+            dataCompleteness += 10;
+        if (request.getSeatingCapacity() != null)
+            dataCompleteness += 5;
+        if (request.getOperatingHoursStart() != null)
+            dataCompleteness += 5;
+        if (request.getBuildingArea() != null)
+            dataCompleteness += 5;
+        if (request.getPhotoUrls() != null && request.getPhotoUrls().size() >= 3)
+            dataCompleteness += 5;
         breakdown.put("data_completeness", dataCompleteness);
-        
+
         int validationSources = 0;
         if (request.getValidationData() != null) {
-            if (request.getValidationData().containsKey("electricityBill")) validationSources += 10;
-            if (request.getValidationData().containsKey("qrisData")) validationSources += 15;
-            if (request.getValidationData().containsKey("supplierInvoice")) validationSources += 5;
+            if (request.getValidationData().containsKey("electricityBill"))
+                validationSources += 10;
+            if (request.getValidationData().containsKey("qrisData"))
+                validationSources += 15;
+            if (request.getValidationData().containsKey("supplierInvoice"))
+                validationSources += 5;
         }
         breakdown.put("validation_sources", validationSources);
-        
+
         int surveyQuality = 15;
-        if (request.getVerifiedBy() != null && !request.getVerifiedBy().isEmpty()) surveyQuality += 10;
-        if (Boolean.TRUE.equals(request.getTaxpayerSigned())) surveyQuality += 5;
+        if (request.getVerifiedBy() != null && !request.getVerifiedBy().isEmpty())
+            surveyQuality += 10;
+        if (Boolean.TRUE.equals(request.getTaxpayerSigned()))
+            surveyQuality += 5;
         breakdown.put("survey_quality", surveyQuality);
-        
+
         return breakdown;
     }
-    
+
     private String generateRecommendation(Integer totalScore, Map<String, Integer> breakdown) {
         List<String> recommendations = new ArrayList<>();
-        
+
         if (totalScore >= 80) {
             recommendations.add("High confidence assessment - reliable for tax collection");
         } else if (totalScore >= 60) {
@@ -423,7 +502,7 @@ public class PbjtCalculationService {
         } else {
             recommendations.add("Low confidence - requires improvement");
         }
-        
+
         if (breakdown.get("data_completeness") < 30) {
             recommendations.add("Add more observation sessions to improve accuracy");
         }
@@ -433,7 +512,7 @@ public class PbjtCalculationService {
         if (breakdown.get("survey_quality") < 20) {
             recommendations.add("Obtain verification from supervisor and taxpayer signature");
         }
-        
+
         return String.join(". ", recommendations);
     }
 }

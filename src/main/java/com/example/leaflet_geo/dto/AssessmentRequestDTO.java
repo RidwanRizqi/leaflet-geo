@@ -67,6 +67,10 @@ public class AssessmentRequestDTO {
     private Boolean nearSchool;
     private Boolean nearOffice;
     private Boolean nearMarket;
+    private String crowdLevel; // SEPI, NORMAL, RAMAI
+    private java.util.List<String> customerOrderEstimates;
+    private java.util.List<String> bestSellingMenus;
+    private java.util.List<String> crowdPeakTimes;
 
     private String kelurahan;
     private String kecamatan;

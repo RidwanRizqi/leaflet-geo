@@ -162,6 +162,18 @@ public class PbjtAssessment {
     @Column(name = "near_market")
     private Boolean nearMarket;
 
+    @Column(name = "crowd_level", length = 20)
+    private String crowdLevel;
+
+    @Column(name = "customer_order_estimates", length = 1000)
+    private String customerOrderEstimates;
+
+    @Column(name = "best_selling_menus", length = 1000)
+    private String bestSellingMenus;
+
+    @Column(name = "crowd_peak_times", length = 1000)
+    private String crowdPeakTimes;
+
     @Column(name = "kelurahan")
     private String kelurahan;
     

@@ -147,6 +147,12 @@ public class PendapatanService {
                 "E-PASIR Realisasi");
         totalRealisasi = totalRealisasi.add(new BigDecimal(realisasiEpasir));
 
+        BigDecimal realisasiOpsen = executeSafely(() -> postgresJdbcTemplate.queryForObject(
+                "SELECT COALESCE(SUM(nilai_realisasi), 0) FROM system.opsen_realisasi WHERE tahun = ?",
+                BigDecimal.class,
+                tahun), BigDecimal.ZERO, "Opsen Realisasi Total");
+        totalRealisasi = totalRealisasi.add(realisasiOpsen);
+
         BigDecimal selisih = totalTarget.subtract(totalRealisasi);
 
         Double persentase = 0.0;
@@ -174,6 +180,22 @@ public class PendapatanService {
      * Get Target vs Realisasi per Jenis Pajak (Target Hardcode)
      */
     public List<TargetRealisasiDTO> getTargetRealisasiPerJenis(Integer tahun) {
+
+        // Ambil data realisasi Opsen dari PostgreSQL
+        Map<String, BigDecimal> mapRealisasiOpsen = new HashMap<>();
+        executeSafely(() -> {
+            postgresJdbcTemplate.query(
+                    "SELECT jenis_opsen, SUM(nilai_realisasi) as total_realisasi FROM system.opsen_realisasi WHERE tahun = ? GROUP BY jenis_opsen",
+                    rs -> {
+                        String jp = rs.getString("jenis_opsen");
+                        if (jp != null) {
+                            mapRealisasiOpsen.put(jp.trim().toLowerCase(), rs.getBigDecimal("total_realisasi"));
+                        }
+                    },
+                    tahun);
+            return null;
+        }, null, "Load PostgreSQL Opsen Realisasi");
+
         // Ambil mapping anggaran (target) dari tabel system.anggaran di PostgreSQL
         Map<String, BigDecimal> mapAnggaran = new HashMap<>();
         executeSafely(() -> {
@@ -300,6 +322,11 @@ public class PendapatanService {
             BigDecimal realisasi = new BigDecimal(realisasiPbb);
             BigDecimal selisih = target.subtract(realisasi);
 
+            TargetRealisasiDTO pkbDto = new TargetRealisasiDTO();
+            pkbDto.setJenisPajak("Opsen PKB");
+
+            BigDecimal targetPkb = mapAnggaran.getOrDefault("Opsen pkb", BigDecimal.ZERO);
+
             Double persentase = 0.0;
             if (target.compareTo(BigDecimal.ZERO) > 0) {
                 persentase = realisasi.divide(target, 4, RoundingMode.HALF_UP)
@@ -320,13 +347,20 @@ public class PendapatanService {
         pkbDto.setJenisPajak("Opsen PKB");
 
         BigDecimal targetPkb = mapAnggaran.getOrDefault("Opsen PKB".toLowerCase(), BigDecimal.ZERO);
-        BigDecimal realisasiPkb = BigDecimal.ZERO;
+        BigDecimal realisasiPkb = mapRealisasiOpsen.getOrDefault("opsen pkb", BigDecimal.ZERO);
         BigDecimal selisihPkb = targetPkb.subtract(realisasiPkb);
+
+        Double persentasePkb = 0.0;
+        if (targetPkb.compareTo(BigDecimal.ZERO) > 0) {
+            persentasePkb = realisasiPkb.divide(targetPkb, 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"))
+                    .doubleValue();
+        }
 
         pkbDto.setTarget(targetPkb);
         pkbDto.setRealisasi(realisasiPkb);
         pkbDto.setSelisih(selisihPkb);
-        pkbDto.setPersentasePencapaian(0.0);
+        pkbDto.setPersentasePencapaian(persentasePkb);
         pkbDto.setDetails(List.of());
         results.add(pkbDto);
 
@@ -335,13 +369,20 @@ public class PendapatanService {
         bbnkbDto.setJenisPajak("Opsen BBNKB");
 
         BigDecimal targetBbnkb = mapAnggaran.getOrDefault("Opsen BBNKB".toLowerCase(), BigDecimal.ZERO);
-        BigDecimal realisasiBbnkb = BigDecimal.ZERO;
+        BigDecimal realisasiBbnkb = mapRealisasiOpsen.getOrDefault("opsen bbnkb", BigDecimal.ZERO);
         BigDecimal selisihBbnkb = targetBbnkb.subtract(realisasiBbnkb);
+
+        Double persentaseBbnkb = 0.0;
+        if (targetBbnkb.compareTo(BigDecimal.ZERO) > 0) {
+            persentaseBbnkb = realisasiBbnkb.divide(targetBbnkb, 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"))
+                    .doubleValue();
+        }
 
         bbnkbDto.setTarget(targetBbnkb);
         bbnkbDto.setRealisasi(realisasiBbnkb);
         bbnkbDto.setSelisih(selisihBbnkb);
-        bbnkbDto.setPersentasePencapaian(0.0);
+        bbnkbDto.setPersentasePencapaian(persentaseBbnkb);
         bbnkbDto.setDetails(List.of());
         results.add(bbnkbDto);
 
@@ -434,6 +475,31 @@ public class PendapatanService {
             }
         } catch (Exception e) {
             System.err.println("⚠️ Could not merge E-PASIR to Trend Bulanan: " + e.getMessage());
+        }
+
+        // Merge Opsen Data ke Trend Bulanan
+        try {
+            postgresJdbcTemplate.query(
+                    "SELECT bulan, SUM(nilai_realisasi) as total_realisasi FROM system.opsen_realisasi WHERE tahun = ? GROUP BY bulan",
+                    (rs) -> {
+                        int bulanNum = rs.getInt("bulan");
+                        BigDecimal realisasiBulanOpsen = rs.getBigDecimal("total_realisasi");
+
+                        TrendBulananDTO existing = trends.stream().filter(t -> t.getBulan() == bulanNum).findFirst()
+                                .orElse(null);
+                        if (existing != null) {
+                            existing.setRealisasiBulan(existing.getRealisasiBulan().add(realisasiBulanOpsen));
+                        } else {
+                            TrendBulananDTO dto = new TrendBulananDTO();
+                            dto.setBulan(bulanNum);
+                            dto.setNamaBulan(getNamaBulan(bulanNum));
+                            dto.setRealisasiBulan(realisasiBulanOpsen);
+                            trends.add(dto);
+                        }
+                    },
+                    tahun);
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not merge Opsen to Trend Bulanan: " + e.getMessage());
         }
 
         // Sort just in case we appended new months
@@ -646,6 +712,25 @@ public class PendapatanService {
         } catch (Exception e) {
         }
 
+        // Add Opsen data (Hanya ambil 1 data Opsen terbaru berdasarkan bulan & tahun
+        // nyata)
+        try {
+            List<PajakDataDTO> opsenData = postgresJdbcTemplate.query(
+                    "SELECT DISTINCT ON (jenis_opsen) tahun, bulan, jenis_opsen, nilai_realisasi FROM system.opsen_realisasi WHERE tahun = ? ORDER BY jenis_opsen, bulan DESC",
+                    (rs, rowNum) -> {
+                        PajakDataDTO dto = new PajakDataDTO();
+                        dto.setKategori("Opsen (" + rs.getString("jenis_opsen") + ")");
+                        dto.setTahun(rs.getInt("tahun"));
+                        dto.setBulan(getNamaBulan(rs.getInt("bulan")));
+                        dto.setValue(rs.getBigDecimal("nilai_realisasi"));
+                        return dto;
+                    },
+                    tahun);
+            results.addAll(opsenData);
+        } catch (Exception e) {
+            System.err.println("⚠️ Could not load Opsen data: " + e.getMessage());
+        }
+
         // Urutkan List berdasarkan nama kategori yang sudah dipetakan
         results.sort((a, b) -> {
             Integer urutanA = KATEGORI_URUTAN.getOrDefault(a.getKategori(), 99);
@@ -674,7 +759,9 @@ public class PendapatanService {
             java.io.File file = new java.io.File(jsonPath);
             if (file.exists()) {
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                results = mapper.readValue(file, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
+                results = mapper.readValue(file,
+                        new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {
+                        });
             }
         } catch (Exception e) {
             System.err.println("Error reading proyeksi JSON: " + e.getMessage());
@@ -692,7 +779,9 @@ public class PendapatanService {
             java.io.File file = new java.io.File(statusPath);
             if (file.exists()) {
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                status = mapper.readValue(file, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+                status = mapper.readValue(file,
+                        new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {
+                        });
             } else {
                 status.put("stage", 0);
                 status.put("percent", 0);
@@ -716,15 +805,17 @@ public class PendapatanService {
     public Map<String, Object> triggerProyeksiExecution() {
         Map<String, Object> response = new HashMap<>();
         try {
-            String statusPath = "D:/BPRD/leaflet-geo/python_bridge/proyeksi_status.json";
+            String statusPath = "E:/BPRD/leaflet-geo/python_bridge/proyeksi_status.json";
             Map<String, Object> resetStatus = new HashMap<>();
             resetStatus.put("stage", 1);
             resetStatus.put("percent", 15);
-            resetStatus.put("message", "STAGE 1: Structural Break Detection & ITSA segmented regression (Bai-Perron)...");
+            resetStatus.put("message",
+                    "STAGE 1: Structural Break Detection & ITSA segmented regression (Bai-Perron)...");
             resetStatus.put("isRunning", true);
             resetStatus.put("isError", false);
-            resetStatus.put("timestamp", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
-            
+            resetStatus.put("timestamp",
+                    new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
+
             try {
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                 mapper.writeValue(new java.io.File(statusPath), resetStatus);
@@ -732,13 +823,13 @@ public class PendapatanService {
                 System.err.println("Could not reset status file: " + ex.getMessage());
             }
 
-            String scriptPath = "D:/BPRD/leaflet-geo/python_bridge/extract_and_train_iipa.py";
+            String scriptPath = "E:/BPRD/leaflet-geo/python_bridge/extract_and_train_iipa.py";
             String pythonExec = "C:/Users/Zephyrus/AppData/Local/Programs/Python/Python312/python.exe";
-            
+
             ProcessBuilder pb = new ProcessBuilder(pythonExec, scriptPath);
-            pb.directory(new java.io.File("D:/BPRD/leaflet-geo/python_bridge"));
-            pb.start(); // Runs asynchronously in background
-            
+            pb.directory(new java.io.File("E:/BPRD/leaflet-geo/python_bridge"));
+            pb.start();
+
             response.put("success", true);
             response.put("message", "Analisis Adaptif IIPA Machine Learning berhasil dijalankan di background server!");
         } catch (Exception e) {
