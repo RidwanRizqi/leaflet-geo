@@ -150,6 +150,10 @@ public class PbjtAssessmentService {
             .nearSchool(request.getNearSchool())
             .nearOffice(request.getNearOffice())
             .nearMarket(request.getNearMarket())
+            .crowdLevel(request.getCrowdLevel())
+            .customerOrderEstimates(request.getCustomerOrderEstimates() != null ? String.join(",", request.getCustomerOrderEstimates()) : null)
+            .bestSellingMenus(request.getBestSellingMenus() != null ? String.join(",", request.getBestSellingMenus()) : null)
+            .crowdPeakTimes(request.getCrowdPeakTimes() != null ? String.join(",", request.getCrowdPeakTimes()) : null)
             .kelurahan(request.getKelurahan())
             .kecamatan(request.getKecamatan())
             .kabupaten(request.getKabupaten())
@@ -263,6 +267,10 @@ public class PbjtAssessmentService {
         existing.setNearSchool(request.getNearSchool());
         existing.setNearOffice(request.getNearOffice());
         existing.setNearMarket(request.getNearMarket());
+        existing.setCrowdLevel(request.getCrowdLevel());
+        existing.setCustomerOrderEstimates(request.getCustomerOrderEstimates() != null ? String.join(",", request.getCustomerOrderEstimates()) : null);
+        existing.setBestSellingMenus(request.getBestSellingMenus() != null ? String.join(",", request.getBestSellingMenus()) : null);
+        existing.setCrowdPeakTimes(request.getCrowdPeakTimes() != null ? String.join(",", request.getCrowdPeakTimes()) : null);
         existing.setKelurahan(request.getKelurahan());
         existing.setKecamatan(request.getKecamatan());
         existing.setKabupaten(request.getKabupaten());
@@ -586,6 +594,10 @@ public class PbjtAssessmentService {
                 .nearSchool(assessment.getNearSchool())
                 .nearOffice(assessment.getNearOffice())
                 .nearMarket(assessment.getNearMarket())
+                .crowdLevel(assessment.getCrowdLevel())
+                .customerOrderEstimates(assessment.getCustomerOrderEstimates() != null ? java.util.Arrays.asList(assessment.getCustomerOrderEstimates().split(",")) : null)
+                .bestSellingMenus(assessment.getBestSellingMenus() != null ? java.util.Arrays.asList(assessment.getBestSellingMenus().split(",")) : null)
+                .crowdPeakTimes(assessment.getCrowdPeakTimes() != null ? java.util.Arrays.asList(assessment.getCrowdPeakTimes().split(",")) : null)
                 .kelurahan(assessment.getKelurahan())
                 .kecamatan(assessment.getKecamatan())
                 .kabupaten(assessment.getKabupaten())
@@ -623,6 +635,9 @@ public class PbjtAssessmentService {
 
         existing.setOpeningDaysPerMonth(request.getOpeningDaysPerMonth());
         existing.setMenuItems(request.getMenuItems());
+        existing.setCustomerOrderEstimates(request.getCustomerOrderEstimates() != null ? String.join(",", request.getCustomerOrderEstimates()) : null);
+        existing.setBestSellingMenus(request.getBestSellingMenus() != null ? String.join(",", request.getBestSellingMenus()) : null);
+        existing.setCrowdPeakTimes(request.getCrowdPeakTimes() != null ? String.join(",", request.getCrowdPeakTimes()) : null);
 
         com.example.leaflet_geo.dto.AssessmentRequestDTO reqDTO = new com.example.leaflet_geo.dto.AssessmentRequestDTO();
         reqDTO.setSeatingCapacity(existing.getSeatingCapacity());

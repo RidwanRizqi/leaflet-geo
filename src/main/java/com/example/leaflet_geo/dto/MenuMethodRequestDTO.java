@@ -10,4 +10,7 @@ public class MenuMethodRequestDTO {
     private LocalDate observationDate;
     private Integer openingDaysPerMonth;
     private List<Map<String, Object>> menuItems;
+    private List<String> customerOrderEstimates;
+    private List<String> bestSellingMenus;
+    private List<String> crowdPeakTimes;
 }

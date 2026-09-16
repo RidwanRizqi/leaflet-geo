@@ -107,6 +107,10 @@ public class AssessmentResponseDTO {
         private Boolean nearSchool;
         private Boolean nearOffice;
         private Boolean nearMarket;
+        private String crowdLevel;
+        private java.util.List<String> customerOrderEstimates;
+        private java.util.List<String> bestSellingMenus;
+        private java.util.List<String> crowdPeakTimes;
         private String kelurahan;
         private String kecamatan;
         private String kabupaten;
