@@ -71,6 +71,15 @@ public class AssessmentResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
+    private String updatedBy;
+
+    // Omzet Justification
+    private BigDecimal justifikasiOmzet;
+    
+
+    // Validation data for Berita Acara Form
+    private Map<String, Object> validationData;
+    
     @Data
     @Builder
     @NoArgsConstructor

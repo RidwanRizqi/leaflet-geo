@@ -81,6 +81,9 @@ CREATE TABLE IF NOT EXISTS pbjt_assessments (
     -- Timestamps
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Omzet Justification
+    justifikasi_omzet NUMERIC(15, 2),
     
     CONSTRAINT valid_coordinates CHECK (
         latitude BETWEEN -90 AND 90 AND
