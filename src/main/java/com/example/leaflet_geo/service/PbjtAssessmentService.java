@@ -162,6 +162,8 @@ public class PbjtAssessmentService {
             .supportingDocUrl(request.getSupportingDocUrl())
             .taxObjectId(request.getBusinessId())
             .taxObjectNumber(request.getBusinessId())
+            .justifikasiOmzet(request.getJustifikasiOmzet())
+            .validationData(request.getValidationData())
             .build();
         
         // Save assessment
@@ -280,9 +282,19 @@ public class PbjtAssessmentService {
             existing.setPhotoUrls(request.getPhotoUrls().toArray(new String[0]));
         }
         
+        // Update Omzet Justification
+        existing.setJustifikasiOmzet(request.getJustifikasiOmzet());
+
+        // Update validationData for Berita Acara
+        existing.setValidationData(request.getValidationData());
+        
         // Update surveyor ID
         if (request.getSurveyorId() != null) {
             existing.setSurveyorId(request.getSurveyorId());
+        }
+        
+        if (request.getUpdatedBy() != null) {
+            existing.setUpdatedBy(request.getUpdatedBy());
         }
         
         // Ensure tax object IDs are set
@@ -626,6 +638,9 @@ public class PbjtAssessmentService {
             .surveyorId(assessment.getSurveyorId())
             .createdAt(assessment.getCreatedAt())
             .updatedAt(assessment.getUpdatedAt())
+            .updatedBy(assessment.getUpdatedBy())
+            .justifikasiOmzet(assessment.getJustifikasiOmzet())
+            .validationData(assessment.getValidationData())
             .build();
     }
 

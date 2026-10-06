@@ -306,12 +306,32 @@ public class SismiopService {
      */
     public Long getRealisasiPbbTahunan(String tahun) {
         try {
-            String sql = """
-                SELECT COALESCE(SUM(JML_SPPT_YG_DIBAYAR), 0) AS TOTAL_REALISASI
-                FROM PEMBAYARAN_SPPT
-                WHERE THN_PAJAK_SPPT = ?
-                """;
-            Map<String, Object> result = sismiopJdbcTemplate.queryForMap(sql, tahun);
+            int currentYear = java.time.Year.now().getValue();
+            boolean isCurrentYear = String.valueOf(currentYear).equals(tahun);
+            
+            String sql;
+            Map<String, Object> result;
+            
+            if (isCurrentYear) {
+                // Untuk tahun saat ini, ambil dari 1 Januari sampai hari ini (SYSDATE di Oracle)
+                sql = """
+                    SELECT COALESCE(SUM(JML_SPPT_YG_DIBAYAR - COALESCE(DENDA_SPPT, 0)), 0) AS TOTAL_REALISASI
+                    FROM PEMBAYARAN_SPPT
+                    WHERE THN_PAJAK_SPPT = ?
+                    AND TGL_PEMBAYARAN_SPPT >= TO_DATE(? || '-01-01', 'YYYY-MM-DD')
+                    AND TGL_PEMBAYARAN_SPPT <= SYSDATE
+                    """;
+                result = sismiopJdbcTemplate.queryForMap(sql, tahun, tahun);
+            } else {
+                // Untuk tahun selain tahun saat ini, ambil semua data pada tahun tersebut
+                sql = """
+                    SELECT COALESCE(SUM(JML_SPPT_YG_DIBAYAR - COALESCE(DENDA_SPPT, 0)), 0) AS TOTAL_REALISASI
+                    FROM PEMBAYARAN_SPPT
+                    WHERE THN_PAJAK_SPPT = ?
+                    """;
+                result = sismiopJdbcTemplate.queryForMap(sql, tahun);
+            }
+
             Object value = result.get("TOTAL_REALISASI");
             if (value instanceof Number) {
                 return ((Number) value).longValue();
@@ -354,7 +374,7 @@ public class SismiopService {
             String sql = """
                 SELECT
                     EXTRACT(MONTH FROM TGL_PEMBAYARAN_SPPT) AS BULAN,
-                    COALESCE(SUM(JML_SPPT_YG_DIBAYAR), 0) AS REALISASI
+                    COALESCE(SUM(JML_SPPT_YG_DIBAYAR - COALESCE(DENDA_SPPT, 0)), 0) AS REALISASI
                 FROM PEMBAYARAN_SPPT
                 WHERE THN_PAJAK_SPPT = ?
                 GROUP BY EXTRACT(MONTH FROM TGL_PEMBAYARAN_SPPT)

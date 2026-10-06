@@ -65,7 +65,9 @@ public class OpsenController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
         }
     }
 
@@ -83,11 +85,11 @@ public class OpsenController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> createOpsen(@RequestBody Map<String, Object> body) {
         try {
-            Integer tahun = (Integer) body.get("tahun");
-            Integer bulan = (Integer) body.get("bulan");
-            String jenisOpsen = (String) body.get("jenis_opsen");
+            Integer tahun = body.get("tahun") != null ? Integer.valueOf(body.get("tahun").toString()) : null;
+            Integer bulan = body.get("bulan") != null ? Integer.valueOf(body.get("bulan").toString()) : null;
+            String jenisOpsen = body.get("jenis_opsen") != null ? body.get("jenis_opsen").toString() : null;
             Object nilaiObj = body.get("nilai_realisasi");
-            String keterangan = (String) body.get("keterangan");
+            String keterangan = body.get("keterangan") != null ? body.get("keterangan").toString() : null;
 
             if (tahun == null || bulan == null || jenisOpsen == null || nilaiObj == null) {
                 return ResponseEntity.badRequest()
@@ -114,7 +116,9 @@ public class OpsenController {
 
             return ResponseEntity.ok(Map.of("success", true, "message", "Data realisasi Opsen berhasil ditambahkan"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
         }
     }
 
@@ -125,7 +129,7 @@ public class OpsenController {
             @RequestBody Map<String, Object> body) {
         try {
             Object nilaiObj = body.get("nilai_realisasi");
-            String keterangan = (String) body.get("keterangan");
+            String keterangan = body.get("keterangan") != null ? body.get("keterangan").toString() : null;
 
             if (nilaiObj == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Nilai Realisasi wajib diisi"));
@@ -142,7 +146,9 @@ public class OpsenController {
 
             return ResponseEntity.ok(Map.of("success", true, "message", "Data realisasi Opsen berhasil diupdate"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
         }
     }
 
@@ -159,7 +165,9 @@ public class OpsenController {
 
             return ResponseEntity.ok(Map.of("success", true, "message", "Data realisasi Opsen berhasil dihapus"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            return ResponseEntity.status(500).body(Map.of("error", errorMsg));
         }
     }
 }

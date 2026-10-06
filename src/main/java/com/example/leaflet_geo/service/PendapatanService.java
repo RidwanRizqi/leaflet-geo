@@ -322,11 +322,6 @@ public class PendapatanService {
             BigDecimal realisasi = new BigDecimal(realisasiPbb);
             BigDecimal selisih = target.subtract(realisasi);
 
-            TargetRealisasiDTO pkbDto = new TargetRealisasiDTO();
-            pkbDto.setJenisPajak("Opsen PKB");
-
-            BigDecimal targetPkb = mapAnggaran.getOrDefault("Opsen pkb", BigDecimal.ZERO);
-
             Double persentase = 0.0;
             if (target.compareTo(BigDecimal.ZERO) > 0) {
                 persentase = realisasi.divide(target, 4, RoundingMode.HALF_UP)
@@ -346,15 +341,13 @@ public class PendapatanService {
         TargetRealisasiDTO pkbDto = new TargetRealisasiDTO();
         pkbDto.setJenisPajak("Opsen PKB");
 
-        BigDecimal targetPkb = mapAnggaran.getOrDefault("Opsen PKB".toLowerCase(), BigDecimal.ZERO);
+        // Target Opsen PKB sementara diset 0 karena belum ada data valid
+        BigDecimal targetPkb = BigDecimal.ZERO;
         BigDecimal realisasiPkb = mapRealisasiOpsen.getOrDefault("opsen pkb", BigDecimal.ZERO);
         BigDecimal selisihPkb = targetPkb.subtract(realisasiPkb);
 
         Double persentasePkb = 0.0;
-        if (targetPkb.compareTo(BigDecimal.ZERO) > 0) {
-            persentasePkb = realisasiPkb.divide(targetPkb, 4, RoundingMode.HALF_UP)
-                    .multiply(new BigDecimal("100"))
-                    .doubleValue();
+        if (targetPkb.compareTo(BigDecimal.ZERO) > 0 || realisasiPkb.compareTo(BigDecimal.ZERO) > 0) {
         }
 
         pkbDto.setTarget(targetPkb);
@@ -368,7 +361,8 @@ public class PendapatanService {
         TargetRealisasiDTO bbnkbDto = new TargetRealisasiDTO();
         bbnkbDto.setJenisPajak("Opsen BBNKB");
 
-        BigDecimal targetBbnkb = mapAnggaran.getOrDefault("Opsen BBNKB".toLowerCase(), BigDecimal.ZERO);
+        // Target Opsen BBNKB sementara diset 0 karena belum ada data valid
+        BigDecimal targetBbnkb = BigDecimal.ZERO;
         BigDecimal realisasiBbnkb = mapRealisasiOpsen.getOrDefault("opsen bbnkb", BigDecimal.ZERO);
         BigDecimal selisihBbnkb = targetBbnkb.subtract(realisasiBbnkb);
 

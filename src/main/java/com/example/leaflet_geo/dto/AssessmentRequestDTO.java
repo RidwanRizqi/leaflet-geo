@@ -88,6 +88,8 @@ public class AssessmentRequestDTO {
     @NotBlank(message = "Surveyor ID is required")
     private String surveyorId;
     
+    private String updatedBy;
+    
     private String verifiedBy;
     private Boolean taxpayerSigned;
     
@@ -103,4 +105,7 @@ public class AssessmentRequestDTO {
     private BigDecimal taxRate;
     private BigDecimal inflationRate;
     private BigDecimal operationalRate;
+
+    // Omzet Justification
+    private BigDecimal justifikasiOmzet;
 }

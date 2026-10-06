@@ -228,6 +228,13 @@ public class PbjtAssessment {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "updated_by", length = 50)
+    private String updatedBy;
+
+    // Omzet Justification
+    @Column(name = "justifikasi_omzet", precision = 15, scale = 2)
+    private BigDecimal justifikasiOmzet;
     
     // One-to-many relationship with observations
     @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
