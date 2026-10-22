@@ -31,7 +31,16 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With",
+                "X-User-Name",
+                "x-user-name",
+                "*"
+        ));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);  // Diubah dari false menjadi true agar bisa menerima state Auth cookie/proxy
         configuration.setMaxAge(3600L);
@@ -72,12 +81,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/pendapatan/**").permitAll()
                         .requestMatchers("/api/dashboard/**").permitAll()
                         .requestMatchers("/api/pajak/**").permitAll()
-                        // PBJT Assessment (Test Permission)
+                        // PBJT Assessment & Potensi
                         .requestMatchers("/api/pbjt-assessments/**").permitAll()
+                        .requestMatchers("/api/pbjt-potensi/**").permitAll()
+                        .requestMatchers("/api/pbjt-master-menus/**").permitAll()
                         .requestMatchers("/api/role-menu/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/hotel-accommodations/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/attendance/photo/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

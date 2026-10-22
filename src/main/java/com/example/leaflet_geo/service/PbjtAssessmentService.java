@@ -318,8 +318,34 @@ public class PbjtAssessmentService {
         return savedAssessment;
     }
     
+    @Transactional(transactionManager = "pbjtTransactionManager")
     public void deleteAssessment(Long id) {
+        log.info("Deleting assessment id: {}", id);
+        
+        // Hapus menu observation history jika ada
+        try {
+            var menuObs = menuObservationRepository.findByAssessmentIdOrderByObservationDateDesc(id);
+            if (menuObs != null && !menuObs.isEmpty()) {
+                menuObservationRepository.deleteAll(menuObs);
+                menuObservationRepository.flush();
+            }
+        } catch (Exception e) {
+            log.warn("Warning deleting menu observations for assessment {}: {}", id, e.getMessage());
+        }
+
+        // Hapus observation history jika ada
+        try {
+            var obs = observationRepository.findByAssessmentId(id);
+            if (obs != null && !obs.isEmpty()) {
+                observationRepository.deleteAll(obs);
+                observationRepository.flush();
+            }
+        } catch (Exception e) {
+            log.warn("Warning deleting observations for assessment {}: {}", id, e.getMessage());
+        }
+
         assessmentRepository.deleteById(id);
+        log.info("Successfully deleted assessment id: {}", id);
     }
     
 

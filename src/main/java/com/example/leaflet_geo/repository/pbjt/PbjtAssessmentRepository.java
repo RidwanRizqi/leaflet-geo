@@ -82,4 +82,10 @@ public interface PbjtAssessmentRepository extends JpaRepository<PbjtAssessment, 
     @Query("SELECT DISTINCT a.kelurahan FROM PbjtAssessment a WHERE a.kecamatan = :kecamatan AND a.kelurahan IS NOT NULL AND a.businessType IN :types ORDER BY a.kelurahan")
     List<String> findDistinctKelurahanByKecamatanAndBusinessTypeIn(@Param("kecamatan") String kecamatan,
                     @Param("types") List<String> types);
+
+    @Query("SELECT a FROM PbjtAssessment a WHERE LOWER(TRIM(a.businessName)) = LOWER(TRIM(:businessName)) ORDER BY a.id DESC")
+    List<PbjtAssessment> findByBusinessNameIgnoreCase(@Param("businessName") String businessName);
+
+    @Query("SELECT DISTINCT a.businessName FROM PbjtAssessment a WHERE a.businessName IS NOT NULL ORDER BY a.businessName ASC")
+    List<String> findDistinctBusinessNames();
 }

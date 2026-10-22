@@ -239,6 +239,10 @@ public class PbjtAssessment {
     // One-to-many relationship with observations
     @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ObservationHistory> observationHistories;
+
+    // One-to-many relationship with menu observations
+    @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MenuObservationHistory> menuObservationHistories;
     
     @PrePersist
     protected void onCreate() {
